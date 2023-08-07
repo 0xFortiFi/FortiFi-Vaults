@@ -4,7 +4,6 @@ import { Contract } from "ethers";
 import { ethers } from "hardhat";
 
 const NULL_ADDRESS = "0x0000000000000000000000000000000000000000";
-const powTen18 = ethers.utils.parseEther;
 
 // when doing multiple calls its not same block so we need to add seconds
 async function wait(days: number, secondsToAdd: number = 0): Promise<void> {

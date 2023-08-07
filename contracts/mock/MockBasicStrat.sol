@@ -20,7 +20,18 @@ contract MockBasicStrat is ERC20 {
 
     function withdraw(uint256 amount) external {
         _burn(msg.sender, amount);
-        depositToken.transfer(msg.sender, amount);
+        depositToken.transfer(msg.sender, getDepositTokensForShares(amount));
+    }
+
+    function getDepositTokensForShares(uint256 amount) internal view returns(uint256) {
+        uint256 _depositBalance = depositToken.balanceOf(address(this));
+        uint256 _supply = totalSupply() + amount;
+
+        if (_supply > 0) {
+            return amount * _depositBalance / _supply;
+        } 
+
+        return 0;
     }
 
 }
