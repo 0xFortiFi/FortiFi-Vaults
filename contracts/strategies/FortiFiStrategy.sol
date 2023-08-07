@@ -39,6 +39,14 @@ contract FortiFiStrategy is Ownable {
         _dToken.approve(address(_strat), type(uint256).max);
     }
 
+    function depositToken() external view returns(address) {
+        return address(_dToken);
+    }
+
+    function strategy() external view returns(address) {
+        return address(_strat);
+    }
+
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).transfer(msg.sender, _amount);
     }
