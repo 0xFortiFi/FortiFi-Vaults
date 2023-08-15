@@ -11,4 +11,5 @@ interface IVectorStrategy {
     function withdraw(uint amount, uint minAmount) external;
     function balanceOf(address holder) external view returns(uint256);
     function getDepositTokensForShares(uint256 amount) external view returns(uint256);
+    function strategy() external view returns(address);
 }
