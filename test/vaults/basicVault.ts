@@ -27,7 +27,7 @@ describe("Base Test Setup", function () {
     const [facMockERC20, facMockERC721, facVault] = await Promise.all([
       ethers.getContractFactory("contracts/mock/MockERC20.sol:MockERC20"),
       ethers.getContractFactory("contracts/mock/MockERC721.sol:MockERC721"),
-      ethers.getContractFactory("contracts/vaults/FortiFiVault.sol:FortiFiVault"),
+      ethers.getContractFactory("contracts/vaults/FortiFiSAMSVault.sol:FortiFiSAMSVault"),
     ]);
 
     MockERC20 = await facMockERC20.deploy();

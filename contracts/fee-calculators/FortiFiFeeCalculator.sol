@@ -8,11 +8,12 @@ pragma solidity ^0.8.2;
 
 contract FortiFiFeeCalculator is Ownable {
 
+    uint16 public constant BPS = 10_000;
+    bool public combineNftHoldings;
     uint8[] public tokenAmounts;
     uint16[] public threshholdBps;
     address[] public nftContracts;
-    bool public combineNftHoldings;
-
+    
     constructor(address[] memory _nftContracts,
                 uint8[] memory _tokenAmounts,
                 uint16[] memory _threshholdBps,
@@ -90,11 +91,11 @@ contract FortiFiFeeCalculator is Ownable {
         }
 
         // return 0 fee if amount is too small
-        if (_amount * _feeBps < 10000) {
+        if (_amount * _feeBps < BPS) {
             return 0;
         }
 
-        return _amount * _feeBps / 10000;
+        return _amount * _feeBps / BPS;
     }
 
     function _getCombinedFees(address _user, uint256 _amount) internal view returns (uint256) {
@@ -126,10 +127,10 @@ contract FortiFiFeeCalculator is Ownable {
         } 
 
         // return 0 fee if amount is too small
-        if (_amount * _feeBps < 10000) {
+        if (_amount * _feeBps < BPS) {
             return 0;
         }
 
-        return _amount * _feeBps / 10000;
+        return _amount * _feeBps / BPS;
     }
 }

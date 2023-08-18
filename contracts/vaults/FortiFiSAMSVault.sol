@@ -54,15 +54,15 @@ contract FortiFiSAMSVault is ERC1155, Ownable, ReentrancyGuard {
     }
 
     constructor(string memory _name, 
-                string memory _symbol, 
-                string memory _metadata,
-                address _depositToken,
-                address _feeManager,
-                address _feeCalculator,
-                address[] memory _strategies,
-                bool[] memory _isVector,
-                uint16[] memory _strategyBps,
-                uint256 _minDeposit) ERC1155(_metadata) {
+        string memory _symbol, 
+        string memory _metadata,
+        address _depositToken,
+        address _feeManager,
+        address _feeCalculator,
+        address[] memory _strategies,
+        bool[] memory _isVector,
+        uint16[] memory _strategyBps,
+        uint256 _minDeposit) ERC1155(_metadata) {
         setStrategies(_strategies, _isVector, _strategyBps);
         name = _name; 
         symbol = _symbol;

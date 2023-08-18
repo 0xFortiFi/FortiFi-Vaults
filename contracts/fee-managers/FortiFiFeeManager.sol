@@ -8,6 +8,7 @@ pragma solidity ^0.8.2;
 
 contract FortiFiFeeManager is Ownable {
 
+    uint16 public constant BPS = 10_000;
     uint16[] public splitBps;
     address[] public receivers;
 
@@ -28,7 +29,7 @@ contract FortiFiFeeManager is Ownable {
                 if (i == (_length - 1)) {
                     require(_t.transfer(receivers[i], _t.balanceOf(address(this))), "FortiFi: Failed to transfer last share");
                 } else {
-                    uint256 _share = _feeBalance * splitBps[i] / 10000;
+                    uint256 _share = _feeBalance * splitBps[i] / BPS;
                     require(_t.transfer(receivers[i], _share), "FortiFi: Failed to transfer share");
                 }
             }
@@ -60,7 +61,7 @@ contract FortiFiFeeManager is Ownable {
             _totalBps += _b;
         }
 
-        require(_totalBps == 10000, "FortiFi: Invalid total bps");
+        require(_totalBps == BPS, "FortiFi: Invalid total bps");
 
         return true;
     }
