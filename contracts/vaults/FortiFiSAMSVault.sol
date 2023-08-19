@@ -63,13 +63,13 @@ contract FortiFiSAMSVault is ERC1155, Ownable, ReentrancyGuard {
         bool[] memory _isVector,
         uint16[] memory _strategyBps,
         uint256 _minDeposit) ERC1155(_metadata) {
-        setStrategies(_strategies, _isVector, _strategyBps);
         name = _name; 
         symbol = _symbol;
+        minDeposit = _minDeposit;
         depositToken = _depositToken;
         feeCalc = IFortiFiFeeCalculator(_feeCalculator);
         feeMgr = IFortiFiFeeManager(_feeManager);
-        minDeposit = _minDeposit;
+        setStrategies(_strategies, _isVector, _strategyBps);
     }
 
     function deposit(uint256 _amount) external nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
@@ -135,6 +135,8 @@ contract FortiFiSAMSVault is ERC1155, Ownable, ReentrancyGuard {
         for(uint8 i = 0; i < _length; i++) {
             _depositToken.approve(strategies[i].strategy, type(uint256).max);
         }
+
+        _depositToken.approve(address(feeMgr), type(uint256).max);
     }
 
     function setStrategies(address[] memory _strategies, bool[] memory _isVector, uint16[] memory _strategyBps) public onlyOwner {
