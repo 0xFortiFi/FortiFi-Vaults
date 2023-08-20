@@ -3,7 +3,7 @@
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../strategies/interfaces/IStrategy.sol";
 import "../strategies/interfaces/IVectorStrategy.sol";
@@ -12,7 +12,7 @@ import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
 
 pragma solidity ^0.8.2;
 
-contract FortiFiSAMSVault is ERC1155, Ownable, ReentrancyGuard {
+contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
     struct Strategy {
         address strategy;
         bool isVector;
@@ -46,6 +46,7 @@ contract FortiFiSAMSVault is ERC1155, Ownable, ReentrancyGuard {
     mapping(uint256 => TokenInfo) public tokenInfo;
 
     event Deposit(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
+    event Rebalance(uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Withdrawal(address indexed depositor, uint256 indexed tokenId, uint256 amountWithdrawn, uint256 profit, uint256 fee);
 
     modifier whileNotPaused() {
@@ -63,6 +64,10 @@ contract FortiFiSAMSVault is ERC1155, Ownable, ReentrancyGuard {
         bool[] memory _isVector,
         uint16[] memory _strategyBps,
         uint256 _minDeposit) ERC1155(_metadata) {
+        require(_depositToken != address(0), "FortiFi: Invalid deposit token");
+        require(_feeManager != address(0), "FortiFi: Invalid feeManager");
+        require(_feeCalculator != address(0), "FortiFi: Invalid feeCalculator");
+        require(_minDeposit >= BPS, "FortiFi: Invalid min deposit");
         name = _name; 
         symbol = _symbol;
         minDeposit = _minDeposit;
@@ -102,6 +107,16 @@ contract FortiFiSAMSVault is ERC1155, Ownable, ReentrancyGuard {
         
         require(IERC20(depositToken).transfer(msg.sender, _amount - _fee), "FortiFi: Failed to send proceeds");
         emit Withdrawal(msg.sender, _tokenId, _amount, _profit, _fee);
+    }
+
+    function forceRebalance(uint256[] calldata _tokenIds) external onlyOwner {
+        uint256 _length = _tokenIds.length;
+        for (uint256 i = 0; i < _length; i++) {
+            uint256 _tokenId = _tokenIds[i];
+            if (exists(_tokenId)) {
+                rebalance(_tokenId);
+            }
+        }
     }
 
     function setMinDeposit(uint256 _amount) external onlyOwner {
@@ -160,6 +175,19 @@ contract FortiFiSAMSVault is ERC1155, Ownable, ReentrancyGuard {
         }
 
         refreshApprovals();
+    }
+
+    function rebalance(uint256 _tokenId) public nonReentrant {
+        require((balanceOf(msg.sender, _tokenId) > 0 && !paused) ||
+                          msg.sender == owner(), "FortiFi: Invalid message sender");
+        uint256 _originalDeposit = tokenInfo[_tokenId].deposit;
+        (uint256 _amount, ) = _withdraw(_tokenId);
+        delete tokenInfo[_tokenId];
+        _deposit(_amount, _tokenId, false);
+        TokenInfo storage _info = tokenInfo[_tokenId];
+        _info.deposit = _originalDeposit;
+
+        emit Rebalance(_tokenId, _amount, _info);
     }
 
     function _mintReceipt() internal returns(uint256 _tokenId) {
