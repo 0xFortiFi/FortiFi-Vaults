@@ -1,0 +1,294 @@
+-- High severity issues are all in the Mock contracts or within a recoverERC20 function that can only be called by the contract owner. 
+
+INFO:Detectors:
+FortiFiFeeManager.recoverERC20(address,uint256) (contracts/fee-managers/FortiFiFeeManager.sol#74-76) ignores return value by IERC20(_token).transfer(msg.sender,_amount) (contracts/fee-managers/FortiFiFeeManager.sol#75)
+MockBasicStrat.deposit(uint256) (contracts/mock/MockBasicStrat.sol#20-23) ignores return value by depositToken.transferFrom(msg.sender,address(this),amount) (contracts/mock/MockBasicStrat.sol#21)
+MockBasicStrat.withdraw(uint256) (contracts/mock/MockBasicStrat.sol#25-28) ignores return value by depositToken.transfer(msg.sender,getDepositTokensForShares(amount)) (contracts/mock/MockBasicStrat.sol#27)
+MockVectorStrat.deposit(uint256) (contracts/mock/MockVectorStrat.sol#19-22) ignores return value by depositToken.transferFrom(msg.sender,address(this),amount) (contracts/mock/MockVectorStrat.sol#20)
+MockVectorStrat.withdraw(uint256,uint256) (contracts/mock/MockVectorStrat.sol#24-35) ignores return value by depositToken.transfer(msg.sender,_tokensForShares) (contracts/mock/MockVectorStrat.sol#34)
+FortiFiSAMSVault.recoverERC20(address,uint256) (contracts/vaults/FortiFiSAMSVault.sol#142-144) ignores return value by IERC20(_token).transfer(msg.sender,_amount) (contracts/vaults/FortiFiSAMSVault.sol#143)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unchecked-transfer
+
+
+******************************************************************************
+
+-- Medium severity issues identified. For the possible reentrancy issues, _deposit and _mintReceipt are both internal functions that are only called 
+by function using the nonReentrant modifier. rebalance uses the nonReentrant modifier, but may have cross-function reentrancy risk? This would 
+be an area where input from the auditor would be useful to determine if this is a real risk.
+
+******************************************************************************
+
+
+INFO:Detectors:
+FortiFiFeeCalculator._getCombinedFees(address,uint256) (contracts/fee-calculators/FortiFiFeeCalculator.sol#107-141) uses a dangerous strict equality:
+        - _balance == tokenAmounts[j] || j == (_amountLength - 1) (contracts/fee-calculators/FortiFiFeeCalculator.sol#126)
+FortiFiFeeCalculator._getFees(address,uint256) (contracts/fee-calculators/FortiFiFeeCalculator.sol#72-105) uses a dangerous strict equality:
+        - _balance == tokenAmounts[j] || j == (_amountLength - 1) (contracts/fee-calculators/FortiFiFeeCalculator.sol#89)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Reentrancy in FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244):
+        External calls:
+        - _strat.deposit(_remainder) (contracts/vaults/FortiFiSAMSVault.sol#229)
+        - _strat.deposit(_split) (contracts/vaults/FortiFiSAMSVault.sol#233)
+        State variables written after the call(s):
+        - _info.positions[i].receipt += _strat.balanceOf(address(this)) - _receiptBalance (contracts/vaults/FortiFiSAMSVault.sol#237)
+        FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34) can be used in cross function reentrancies:
+        - FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244)
+        - FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271)
+        - FortiFiSAMSVault.getTokenInfo(uint256) (contracts/vaults/FortiFiSAMSVault.sol#200-202)
+        - FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198)
+        - FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34)
+        - _info.positions.push(Position(_strategy,_strat.balanceOf(address(this)) - _receiptBalance)) (contracts/vaults/FortiFiSAMSVault.sol#239)
+        FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34) can be used in cross function reentrancies:
+        - FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244)
+        - FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271)
+        - FortiFiSAMSVault.getTokenInfo(uint256) (contracts/vaults/FortiFiSAMSVault.sol#200-202)
+        - FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198)
+        - FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34)
+        - _info.deposit += _amount (contracts/vaults/FortiFiSAMSVault.sol#243)
+        FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34) can be used in cross function reentrancies:
+        - FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244)
+        - FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271)
+        - FortiFiSAMSVault.getTokenInfo(uint256) (contracts/vaults/FortiFiSAMSVault.sol#200-202)
+        - FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198)
+        - FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34)
+Reentrancy in FortiFiSAMSVault._mintReceipt() (contracts/vaults/FortiFiSAMSVault.sol#204-208):
+        External calls:
+        - _mint(msg.sender,_tokenId,1,) (contracts/vaults/FortiFiSAMSVault.sol#206)
+                - response = IERC1155Receiver(to).onERC1155Received(operator,from,id,amount,data) (node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol#423-431)
+        State variables written after the call(s):
+        - nextToken += 1 (contracts/vaults/FortiFiSAMSVault.sol#207)
+        FortiFiSAMSVault.nextToken (contracts/vaults/FortiFiSAMSVault.sol#26) can be used in cross function reentrancies:
+        - FortiFiSAMSVault.nextToken (contracts/vaults/FortiFiSAMSVault.sol#26)
+Reentrancy in FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198):
+        External calls:
+        - (_amount) = _withdraw(_tokenId) (contracts/vaults/FortiFiSAMSVault.sol#190)
+                - _strat.withdraw(_tokensForShares,_minAmount) (contracts/vaults/FortiFiSAMSVault.sol#257)
+                - _strat_scope_0.withdraw(_info.positions[i].receipt) (contracts/vaults/FortiFiSAMSVault.sol#260)
+        State variables written after the call(s):
+        - delete tokenInfo[_tokenId] (contracts/vaults/FortiFiSAMSVault.sol#191)
+        FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34) can be used in cross function reentrancies:
+        - FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244)
+        - FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271)
+        - FortiFiSAMSVault.getTokenInfo(uint256) (contracts/vaults/FortiFiSAMSVault.sol#200-202)
+        - FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198)
+        - FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34)
+Reentrancy in FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198):
+        External calls:
+        - (_amount) = _withdraw(_tokenId) (contracts/vaults/FortiFiSAMSVault.sol#190)
+                - _strat.withdraw(_tokensForShares,_minAmount) (contracts/vaults/FortiFiSAMSVault.sol#257)
+                - _strat_scope_0.withdraw(_info.positions[i].receipt) (contracts/vaults/FortiFiSAMSVault.sol#260)
+        - _deposit(_amount,_tokenId,false) (contracts/vaults/FortiFiSAMSVault.sol#192)
+                - _strat.deposit(_remainder) (contracts/vaults/FortiFiSAMSVault.sol#229)
+                - _strat.deposit(_split) (contracts/vaults/FortiFiSAMSVault.sol#233)
+        State variables written after the call(s):
+        - _deposit(_amount,_tokenId,false) (contracts/vaults/FortiFiSAMSVault.sol#192)
+                - _info.positions[i].receipt += _strat.balanceOf(address(this)) - _receiptBalance (contracts/vaults/FortiFiSAMSVault.sol#237)
+                - _info.positions.push(Position(_strategy,_strat.balanceOf(address(this)) - _receiptBalance)) (contracts/vaults/FortiFiSAMSVault.sol#239)
+                - _info.deposit += _amount (contracts/vaults/FortiFiSAMSVault.sol#243)
+        FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34) can be used in cross function reentrancies:
+        - FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244)
+        - FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271)
+        - FortiFiSAMSVault.getTokenInfo(uint256) (contracts/vaults/FortiFiSAMSVault.sol#200-202)
+        - FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198)
+        - FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34)
+        - tokenInfo[_tokenId].deposit = _originalDeposit (contracts/vaults/FortiFiSAMSVault.sol#193)
+        FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34) can be used in cross function reentrancies:
+        - FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244)
+        - FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271)
+        - FortiFiSAMSVault.getTokenInfo(uint256) (contracts/vaults/FortiFiSAMSVault.sol#200-202)
+        - FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198)
+        - FortiFiSAMSVault.tokenInfo (contracts/vaults/FortiFiSAMSVault.sol#34)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1
+INFO:Detectors:
+FortiFiSAMSVault.refreshApprovals() (contracts/vaults/FortiFiSAMSVault.sol#146-155) ignores return value by _depositToken.approve(strategies[i].strategy,type()(uint256).max) (contracts/vaults/FortiFiSAMSVault.sol#151)
+FortiFiSAMSVault.refreshApprovals() (contracts/vaults/FortiFiSAMSVault.sol#146-155) ignores return value by _depositToken.approve(address(feeMgr),type()(uint256).max) (contracts/vaults/FortiFiSAMSVault.sol#154)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+FortiFiSAMSVault.setSlippage(uint16) (contracts/vaults/FortiFiSAMSVault.sol#126-128) should emit an event for:
+        - slippageBps = _amount (contracts/vaults/FortiFiSAMSVault.sol#127)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-events-arithmetic
+
+-- Low severity issues do not look concerning
+
+INFO:Detectors:
+FortiFiFeeManager.collectFees(address,uint256) (contracts/fee-managers/FortiFiFeeManager.sol#26-42) has external calls inside a loop: require(bool,string)(_t.transfer(receivers[i],_t.balanceOf(address(this))),FortiFi: Failed to transfer last share) (contracts/fee-managers/FortiFiFeeManager.sol#35)
+FortiFiFeeManager.collectFees(address,uint256) (contracts/fee-managers/FortiFiFeeManager.sol#26-42) has external calls inside a loop: require(bool,string)(_t.transfer(receivers[i],_share),FortiFi: Failed to transfer share) (contracts/fee-managers/FortiFiFeeManager.sol#38)
+FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271) has external calls inside a loop: _tokensForShares = _strat.getDepositTokensForShares(_info.positions[i].receipt) (contracts/vaults/FortiFiSAMSVault.sol#254)
+FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271) has external calls inside a loop: _strat.withdraw(_tokensForShares,_minAmount) (contracts/vaults/FortiFiSAMSVault.sol#257)
+FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271) has external calls inside a loop: _strat_scope_0.withdraw(_info.positions[i].receipt) (contracts/vaults/FortiFiSAMSVault.sol#260)
+FortiFiSAMSVault._withdraw(uint256) (contracts/vaults/FortiFiSAMSVault.sol#247-271) has external calls inside a loop: _proceeds = IERC20(depositToken).balanceOf(address(this)) (contracts/vaults/FortiFiSAMSVault.sol#264)
+FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244) has external calls inside a loop: _receiptBalance = _strat.balanceOf(address(this)) (contracts/vaults/FortiFiSAMSVault.sol#226)
+FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244) has external calls inside a loop: _strat.deposit(_remainder) (contracts/vaults/FortiFiSAMSVault.sol#229)
+FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244) has external calls inside a loop: _info.positions[i].receipt += _strat.balanceOf(address(this)) - _receiptBalance (contracts/vaults/FortiFiSAMSVault.sol#237)
+FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244) has external calls inside a loop: _info.positions.push(Position(_strategy,_strat.balanceOf(address(this)) - _receiptBalance)) (contracts/vaults/FortiFiSAMSVault.sol#239)
+FortiFiSAMSVault._deposit(uint256,uint256,bool) (contracts/vaults/FortiFiSAMSVault.sol#214-244) has external calls inside a loop: _strat.deposit(_split) (contracts/vaults/FortiFiSAMSVault.sol#233)
+FortiFiSAMSVault.refreshApprovals() (contracts/vaults/FortiFiSAMSVault.sol#146-155) has external calls inside a loop: _depositToken.approve(strategies[i].strategy,type()(uint256).max) 
+(contracts/vaults/FortiFiSAMSVault.sol#151)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation/#calls-inside-a-loop
+INFO:Detectors:
+Reentrancy in MockBasicStrat.deposit(uint256) (contracts/mock/MockBasicStrat.sol#20-23):
+        External calls:
+        - depositToken.transferFrom(msg.sender,address(this),amount) (contracts/mock/MockBasicStrat.sol#21)
+        State variables written after the call(s):
+        - _mint(msg.sender,amount) (contracts/mock/MockBasicStrat.sol#22)
+                - _balances[account] += amount (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#263)
+        - _mint(msg.sender,amount) (contracts/mock/MockBasicStrat.sol#22)
+                - _totalSupply += amount (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#262)
+Reentrancy in MockVectorStrat.deposit(uint256) (contracts/mock/MockVectorStrat.sol#19-22):
+        External calls:
+        - depositToken.transferFrom(msg.sender,address(this),amount) (contracts/mock/MockVectorStrat.sol#20)
+        State variables written after the call(s):
+        - _mint(msg.sender,amount * 9000 / 10000) (contracts/mock/MockVectorStrat.sol#21)
+                - _balances[account] += amount (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#263)
+        - _mint(msg.sender,amount * 9000 / 10000) (contracts/mock/MockVectorStrat.sol#21)
+                - _totalSupply += amount (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#262)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+INFO:Detectors:
+Reentrancy in MockBasicStrat.deposit(uint256) (contracts/mock/MockBasicStrat.sol#20-23):
+        External calls:
+        - depositToken.transferFrom(msg.sender,address(this),amount) (contracts/mock/MockBasicStrat.sol#21)
+        Event emitted after the call(s):
+        - Transfer(address(0),account,amount) (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#264)
+                - _mint(msg.sender,amount) (contracts/mock/MockBasicStrat.sol#22)
+Reentrancy in MockVectorStrat.deposit(uint256) (contracts/mock/MockVectorStrat.sol#19-22):
+        External calls:
+        - depositToken.transferFrom(msg.sender,address(this),amount) (contracts/mock/MockVectorStrat.sol#20)
+        Event emitted after the call(s):
+        - Transfer(address(0),account,amount) (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#264)
+                - _mint(msg.sender,amount * 9000 / 10000) (contracts/mock/MockVectorStrat.sol#21)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+ERC721._checkOnERC721Received(address,address,uint256,bytes) (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#388-409) uses assembly
+        - INLINE ASM (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#401-403)
+Address.verifyCallResult(bool,bytes,string) (node_modules/@openzeppelin/contracts/utils/Address.sol#201-221) uses assembly
+        - INLINE ASM (node_modules/@openzeppelin/contracts/utils/Address.sol#213-216)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+INFO:Detectors:
+Different versions of Solidity are used:
+        - Version used: ['0.8.2', '^0.8.0', '^0.8.1', '^0.8.2']
+        - 0.8.2 (contracts/mock/MockBasicStrat.sol#2)
+        - 0.8.2 (contracts/mock/MockERC20.sol#2)
+        - 0.8.2 (contracts/mock/MockERC721.sol#2)
+        - 0.8.2 (contracts/mock/MockVectorStrat.sol#2)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/access/Ownable.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/IERC1155.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/Context.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/Strings.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol#4)
+        - ^0.8.0 (node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol#4)
+        - ^0.8.1 (node_modules/@openzeppelin/contracts/utils/Address.sol#4)
+        - ^0.8.2 (contracts/fee-calculators/FortiFiFeeCalculator.sol#8)
+        - ^0.8.2 (contracts/fee-calculators/interfaces/IFortiFiFeeCalculator.sol#4)
+        - ^0.8.2 (contracts/fee-managers/FortiFiFeeManager.sol#8)
+        - ^0.8.2 (contracts/fee-managers/interfaces/IFortiFiFeeManager.sol#4)
+        - ^0.8.2 (contracts/strategies/interfaces/IStrategy.sol#4)
+        - ^0.8.2 (contracts/strategies/interfaces/IVectorStrategy.sol#4)
+        - ^0.8.2 (contracts/vaults/FortiFiSAMSVault.sol#14)
+        - ^0.8.2 (contracts/vaults/interfaces/ISAMS.sol#4)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#different-pragma-directives-are-used
+INFO:Detectors:
+MockERC721.mint(address,uint256) (contracts/mock/MockERC721.sol#16-21) has costly operations inside a loop:
+        - totalSupply += 1 (contracts/mock/MockERC721.sol#18)
+ReentrancyGuard.nonReentrant() (node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol#50-62) has costly operations inside a loop:
+        - _status = _ENTERED (node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol#55)
+ReentrancyGuard.nonReentrant() (node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol#50-62) has costly operations inside a loop:
+        - _status = _NOT_ENTERED (node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol#61)
+FortiFiSAMSVault.rebalance(uint256) (contracts/vaults/FortiFiSAMSVault.sol#186-198) has costly operations inside a loop:
+        - delete tokenInfo[_tokenId] (contracts/vaults/FortiFiSAMSVault.sol#191)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#costly-operations-inside-a-loop
+INFO:Detectors:
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/access/Ownable.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/ERC1155.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/IERC1155.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/ERC20.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol#4) allows old versions
+Pragma version^0.8.1 (node_modules/@openzeppelin/contracts/utils/Address.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/Context.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/Strings.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/introspection/ERC165.sol#4) allows old versions
+Pragma version^0.8.0 (node_modules/@openzeppelin/contracts/utils/introspection/IERC165.sol#4) allows old versions
+Pragma version^0.8.2 (contracts/fee-calculators/FortiFiFeeCalculator.sol#8) allows old versions
+Pragma version^0.8.2 (contracts/fee-calculators/interfaces/IFortiFiFeeCalculator.sol#4) allows old versions
+Pragma version^0.8.2 (contracts/fee-managers/FortiFiFeeManager.sol#8) allows old versions
+Pragma version^0.8.2 (contracts/fee-managers/interfaces/IFortiFiFeeManager.sol#4) allows old versions
+Pragma version0.8.2 (contracts/mock/MockBasicStrat.sol#2) allows old versions
+Pragma version0.8.2 (contracts/mock/MockERC20.sol#2) allows old versions
+Pragma version0.8.2 (contracts/mock/MockERC721.sol#2) allows old versions
+Pragma version0.8.2 (contracts/mock/MockVectorStrat.sol#2) allows old versions
+Pragma version^0.8.2 (contracts/strategies/interfaces/IStrategy.sol#4) allows old versions
+Pragma version^0.8.2 (contracts/strategies/interfaces/IVectorStrategy.sol#4) allows old versions
+Pragma version^0.8.2 (contracts/vaults/FortiFiSAMSVault.sol#14) allows old versions
+Pragma version^0.8.2 (contracts/vaults/interfaces/ISAMS.sol#4) allows old versions
+solc-0.8.2 is not recommended for deployment
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#incorrect-versions-of-solidity
+INFO:Detectors:
+Low level call in Address.sendValue(address,uint256) (node_modules/@openzeppelin/contracts/utils/Address.sol#60-65):
+        - (success) = recipient.call{value: amount}() (node_modules/@openzeppelin/contracts/utils/Address.sol#63)
+Low level call in Address.functionCallWithValue(address,bytes,uint256,string) (node_modules/@openzeppelin/contracts/utils/Address.sol#128-139):
+        - (success,returndata) = target.call{value: value}(data) (node_modules/@openzeppelin/contracts/utils/Address.sol#137)
+Low level call in Address.functionStaticCall(address,bytes,string) (node_modules/@openzeppelin/contracts/utils/Address.sol#157-166):
+        - (success,returndata) = target.staticcall(data) (node_modules/@openzeppelin/contracts/utils/Address.sol#164)
+Low level call in Address.functionDelegateCall(address,bytes,string) (node_modules/@openzeppelin/contracts/utils/Address.sol#184-193):
+        - (success,returndata) = target.delegatecall(data) (node_modules/@openzeppelin/contracts/utils/Address.sol#191)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+MockBasicStrat (contracts/mock/MockBasicStrat.sol#13-42) should inherit from IStrategy (contracts/strategies/interfaces/IStrategy.sol#7-15)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-inheritance
+INFO:Detectors:
+Parameter ERC721.safeTransferFrom(address,address,uint256,bytes)._data (node_modules/@openzeppelin/contracts/token/ERC721/ERC721.sol#179) is not in mixedCase
+Parameter FortiFiFeeCalculator.getFees(address,uint256)._user (contracts/fee-calculators/FortiFiFeeCalculator.sol#32) is not in mixedCase
+Parameter FortiFiFeeCalculator.getFees(address,uint256)._amount (contracts/fee-calculators/FortiFiFeeCalculator.sol#32) is not in mixedCase
+Parameter FortiFiFeeCalculator.setFees(address[],uint8[],uint16[])._nftContracts (contracts/fee-calculators/FortiFiFeeCalculator.sol#40) is not in mixedCase
+Parameter FortiFiFeeCalculator.setFees(address[],uint8[],uint16[])._tokenAmounts (contracts/fee-calculators/FortiFiFeeCalculator.sol#40) is not in mixedCase
+Parameter FortiFiFeeCalculator.setFees(address[],uint8[],uint16[])._threshholdBps (contracts/fee-calculators/FortiFiFeeCalculator.sol#40) is not in mixedCase
+Parameter FortiFiFeeCalculator.setCombine(bool)._bool (contracts/fee-calculators/FortiFiFeeCalculator.sol#56) is not in mixedCase
+Parameter FortiFiFeeManager.collectFees(address,uint256)._token (contracts/fee-managers/FortiFiFeeManager.sol#26) is not in mixedCase
+Parameter FortiFiFeeManager.collectFees(address,uint256)._amount (contracts/fee-managers/FortiFiFeeManager.sol#26) is not in mixedCase
+Parameter FortiFiFeeManager.setSplit(address[],uint16[])._receivers (contracts/fee-managers/FortiFiFeeManager.sol#44) is not in mixedCase
+Parameter FortiFiFeeManager.setSplit(address[],uint16[])._splitBps (contracts/fee-managers/FortiFiFeeManager.sol#44) is not in mixedCase
+Parameter FortiFiFeeManager.recoverERC20(address,uint256)._token (contracts/fee-managers/FortiFiFeeManager.sol#74) is not in mixedCase
+Parameter FortiFiFeeManager.recoverERC20(address,uint256)._amount (contracts/fee-managers/FortiFiFeeManager.sol#74) is not in mixedCase
+Parameter FortiFiSAMSVault.deposit(uint256)._amount (contracts/vaults/FortiFiSAMSVault.sol#73) is not in mixedCase
+Parameter FortiFiSAMSVault.add(uint256,uint256)._amount (contracts/vaults/FortiFiSAMSVault.sol#85) is not in mixedCase
+Parameter FortiFiSAMSVault.add(uint256,uint256)._tokenId (contracts/vaults/FortiFiSAMSVault.sol#85) is not in mixedCase
+Parameter FortiFiSAMSVault.withdraw(uint256)._tokenId (contracts/vaults/FortiFiSAMSVault.sol#98) is not in mixedCase
+Parameter FortiFiSAMSVault.forceRebalance(uint256[])._tokenIds (contracts/vaults/FortiFiSAMSVault.sol#112) is not in mixedCase
+Parameter FortiFiSAMSVault.setMinDeposit(uint256)._amount (contracts/vaults/FortiFiSAMSVault.sol#122) is not in mixedCase
+Parameter FortiFiSAMSVault.setSlippage(uint16)._amount (contracts/vaults/FortiFiSAMSVault.sol#126) is not in mixedCase
+Parameter FortiFiSAMSVault.setFeeManager(address)._contract (contracts/vaults/FortiFiSAMSVault.sol#130) is not in mixedCase
+Parameter FortiFiSAMSVault.setFeeCalculator(address)._contract (contracts/vaults/FortiFiSAMSVault.sol#134) is not in mixedCase
+Parameter FortiFiSAMSVault.recoverERC20(address,uint256)._token (contracts/vaults/FortiFiSAMSVault.sol#142) is not in mixedCase
+Parameter FortiFiSAMSVault.recoverERC20(address,uint256)._amount (contracts/vaults/FortiFiSAMSVault.sol#142) is not in mixedCase
+Parameter FortiFiSAMSVault.setStrategies(address[],bool[],uint16[])._strategies (contracts/vaults/FortiFiSAMSVault.sol#158) is not in mixedCase
+Parameter FortiFiSAMSVault.setStrategies(address[],bool[],uint16[])._isVector (contracts/vaults/FortiFiSAMSVault.sol#158) is not in mixedCase
+Parameter FortiFiSAMSVault.setStrategies(address[],bool[],uint16[])._strategyBps (contracts/vaults/FortiFiSAMSVault.sol#158) is not in mixedCase
+Parameter FortiFiSAMSVault.rebalance(uint256)._tokenId (contracts/vaults/FortiFiSAMSVault.sol#186) is not in mixedCase
+Parameter FortiFiSAMSVault.getTokenInfo(uint256)._tokenId (contracts/vaults/FortiFiSAMSVault.sol#200) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Detectors:
+FortiFiSAMSVault.depositToken (contracts/vaults/FortiFiSAMSVault.sol#22) should be immutable
+MockBasicStrat.depositToken (contracts/mock/MockBasicStrat.sol#14) should be immutable
+MockVectorStrat.depositToken (contracts/mock/MockVectorStrat.sol#13) should be immutable
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variables-that-could-be-declared-immutable

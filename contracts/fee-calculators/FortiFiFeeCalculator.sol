@@ -3,6 +3,7 @@
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 
 pragma solidity ^0.8.2;
 
@@ -11,7 +12,7 @@ pragma solidity ^0.8.2;
 /// @dev When combineNftHoldings is true the contract will combine the user's balance across all NFT
 /// contracts in the nftContracts array when determining fees. Otherwise, the contract will only take 
 /// the user's highest balance out of the nftContracts.
-contract FortiFiFeeCalculator is Ownable {
+contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
 
     uint16 public constant BPS = 10_000;
     bool public combineNftHoldings;
@@ -28,7 +29,7 @@ contract FortiFiFeeCalculator is Ownable {
         combineNftHoldings = _combineHoldings;
     }
 
-    function getFees(address _user, uint256 _amount) external view returns(uint256) {
+    function getFees(address _user, uint256 _amount) external view override returns(uint256) {
         if (combineNftHoldings) {
             return _getCombinedFees(_user, _amount);
         } 

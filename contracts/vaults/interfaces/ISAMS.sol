@@ -21,8 +21,9 @@ interface ISAMS {
         Position[] positions;
     }
 
-    function deposit(uint amount) external;
-    function add(uint amount, uint tokenId) external;
+    function deposit(uint amount) external returns(uint256 tokenId, TokenInfo memory info);
+    function add(uint amount, uint tokenId) external returns(TokenInfo memory info);
     function withdraw(uint amount) external;
-    function tokenInfo(uint tokenId) external view returns(TokenInfo memory);
+    function rebalance(uint tokenId) external returns(TokenInfo memory info);
+    function getTokenInfo(uint tokenId) external view returns(TokenInfo memory info);
 }

@@ -9,29 +9,14 @@ import "../strategies/interfaces/IStrategy.sol";
 import "../strategies/interfaces/IVectorStrategy.sol";
 import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
+import "./interfaces/ISAMS.sol";
 
 pragma solidity ^0.8.2;
 
 /// @title Contract for FortiFi SAMS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then split and deposited in to 
 /// multiple yield-bearing strategies. 
-contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
-    struct Strategy {
-        address strategy;
-        bool isVector;
-        uint16 bps;
-    }
-
-    struct Position {
-        Strategy strategy;
-        uint256 receipt;
-    }
-
-    struct TokenInfo {
-        uint256 deposit;
-        Position[] positions;
-    }
-
+contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
     string public name;
     string public symbol;
     address public depositToken;
@@ -85,7 +70,7 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
     /// @dev The user must deposit at least the minDeposit, and will receive an ERC1155 non-fungible receipt token. 
     /// The receipt token will be mapped to a TokenInfo containing the amount deposited as well as the strategy receipt 
     /// tokens received for later withdrawal.
-    function deposit(uint256 _amount) external nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
+    function deposit(uint256 _amount) external override nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
         require(IERC20(depositToken).transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
         _tokenId = _mintReceipt();
@@ -97,7 +82,7 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
 
     /// @notice This function is used to add to a user's deposit when they already has a receipt (ERC1155). The user can add to their 
     /// deposit without needing to burn/withdraw first. 
-    function add(uint256 _amount, uint256 _tokenId) external nonReentrant whileNotPaused returns(TokenInfo memory _info) {
+    function add(uint256 _amount, uint256 _tokenId) external override nonReentrant whileNotPaused returns(TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
         require(IERC20(depositToken).transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
         require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
@@ -110,7 +95,7 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice This function is used to burn a receipt (ERC1155) and withdraw all underlying strategy receipt tokens. 
     /// @dev Once all receipts are burned and deposit tokens received, the fee manager will calculate the fees due, 
     /// and the fee manager will distribute those fees before transfering the user their proceeds.
-    function withdraw(uint256 _tokenId) external nonReentrant whileNotPaused {
+    function withdraw(uint256 _tokenId) external override nonReentrant whileNotPaused {
         require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
         _burn(msg.sender, _tokenId, 1);
 
@@ -198,17 +183,22 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
     /// the strategies set in the contract. Since _deposit will set the TokenInfo.deposit to the total 
     /// deposited after the rebalance, we must store the original deposit and overwrite the TokenInfo
     /// before completing the transaction.
-    function rebalance(uint256 _tokenId) public nonReentrant {
+    function rebalance(uint256 _tokenId) public override nonReentrant  returns(TokenInfo memory) {
         require((balanceOf(msg.sender, _tokenId) > 0 && !paused) ||
                           msg.sender == owner(), "FortiFi: Invalid message sender");
         uint256 _originalDeposit = tokenInfo[_tokenId].deposit;
         (uint256 _amount, ) = _withdraw(_tokenId);
         delete tokenInfo[_tokenId];
         _deposit(_amount, _tokenId, false);
-        TokenInfo storage _info = tokenInfo[_tokenId];
-        _info.deposit = _originalDeposit;
+        tokenInfo[_tokenId].deposit = _originalDeposit;
+        TokenInfo memory _info = tokenInfo[_tokenId];
 
         emit Rebalance(_tokenId, _amount, _info);
+        return _info;
+    }
+
+    function getTokenInfo(uint256 _tokenId) public view override returns(TokenInfo memory) {
+        return tokenInfo[_tokenId];
     }
 
     function _mintReceipt() internal returns(uint256 _tokenId) {

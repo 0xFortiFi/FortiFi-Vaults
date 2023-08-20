@@ -5,7 +5,7 @@ pragma solidity ^0.8.2;
 
 /// @title Interface for Vector strategies used by FortiFi SAMS Vaults
 interface IVectorStrategy {
-    function approve(address spender, uint amount) external;
+    function approve(address spender, uint amount) external returns (bool);
     function deposit(uint amount) external;
     function transferFrom(address from, address to, uint amount) external returns(bool);
     function transfer(address to, uint amount) external returns(bool);
