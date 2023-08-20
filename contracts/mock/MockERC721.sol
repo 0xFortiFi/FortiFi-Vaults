@@ -4,7 +4,8 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 
-
+/// @title A mock ERC721
+/// @notice This contract is a very basic ERC721 implementation for testing
 contract MockERC721 is ERC721 {
     uint256 public totalSupply = 0;
 

@@ -12,6 +12,9 @@ import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
 
 pragma solidity ^0.8.2;
 
+/// @title Contract for FortiFi SAMS Vaults
+/// @notice This contract allows for the deposit of a single asset, which is then split and deposited in to 
+/// multiple yield-bearing strategies. 
 contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
     struct Strategy {
         address strategy;
@@ -49,6 +52,7 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
     event Rebalance(uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Withdrawal(address indexed depositor, uint256 indexed tokenId, uint256 amountWithdrawn, uint256 profit, uint256 fee);
 
+    /// @notice Used to restrict function access while paused.
     modifier whileNotPaused() {
         require(!paused, "FortiFi: Contract paused");
         _;
@@ -77,6 +81,10 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
         setStrategies(_strategies, _isVector, _strategyBps);
     }
 
+    /// @notice This function is used when a user does not already have a receipt (ERC1155). 
+    /// @dev The user must deposit at least the minDeposit, and will receive an ERC1155 non-fungible receipt token. 
+    /// The receipt token will be mapped to a TokenInfo containing the amount deposited as well as the strategy receipt 
+    /// tokens received for later withdrawal.
     function deposit(uint256 _amount) external nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
         require(IERC20(depositToken).transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
@@ -87,6 +95,8 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
         emit Deposit(msg.sender, _tokenId, _amount, _info);
     }
 
+    /// @notice This function is used to add to a user's deposit when they already has a receipt (ERC1155). The user can add to their 
+    /// deposit without needing to burn/withdraw first. 
     function add(uint256 _amount, uint256 _tokenId) external nonReentrant whileNotPaused returns(TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
         require(IERC20(depositToken).transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
@@ -97,6 +107,9 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
         emit Deposit(msg.sender, _tokenId, _amount, _info);
     }
 
+    /// @notice This function is used to burn a receipt (ERC1155) and withdraw all underlying strategy receipt tokens. 
+    /// @dev Once all receipts are burned and deposit tokens received, the fee manager will calculate the fees due, 
+    /// and the fee manager will distribute those fees before transfering the user their proceeds.
     function withdraw(uint256 _tokenId) external nonReentrant whileNotPaused {
         require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
         _burn(msg.sender, _tokenId, 1);
@@ -109,6 +122,8 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
         emit Withdrawal(msg.sender, _tokenId, _amount, _profit, _fee);
     }
 
+    /// @notice This function can be used to force the rebalance of deposits. Should only be used in situations
+    /// where an exploit of an underlying strategy requires immediate removal of that strategy. 
     function forceRebalance(uint256[] calldata _tokenIds) external onlyOwner {
         uint256 _length = _tokenIds.length;
         for (uint256 i = 0; i < _length; i++) {
@@ -154,6 +169,7 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
         _depositToken.approve(address(feeMgr), type(uint256).max);
     }
 
+    /// @notice This function sets up the underlying strategies used by the vault.
     function setStrategies(address[] memory _strategies, bool[] memory _isVector, uint16[] memory _strategyBps) public onlyOwner {
         uint8 _length = uint8(_strategies.length);
         require(_length > 0 &&
@@ -177,6 +193,11 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
         refreshApprovals();
     }
 
+    /// @notice This function allows a user to rebalance a receipt (ERC1155) token's underlying assets. 
+    /// @dev This function utilizes the internal _deposit and _withdraw functions to rebalance based on 
+    /// the strategies set in the contract. Since _deposit will set the TokenInfo.deposit to the total 
+    /// deposited after the rebalance, we must store the original deposit and overwrite the TokenInfo
+    /// before completing the transaction.
     function rebalance(uint256 _tokenId) public nonReentrant {
         require((balanceOf(msg.sender, _tokenId) > 0 && !paused) ||
                           msg.sender == owner(), "FortiFi: Invalid message sender");
@@ -196,6 +217,10 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
         nextToken += 1;
     }
 
+    /// @notice Internal deposit function.
+    /// @dev This function will loop through the strategies in order split/deposit the user's deposited tokens. 
+    /// The function handles additions slightly differently, requiring that the current strategies match the 
+    /// strategies that were set at the time of original deposit. 
     function _deposit(uint256 _amount, uint256 _tokenId, bool _isAdd) internal {
         TokenInfo storage _info = tokenInfo[_tokenId];
         uint256 _remainder = _amount;
@@ -228,6 +253,7 @@ contract FortiFiSAMSVault is ERC1155Supply, Ownable, ReentrancyGuard {
         _info.deposit += _amount;
     }
 
+    /// @notice Internal withdraw function that withdraws from strategies and calculates profits.
     function _withdraw(uint256 _tokenId) internal returns(uint256 _proceeds, uint256 _profit) {
         TokenInfo memory _info = tokenInfo[_tokenId];
         uint8 _length = uint8(_info.positions.length);

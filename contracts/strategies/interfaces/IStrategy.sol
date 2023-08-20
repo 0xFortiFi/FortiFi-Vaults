@@ -3,6 +3,7 @@
 
 pragma solidity ^0.8.2;
 
+/// @title Interface for basic strategies used by FortiFi SAMS Vaults
 interface IStrategy {
     function approve(address spender, uint amount) external;
     function deposit(uint amount) external;

@@ -6,6 +6,11 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 pragma solidity ^0.8.2;
 
+/// @title Contract to calculate fees for FortiFi Vaults
+/// @notice This contract is used by FortiFi Vaults to calculate fees based on a user's NFT holdings. 
+/// @dev When combineNftHoldings is true the contract will combine the user's balance across all NFT
+/// contracts in the nftContracts array when determining fees. Otherwise, the contract will only take 
+/// the user's highest balance out of the nftContracts.
 contract FortiFiFeeCalculator is Ownable {
 
     uint16 public constant BPS = 10_000;

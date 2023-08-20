@@ -3,6 +3,7 @@
 
 pragma solidity ^0.8.2;
 
+/// @title Interface for FortiFi SAMS Vaults
 interface ISAMS {
     struct Strategy {
         address strategy;

@@ -4,7 +4,11 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 
-// Stub to simulate vector strategies which require special handling
+/// @title A mock Vector strategy contract
+/// @notice You can use this contract for only the most basic simulation since this contract
+/// does not keep track of deposits. 
+/// @dev This contract is meant to mimic Vector and other strategy contracts that 
+/// allows require calculations for withdrawal. see: https://snowtrace.io/address/0xcade1284aecc2d38bb957368f69a32fa370cf6f8#code
 contract MockVectorStrat is ERC20 {
     IERC20 depositToken;
 

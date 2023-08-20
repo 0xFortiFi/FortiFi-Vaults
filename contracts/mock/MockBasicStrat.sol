@@ -5,7 +5,11 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 
-// Simple stub to simulate Yak and DP strategies
+/// @title A basic mock strategy contract
+/// @notice You can use this contract for only the most basic simulation since this contract
+/// does not keep track of deposits. 
+/// @dev This contract is meant to mimic Yield Yak and other strategy contracts that 
+/// allows for simple deposit and withdrawal. see: https://snowtrace.io/address/0xc8ceea18c2e168c6e767422c8d144c55545d23e9#code
 contract MockBasicStrat is ERC20 {
     IERC20 depositToken;
 

@@ -3,6 +3,7 @@
 
 pragma solidity ^0.8.2;
 
+/// @title Interface for Vector strategies used by FortiFi SAMS Vaults
 interface IVectorStrategy {
     function approve(address spender, uint amount) external;
     function deposit(uint amount) external;

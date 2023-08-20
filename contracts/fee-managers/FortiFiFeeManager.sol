@@ -6,6 +6,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 pragma solidity ^0.8.2;
 
+/// @title Contract to distribute fees for FortiFi Vaults
+/// @notice This contract is used by FortiFi Vaults to distribute fees earned upon withdrawal.
+/// @dev Fees will only be disbursed when the contract holds at least 1000 wei of the token being 
+/// disbursed. This way the contract does not fail when splitting the amount amongst multiple receivers.
 contract FortiFiFeeManager is Ownable {
 
     uint16 public constant BPS = 10_000;
