@@ -1,7 +1,7 @@
 {
   "name": "FortiFi",
   "scripts": {
-    "test": "hardhat test test/vaults/vectorVault.ts"
+    "test": "hardhat test test/vaults/basicMASSVault.ts"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",

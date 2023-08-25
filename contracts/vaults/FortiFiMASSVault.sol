@@ -1,28 +1,31 @@
 // SPDX-License-Identifier: MIT
-// FortiFiSAMSVault by FortiFi
+// FortiFiMASSVault by FortiFi
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../strategies/interfaces/IStrategy.sol";
 import "../strategies/interfaces/IVectorStrategy.sol";
 import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
+import "./interfaces/IMASS.sol";
 import "./interfaces/ISAMS.sol";
+import "./interfaces/IYakRouter.sol";
 
 pragma solidity ^0.8.2;
 
-/// @title Contract for FortiFi SAMS Vaults
-/// @notice This contract allows for the deposit of a single asset, which is then split and deposited in to 
+/// @title Contract for FortiFi MASS Vaults
+/// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
-contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
+contract FortiFiMASSVault is ERC1155Supply, IERC1155Receiver, IMASS, Ownable, ReentrancyGuard {
     string public name;
     string public symbol;
     address public depositToken;
     uint16 public constant BPS = 10_000;
     uint16 public slippageBps = 100;
-    uint256 public minDeposit;
+    uint256 public minDeposit = 30_000;
     uint256 public nextToken = 1;
     bool public paused = true;
 
@@ -32,7 +35,6 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
     Strategy[] public strategies;
 
     mapping(uint256 => TokenInfo) private tokenInfo;
-    mapping(address => bool) public noFeesFor;
 
     event Deposit(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Add(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
@@ -52,20 +54,19 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
         address _feeManager,
         address _feeCalculator,
         address[] memory _strategies,
+        address[] memory _depositTokens,
         bool[] memory _isVector,
-        uint16[] memory _strategyBps,
-        uint256 _minDeposit) ERC1155(_metadata) {
+        bool[] memory _isSAMS,
+        uint16[] memory _strategyBps) ERC1155(_metadata) {
         require(_depositToken != address(0), "FortiFi: Invalid deposit token");
         require(_feeManager != address(0), "FortiFi: Invalid feeManager");
         require(_feeCalculator != address(0), "FortiFi: Invalid feeCalculator");
-        require(_minDeposit >= BPS, "FortiFi: Invalid min deposit");
         name = _name; 
         symbol = _symbol;
-        minDeposit = _minDeposit;
         depositToken = _depositToken;
         feeCalc = IFortiFiFeeCalculator(_feeCalculator);
         feeMgr = IFortiFiFeeManager(_feeManager);
-        setStrategies(_strategies, _isVector, _strategyBps);
+        setStrategies(_strategies, _depositTokens, _isVector, _isSAMS, _strategyBps);
     }
 
     /// @notice This function is used when a user does not already have a receipt (ERC1155). 
@@ -102,12 +103,8 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
         _burn(msg.sender, _tokenId, 1);
 
         (uint256 _amount, uint256 _profit) = _withdraw(_tokenId);
-        uint256 _fee = 0;
-
-        if (!noFeesFor[msg.sender]) {
-            _fee = feeCalc.getFees(msg.sender, _profit);
-            feeMgr.collectFees(depositToken, _fee);
-        }
+        uint256 _fee = feeCalc.getFees(msg.sender, _profit);
+        feeMgr.collectFees(depositToken, _fee);
         
         require(IERC20(depositToken).transfer(msg.sender, _amount - _fee), "FortiFi: Failed to send proceeds");
         emit Withdrawal(msg.sender, _tokenId, _amount, _profit, _fee);
@@ -141,10 +138,6 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
         feeCalc = IFortiFiFeeCalculator(_contract);
     }
 
-    function setNoFeesFor(address _contract, bool _fees) external onlyOwner {
-        noFeesFor[_contract] = _fees;
-    }
-
     function flipPaused() external onlyOwner {
         paused = !paused;
     }
@@ -153,22 +146,38 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
         IERC20(_token).transfer(msg.sender, _amount);
     }
 
+    function recoverERC1155(address _token, uint256[] calldata _tokenIds, uint256[] calldata _amounts) external onlyOwner {
+        IERC1155(_token).safeBatchTransferFrom(
+            address(this),
+            msg.sender,
+            _tokenIds,
+            _amounts,
+            ""
+        );
+    }
+
     function refreshApprovals() public {
-        IERC20 _depositToken = IERC20(depositToken);
         uint8 _length = uint8(strategies.length);
 
         for(uint8 i = 0; i < _length; i++) {
+            IERC20 _depositToken = IERC20(strategies[i].depositToken);
             _depositToken.approve(strategies[i].strategy, type(uint256).max);
         }
 
-        _depositToken.approve(address(feeMgr), type(uint256).max);
+        IERC20(depositToken).approve(address(feeMgr), type(uint256).max);
     }
 
     /// @notice This function sets up the underlying strategies used by the vault.
-    function setStrategies(address[] memory _strategies, bool[] memory _isVector, uint16[] memory _strategyBps) public onlyOwner {
+    function setStrategies(address[] memory _strategies, 
+        address[] memory _depositTokens,
+        bool[] memory _isVector, 
+        bool[] memory _isSAMS, 
+        uint16[] memory _strategyBps) public onlyOwner {
         uint8 _length = uint8(_strategies.length);
         require(_length > 0 &&
+                _length == _depositTokens.length &&
                 _length == _isVector.length &&
+                _length == _isSAMS.length &&
                 _length == _strategyBps.length, "FortiFi: Array length mismatch");
 
         uint16 _bps = 0;
@@ -181,7 +190,12 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
 
         for (uint8 i = 0; i < _length; i++) {
             require(_strategies[i] != address(0), "FortiFi: Invalid strat address");
-            Strategy memory _strategy = Strategy({strategy: _strategies[i], isVector: _isVector[i], bps: _strategyBps[i]});
+            require(_depositTokens[i] != address(0), "FortiFi: Invalid ERC20 address");
+            Strategy memory _strategy = Strategy({strategy: _strategies[i], 
+                depositToken: _depositTokens[i], 
+                isVector: _isVector[i],
+                isSAMS: _isSAMS[i],
+                bps: _strategyBps[i]});
             strategies.push(_strategy);
         }
 
@@ -193,7 +207,7 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
     /// the strategies set in the contract. Since _deposit will set the TokenInfo.deposit to the total 
     /// deposited after the rebalance, we must store the original deposit and overwrite the TokenInfo
     /// before completing the transaction.
-    function rebalance(uint256 _tokenId) public override nonReentrant  returns(TokenInfo memory) {
+    function rebalance(uint256 _tokenId) public override nonReentrant returns(TokenInfo memory) {
         require((balanceOf(msg.sender, _tokenId) > 0 && !paused) ||
                           msg.sender == owner(), "FortiFi: Invalid message sender");
         uint256 _originalDeposit = tokenInfo[_tokenId].deposit;
@@ -217,8 +231,15 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
         nextToken += 1;
     }
 
+    /// @notice Internal swap function.
+    /// @dev This function will use YakSwap's router to determine the best swap from deposited tokens to the strategy
+    /// deposit tokens. 
+    function _swap(uint256 _amount, address _depositToken) internal returns(uint256) {
+        return _amount; //TODO: integrate YakSwap
+    }
+
     /// @notice Internal deposit function.
-    /// @dev This function will loop through the strategies in order split/deposit the user's deposited tokens. 
+    /// @dev This function will loop through the strategies in order split/swap/deposit the user's deposited tokens. 
     /// The function handles additions slightly differently, requiring that the current strategies match the 
     /// strategies that were set at the time of original deposit. 
     function _deposit(uint256 _amount, uint256 _tokenId, bool _isAdd) internal {
@@ -232,21 +253,53 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
                 require(_strategy.strategy == _info.positions[i].strategy.strategy, "FortiFi: Can't add to receipt");
             }
             
-            IStrategy _strat = IStrategy(_strategy.strategy);
-            uint256 _receiptBalance = _strat.balanceOf(address(this));
+            bool _isSAMS = _strategy.isSAMS;
+            uint256 _receiptBalance;
+
+            IStrategy _strat;
+            ISAMS _sams;
+
+            if (_isSAMS) {
+                _sams = ISAMS(_strategy.strategy);
+            } else {
+                _strat = IStrategy(_strategy.strategy);
+                _receiptBalance = _strat.balanceOf(address(this));
+            }
+
+            uint256 _depositAmount;
 
             if (i == (_length - 1)) {
-                _strat.deposit(_remainder);
+                _depositAmount = _swap(_remainder, _strategy.depositToken);
             } else {
                 uint256 _split = _amount * _strategy.bps / BPS;
+                _depositAmount = _swap(_split, _strategy.depositToken);
                 _remainder -= _split;
-                _strat.deposit(_split);
+            }
+
+            uint256 _receiptToken;
+            ISAMS.TokenInfo memory _receiptInfo;
+
+            if (_isSAMS) {
+                if (_isAdd) {
+                    _receiptInfo = _sams.add(_depositAmount, _info.positions[i].receipt);
+                } else {
+                    (_receiptToken, _receiptInfo) = _sams.deposit(_depositAmount);
+                }
+            } else {
+                _strat.deposit(_depositAmount);
             }
 
             if (_isAdd) {
-                _info.positions[i].receipt += _strat.balanceOf(address(this)) - _receiptBalance;
+                // SAMS vaults use ERC1155 receipts and position.receipt is a tokenId so no need to update
+                if(!_strategy.isSAMS) {
+                    _info.positions[i].receipt += _strat.balanceOf(address(this)) - _receiptBalance;
+                }
             } else {
-                _info.positions.push(Position({strategy: _strategy, receipt: _strat.balanceOf(address(this)) - _receiptBalance}));
+                if (_isSAMS) {
+                    _info.positions.push(Position({strategy: _strategy, receipt: _receiptToken}));
+                } else {
+                    _info.positions.push(Position({strategy: _strategy, receipt: _strat.balanceOf(address(this)) - _receiptBalance}));
+                }
             }
         }
 
@@ -259,7 +312,10 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
         uint8 _length = uint8(_info.positions.length);
 
         for (uint8 i = 0 ; i < _length; i++) {
-            if (_info.positions[i].strategy.isVector) {
+            if (_info.positions[i].strategy.isSAMS) {
+                ISAMS _strat = ISAMS(_info.positions[i].strategy.strategy);
+                _strat.withdraw(_info.positions[i].receipt);
+            } else if (_info.positions[i].strategy.isVector) {
                 IVectorStrategy _strat = IVectorStrategy(_info.positions[i].strategy.strategy);
                 uint256 _tokensForShares = _strat.getDepositTokensForShares(_info.positions[i].receipt);
                 uint256 _minAmount = _tokensForShares * (BPS - slippageBps) / BPS;
@@ -278,6 +334,26 @@ contract FortiFiSAMSVault is ERC1155Supply, ISAMS, Ownable, ReentrancyGuard {
         } else {
             _profit = 0;
         }
+    }
+
+    function onERC1155Received(
+        address,
+        address,
+        uint256,
+        uint256,
+        bytes memory
+    ) public virtual override returns (bytes4) {
+        return this.onERC1155Received.selector;
+    }
+
+    function onERC1155BatchReceived(
+        address,
+        address,
+        uint256[] memory,
+        uint256[] memory,
+        bytes memory
+    ) public virtual override returns (bytes4) {
+        return this.onERC1155BatchReceived.selector;
     }
 
 }
