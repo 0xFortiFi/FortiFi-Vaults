@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-only
 // IMASS Interface by FortiFi
 
 pragma solidity ^0.8.2;
@@ -8,6 +8,8 @@ interface IMASS {
     struct Strategy {
         address strategy;
         address depositToken;
+        address router;
+        bool routeETH;
         bool isVector;
         bool isSAMS;
         uint16 bps;

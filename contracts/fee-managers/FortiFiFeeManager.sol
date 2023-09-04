@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-only
 // FortiFiFeeManager by FortiFi
 
 import "@openzeppelin/contracts/access/Ownable.sol";

@@ -76,10 +76,12 @@ describe("Basic MASS Vault Tests", function () {
                                   MockERC20.address,
                                   FeeMgr.address,
                                   FeeCalc.address,
-                                  [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                                  [false, false, false],
-                                  [2000, 5000, 3000],
-                                  10000);
+                                  10000,
+                                  [
+                                    {strategy: MockStrat.address, isVector: false, bps: 2000}, 
+                                    {strategy: MockStrat2.address, isVector: false, bps: 5000},
+                                    {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                                  ]);
     await SAMS.deployed();
 
     await SAMS.connect(owner).flipPaused();
@@ -90,10 +92,11 @@ describe("Basic MASS Vault Tests", function () {
                                   MockERC20.address,
                                   FeeMgr.address,
                                   FeeCalc.address,
-                                  [MockStrat.address, MockStrat2.address],
-                                  [false, false],
-                                  [5000, 5000],
-                                  10000);
+                                  10000,
+                                  [
+                                    {strategy: MockStrat.address, isVector: false, bps: 5000}, 
+                                    {strategy: MockStrat2.address, isVector: false, bps: 5000}
+                                  ]);
     await SAMS2.deployed();
 
     await SAMS2.connect(owner).flipPaused();
@@ -104,10 +107,11 @@ describe("Basic MASS Vault Tests", function () {
                                   MockERC20.address,
                                   FeeMgr.address,
                                   FeeCalc.address,
-                                  [MockStrat2.address, MockStrat3.address],
-                                  [false, false],
-                                  [5000, 5000],
-                                  10000);
+                                  10000,
+                                  [
+                                    {strategy: MockStrat2.address, isVector: false, bps: 5000},
+                                    {strategy: MockStrat3.address, isVector: false, bps: 5000}
+                                  ]);
     await SAMS3.deployed();
 
     await SAMS3.connect(owner).flipPaused();
@@ -118,11 +122,35 @@ describe("Basic MASS Vault Tests", function () {
                                   MockERC20.address,
                                   FeeMgr.address,
                                   FeeCalc.address,
-                                  [SAMS.address, SAMS2.address, SAMS3.address],
-                                  [MockERC20.address, MockERC20.address, MockERC20.address],
-                                  [false, false, false],
-                                  [true, true, true],
-                                  [4000, 1000, 5000]);
+                                  [
+                                    {
+                                      strategy: SAMS.address, 
+                                      depositToken: MockERC20.address,
+                                      router: owner.address, 
+                                      routeETH: false, 
+                                      isVector: false, 
+                                      isSAMS: true,
+                                      bps: 4000
+                                    }, 
+                                    {
+                                      strategy: SAMS2.address, 
+                                      depositToken: MockERC20.address,
+                                      router: owner.address, 
+                                      routeETH: false, 
+                                      isVector: false, 
+                                      isSAMS: true,
+                                      bps: 1000
+                                    }, 
+                                    {
+                                      strategy: SAMS3.address, 
+                                      depositToken: MockERC20.address,
+                                      router: owner.address, 
+                                      routeETH: false, 
+                                      isVector: false, 
+                                      isSAMS: true,
+                                      bps: 5000
+                                    }
+                                  ]);
     await MASS.deployed();
 
     await SAMS.connect(owner).setNoFeesFor(MASS.address, true);
@@ -616,11 +644,28 @@ describe("Basic MASS Vault Tests", function () {
     await MockERC20.mint(MockStrat.address, ethers.utils.parseEther("100"));
 
     // Change strategy allocations
-    await MASS.connect(owner).setStrategies([SAMS2.address, SAMS3.address],
-                                            [MockERC20.address, MockERC20.address], 
-                                            [false, false], 
-                                            [true, true],
-                                            [5000, 5000]);
+    await MASS.connect(owner).setStrategies(
+      [
+        {
+          strategy: SAMS2.address, 
+          depositToken: MockERC20.address,
+          router: owner.address, 
+          routeETH: false, 
+          isVector: false, 
+          isSAMS: true,
+          bps: 5000
+        }, 
+        {
+          strategy: SAMS3.address, 
+          depositToken: MockERC20.address,
+          router: owner.address, 
+          routeETH: false, 
+          isVector: false, 
+          isSAMS: true,
+          bps: 5000
+        }
+      ]
+    );
 
     // Rebalance
     await MASS.connect(owner).forceRebalance([1]);
@@ -654,12 +699,36 @@ describe("Basic MASS Vault Tests", function () {
                       MockERC20.address,
                       FeeMgr.address,
                       FeeCalc.address,
-                      [],
-                      [MockERC20.address, MockERC20.address, MockERC20.address],
-                      [false, false, false],
-                      [true, true, true],
-                      [2000, 5000, 3000])
-    ).to.be.revertedWith("FortiFi: Array length mismatch");
+                      [
+                        {
+                          strategy: SAMS.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 4000
+                        }, 
+                        {
+                          strategy: SAMS2.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 1000
+                        }, 
+                        {
+                          strategy: SAMS3.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 1000
+                        }
+                      ])
+    ).to.be.revertedWith("FortiFi: Invalid total bps");
 
     await expect(
       facMASS.deploy("Basic Vault", 
@@ -668,25 +737,35 @@ describe("Basic MASS Vault Tests", function () {
                       MockERC20.address,
                       FeeMgr.address,
                       FeeCalc.address,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [MockERC20.address, MockERC20.address, MockERC20.address],
-                      [false, false, false],
-                      [true, true, true],
-                      [2000, 1000, 3000])
-    ).to.be.revertedWith("FortiFi: Invalid bps array");
-
-    await expect(
-      facMASS.deploy("Basic Vault", 
-                      "ffBasic", 
-                      "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
-                      FeeCalc.address,
-                      [NULL_ADDRESS, MockStrat2.address, MockStrat3.address],
-                      [MockERC20.address, MockERC20.address, MockERC20.address],
-                      [false, false, false],
-                      [true, true, true],
-                      [2000, 5000, 3000])
+                      [
+                        {
+                          strategy: SAMS.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 4000
+                        }, 
+                        {
+                          strategy: SAMS2.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 1000
+                        }, 
+                        {
+                          strategy: NULL_ADDRESS, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 5000
+                        }
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid strat address");
 
     await expect(
@@ -696,11 +775,35 @@ describe("Basic MASS Vault Tests", function () {
                       MockERC20.address,
                       FeeMgr.address,
                       FeeCalc.address,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [NULL_ADDRESS, MockERC20.address, MockERC20.address],
-                      [false, false, false],
-                      [true, true, true],
-                      [2000, 5000, 3000])
+                      [
+                        {
+                          strategy: SAMS.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 4000
+                        }, 
+                        {
+                          strategy: SAMS2.address, 
+                          depositToken: NULL_ADDRESS,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 1000
+                        }, 
+                        {
+                          strategy: SAMS3.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 5000
+                        }
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid ERC20 address");
 
     await expect(
@@ -710,11 +813,35 @@ describe("Basic MASS Vault Tests", function () {
                       NULL_ADDRESS,
                       FeeMgr.address,
                       FeeCalc.address,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [MockERC20.address, MockERC20.address, MockERC20.address],
-                      [false, false, false],
-                      [true, true, true],
-                      [2000, 5000, 3000])
+                      [
+                        {
+                          strategy: SAMS.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 4000
+                        }, 
+                        {
+                          strategy: SAMS2.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 1000
+                        }, 
+                        {
+                          strategy: SAMS3.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 5000
+                        }
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid deposit token");
 
     await expect(
@@ -724,11 +851,35 @@ describe("Basic MASS Vault Tests", function () {
                       MockERC20.address,
                       NULL_ADDRESS,
                       FeeCalc.address,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [MockERC20.address, MockERC20.address, MockERC20.address],
-                      [false, false, false],
-                      [true, true, true],
-                      [2000, 5000, 3000])
+                      [
+                        {
+                          strategy: SAMS.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 4000
+                        }, 
+                        {
+                          strategy: SAMS2.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 1000
+                        }, 
+                        {
+                          strategy: SAMS3.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 5000
+                        }
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid feeManager");
 
     await expect(
@@ -738,11 +889,35 @@ describe("Basic MASS Vault Tests", function () {
                       MockERC20.address,
                       FeeMgr.address,
                       NULL_ADDRESS,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [MockERC20.address, MockERC20.address, MockERC20.address],
-                      [false, false, false],
-                      [true, true, true],
-                      [2000, 5000, 3000])
+                      [
+                        {
+                          strategy: SAMS.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 4000
+                        }, 
+                        {
+                          strategy: SAMS2.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 1000
+                        }, 
+                        {
+                          strategy: SAMS3.address, 
+                          depositToken: MockERC20.address,
+                          router: owner.address, 
+                          routeETH: false, 
+                          isVector: false, 
+                          isSAMS: true,
+                          bps: 5000
+                        }
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid feeCalculator");
 
   });
@@ -775,11 +950,28 @@ describe("Basic MASS Vault Tests", function () {
           MASS.connect(addr2).rebalance(2)
         ).to.be.revertedWith("FortiFi: Invalid message sender");
 
-        await MASS.connect(owner).setStrategies([SAMS2.address, SAMS3.address], 
-                                                [MockERC20.address, MockERC20.address],
-                                                [false, false], 
-                                                [true, true],
-                                                [5000, 5000]);
+        await MASS.connect(owner).setStrategies(
+          [
+            {
+              strategy: SAMS2.address, 
+              depositToken: MockERC20.address,
+              router: owner.address, 
+              routeETH: false, 
+              isVector: false, 
+              isSAMS: true,
+              bps: 5000
+            }, 
+            {
+              strategy: SAMS3.address, 
+              depositToken: MockERC20.address,
+              router: owner.address, 
+              routeETH: false, 
+              isVector: false, 
+              isSAMS: true,
+              bps: 5000
+            }
+          ]
+        );
 
         await expect(
           MASS.connect(addr2).add(ethers.utils.parseEther("500"), 1)

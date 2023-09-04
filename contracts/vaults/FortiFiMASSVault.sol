@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0-only
 // FortiFiMASSVault by FortiFi
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -19,7 +19,7 @@ pragma solidity ^0.8.2;
 /// @title Contract for FortiFi MASS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
-contract FortiFiMASSVault is ERC1155Supply, IERC1155Receiver, IMASS, Ownable, ReentrancyGuard {
+contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, ReentrancyGuard {
     string public name;
     string public symbol;
     address public depositToken;
@@ -53,11 +53,7 @@ contract FortiFiMASSVault is ERC1155Supply, IERC1155Receiver, IMASS, Ownable, Re
         address _depositToken,
         address _feeManager,
         address _feeCalculator,
-        address[] memory _strategies,
-        address[] memory _depositTokens,
-        bool[] memory _isVector,
-        bool[] memory _isSAMS,
-        uint16[] memory _strategyBps) ERC1155(_metadata) {
+        Strategy[] memory _strategies) ERC1155(_metadata) {
         require(_depositToken != address(0), "FortiFi: Invalid deposit token");
         require(_feeManager != address(0), "FortiFi: Invalid feeManager");
         require(_feeCalculator != address(0), "FortiFi: Invalid feeCalculator");
@@ -66,7 +62,7 @@ contract FortiFiMASSVault is ERC1155Supply, IERC1155Receiver, IMASS, Ownable, Re
         depositToken = _depositToken;
         feeCalc = IFortiFiFeeCalculator(_feeCalculator);
         feeMgr = IFortiFiFeeManager(_feeManager);
-        setStrategies(_strategies, _depositTokens, _isVector, _isSAMS, _strategyBps);
+        setStrategies(_strategies);
     }
 
     /// @notice This function is used when a user does not already have a receipt (ERC1155). 
@@ -168,35 +164,23 @@ contract FortiFiMASSVault is ERC1155Supply, IERC1155Receiver, IMASS, Ownable, Re
     }
 
     /// @notice This function sets up the underlying strategies used by the vault.
-    function setStrategies(address[] memory _strategies, 
-        address[] memory _depositTokens,
-        bool[] memory _isVector, 
-        bool[] memory _isSAMS, 
-        uint16[] memory _strategyBps) public onlyOwner {
+    function setStrategies(Strategy[] memory _strategies) public onlyOwner {
         uint8 _length = uint8(_strategies.length);
-        require(_length > 0 &&
-                _length == _depositTokens.length &&
-                _length == _isVector.length &&
-                _length == _isSAMS.length &&
-                _length == _strategyBps.length, "FortiFi: Array length mismatch");
+        require(_length > 0, "FortiFi: No strategies");
 
         uint16 _bps = 0;
         for (uint8 i = 0; i < _length; i++) {
-            _bps += _strategyBps[i];
+            _bps += _strategies[i].bps;
         }
-        require(_bps == BPS, "FortiFi: Invalid bps array");
+        require(_bps == BPS, "FortiFi: Invalid total bps");
 
         delete strategies; // remove old array, if any
 
         for (uint8 i = 0; i < _length; i++) {
-            require(_strategies[i] != address(0), "FortiFi: Invalid strat address");
-            require(_depositTokens[i] != address(0), "FortiFi: Invalid ERC20 address");
-            Strategy memory _strategy = Strategy({strategy: _strategies[i], 
-                depositToken: _depositTokens[i], 
-                isVector: _isVector[i],
-                isSAMS: _isSAMS[i],
-                bps: _strategyBps[i]});
-            strategies.push(_strategy);
+            require(_strategies[i].strategy != address(0), "FortiFi: Invalid strat address");
+            require(_strategies[i].depositToken != address(0), "FortiFi: Invalid ERC20 address");
+            require(_strategies[i].router != address(0), "FortiFi: Invalid router address");
+            strategies.push(_strategies[i]);
         }
 
         refreshApprovals();
