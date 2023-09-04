@@ -35,7 +35,6 @@ struct FormattedOffer {
     uint256[] amounts;
     address[] adapters;
     address[] path;
-    uint256 gasEstimate;
 }
 struct Trade {
     uint256 amountIn;
