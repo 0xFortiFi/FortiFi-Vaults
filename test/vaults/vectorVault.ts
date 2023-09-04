@@ -73,10 +73,12 @@ describe("Vector SAMS Vault Tests", function () {
                                   MockERC20.address,
                                   FeeMgr.address,
                                   FeeCalc.address,
-                                  [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                                  [true, true, false],
-                                  [2000, 5000, 3000],
-                                  10000);
+                                  10000,
+                                  [
+                                    {strategy: MockStrat.address, isVector: true, bps: 2000}, 
+                                    {strategy: MockStrat2.address, isVector: true, bps: 5000},
+                                    {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                                  ]);
     await Vault.deployed();
 
   });
@@ -548,7 +550,10 @@ describe("Vector SAMS Vault Tests", function () {
     await MockERC20.mint(MockStrat.address, ethers.utils.parseEther("100"));
 
     // Change strategy allocations
-    await Vault.connect(owner).setStrategies([MockStrat2.address, MockStrat3.address], [true, false], [5000, 5000]);
+    await Vault.connect(owner).setStrategies([
+        {strategy: MockStrat2.address, isVector: true, bps: 5000},
+        {strategy: MockStrat3.address, isVector: false, bps: 5000}
+      ]);
 
     // Rebalance
     await Vault.connect(owner).forceRebalance([1]);
@@ -575,18 +580,6 @@ describe("Vector SAMS Vault Tests", function () {
       ethers.getContractFactory("contracts/vaults/FortiFiSAMSVault.sol:FortiFiSAMSVault"),
     ]);
 
-    await expect(
-      facVault.deploy("Basic Vault", 
-                      "ffBasic", 
-                      "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
-                      FeeCalc.address,
-                      [],
-                      [true, true, false],
-                      [2000, 5000, 3000],
-                      10000)
-    ).to.be.revertedWith("FortiFi: Array length mismatch");
 
     await expect(
       facVault.deploy("Basic Vault", 
@@ -595,11 +588,13 @@ describe("Vector SAMS Vault Tests", function () {
                       MockERC20.address,
                       FeeMgr.address,
                       FeeCalc.address,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [true, true, false],
-                      [2000, 1000, 3000],
-                      10000)
-    ).to.be.revertedWith("FortiFi: Invalid bps array");
+                      10000,
+                      [
+                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
+                        {strategy: MockStrat3.address, isVector: false, bps: 1000}
+                      ])
+    ).to.be.revertedWith("FortiFi: Invalid total bps");
 
     await expect(
       facVault.deploy("Basic Vault", 
@@ -608,10 +603,12 @@ describe("Vector SAMS Vault Tests", function () {
                       MockERC20.address,
                       FeeMgr.address,
                       FeeCalc.address,
-                      [NULL_ADDRESS, MockStrat2.address, MockStrat3.address],
-                      [true, true, false],
-                      [2000, 5000, 3000],
-                      10000)
+                      10000,
+                      [
+                        {strategy: NULL_ADDRESS, isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
+                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid strat address");
 
     await expect(
@@ -621,10 +618,12 @@ describe("Vector SAMS Vault Tests", function () {
                       NULL_ADDRESS,
                       FeeMgr.address,
                       FeeCalc.address,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [true, true, false],
-                      [2000, 5000, 3000],
-                      10000)
+                      10000,
+                      [
+                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
+                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid deposit token");
 
     await expect(
@@ -634,10 +633,12 @@ describe("Vector SAMS Vault Tests", function () {
                       MockERC20.address,
                       NULL_ADDRESS,
                       FeeCalc.address,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [true, true, false],
-                      [2000, 5000, 3000],
-                      10000)
+                      10000,
+                      [
+                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
+                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid feeManager");
 
     await expect(
@@ -647,10 +648,12 @@ describe("Vector SAMS Vault Tests", function () {
                       MockERC20.address,
                       FeeMgr.address,
                       NULL_ADDRESS,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [true, true, false],
-                      [2000, 5000, 3000],
-                      10000)
+                      10000,
+                      [
+                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
+                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid feeCalculator");
 
     await expect(
@@ -660,10 +663,12 @@ describe("Vector SAMS Vault Tests", function () {
                       MockERC20.address,
                       FeeMgr.address,
                       FeeCalc.address,
-                      [MockStrat.address, MockStrat2.address, MockStrat3.address],
-                      [true, true, false],
-                      [2000, 5000, 3000],
-                      100)
+                      100,
+                      [
+                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
+                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                      ])
     ).to.be.revertedWith("FortiFi: Invalid min deposit");
 
   });
@@ -696,7 +701,12 @@ describe("Vector SAMS Vault Tests", function () {
           Vault.connect(addr2).rebalance(2)
         ).to.be.revertedWith("FortiFi: Invalid message sender");
 
-        await Vault.connect(owner).setStrategies([MockStrat2.address, MockStrat3.address], [true, false], [5000, 5000]);
+        await Vault.connect(owner).setStrategies(
+          [
+            {strategy: MockStrat2.address, isVector: true, bps: 5000},
+            {strategy: MockStrat3.address, isVector: false, bps: 5000}
+          ]
+        );
 
         await expect(
           Vault.connect(addr2).add(ethers.utils.parseEther("500"), 1)
