@@ -29,6 +29,7 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         combineNftHoldings = _combineHoldings;
     }
 
+    /// @notice Function to determine fees due based on a user's NFT holdings and amount of profit
     function getFees(address _user, uint256 _amount) external view override returns(uint256) {
         if (combineNftHoldings) {
             return _getCombinedFees(_user, _amount);
@@ -37,6 +38,10 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         return _getFees(_user, _amount);
     }
 
+    /// @notice Function to set new values for NFT contracts, threshhold amounts, and threshholdBps
+    /// @dev Each amount in _tokenAmounts must have a corresponding bps value in _threshholdBps. Bps values should 
+    /// decrease at each index, and token amounts should increase at each index. This maintains that the more NFTs
+    /// a user holds, the lower the fee bps.
     function setFees(address[] memory _nftContracts, uint8[] memory _tokenAmounts, uint16[] memory _threshholdBps) public onlyOwner {
         uint8 _length = uint8(_nftContracts.length);
         require (_length > 0, "FortiFi: Invalid NFT array");
@@ -53,10 +58,14 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         threshholdBps = _threshholdBps;
     }
 
+    /// @notice Function to set combineNFTHoldings state variable. 
+    /// @dev When true, holdings across all specified collections in nftContracts will be combined to set the
+    /// NFT count that is used when determining the _feeBps in _getFees.
     function setCombine(bool _bool) external onlyOwner {
         combineNftHoldings = _bool;
     }
 
+    /// @notice Validate that arrays meet specifications
     function _validateAmountsAndBps(uint8[] memory _amounts, uint16[] memory _bps) internal pure returns(bool) {
         require(_amounts.length > 0 &&
                 _amounts[0] == 0, "FortiFi: Invalid amounts array");
@@ -64,11 +73,13 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         for (uint256 i = 0; i < _length; i++) {
             if (i > 0) {
                 require(_bps[i] < _bps[i-1], "FortiFi: Invalid bps array");
+                require(_amounts[i] > _amounts[i-1], "FortiFi: Invalid amount values");
             }
         }
         return true;
     }
 
+    /// @notice Get fees for user
     function _getFees(address _user, uint256 _amount) internal view returns (uint256) {
         uint8 _length = uint8(nftContracts.length);
         uint8 _amountLength = uint8(tokenAmounts.length);
@@ -104,6 +115,7 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         return _amount * _feeBps / BPS;
     }
 
+    /// @notice Get fees for user when combineNFTHoldings is true.
     function _getCombinedFees(address _user, uint256 _amount) internal view returns (uint256) {
         uint8 _length = uint8(nftContracts.length);
         uint8 _amountLength = uint8(tokenAmounts.length);

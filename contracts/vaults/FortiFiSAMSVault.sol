@@ -123,34 +123,48 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         }
     }
 
+    /// @notice Setter for minDeposit state variable
     function setMinDeposit(uint256 _amount) external onlyOwner {
         minDeposit = _amount;
     }
 
+    /// @notice Setter for slippageBps state variable
     function setSlippage(uint16 _amount) external onlyOwner {
         slippageBps = _amount;
     }
 
+    /// @notice Setter for contract fee manager
+    /// @dev Contract address specified should implement IFortiFiFeeManager
     function setFeeManager(address _contract) external onlyOwner {
         feeMgr = IFortiFiFeeManager(_contract);
     }
 
+    /// @notice Setter for contract fee calculator
+    /// @dev Contract address specified should implement IFortiFiFeeCalculator
     function setFeeCalculator(address _contract) external onlyOwner {
         feeCalc = IFortiFiFeeCalculator(_contract);
     }
 
+    /// @notice Function to set noFeesFor a contract. 
+    /// @dev This allows FortiFi MASS vaults to utilize this SAMS vault without paying a fee so that users
+    /// do not pay fees twice.
     function setNoFeesFor(address _contract, bool _fees) external onlyOwner {
         noFeesFor[_contract] = _fees;
     }
 
+    /// @notice Function to pause/unpause the contract.
     function flipPaused() external onlyOwner {
         paused = !paused;
     }
 
+    /// @notice Emergency function to recover stuck ERC20 tokens.
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).transfer(msg.sender, _amount);
     }
 
+    /// @notice Function that approves ERC20 transfers for all strategy contracts
+    /// @dev This function sets the max approval because no depositTokens should remain in this contract at the end of a 
+    /// transaction. This means there should be no risk exposure. 
     function refreshApprovals() public {
         IERC20 _depositToken = IERC20(depositToken);
         uint8 _length = uint8(strategies.length);
@@ -202,10 +216,12 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         return _info;
     }
 
+    /// @notice View function that returns all TokenInfo for a specific receipt
     function getTokenInfo(uint256 _tokenId) public view override returns(TokenInfo memory) {
         return tokenInfo[_tokenId];
     }
 
+    /// @notice Internal function to mint receipt and advance nextToken state variable.
     function _mintReceipt() internal returns(uint256 _tokenId) {
         _tokenId = nextToken;
         _mint(msg.sender, _tokenId, 1, "");

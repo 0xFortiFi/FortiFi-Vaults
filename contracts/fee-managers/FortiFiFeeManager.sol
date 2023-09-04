@@ -23,6 +23,7 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
         setSplit(_receivers, _splitBps);
     }
 
+    /// @notice Function to collect fees from payer
     function collectFees(address _token, uint256 _amount) external override {
         IERC20 _t = IERC20(_token);
         require(_t.transferFrom(msg.sender, address(this), _amount), "FortiFi: Unable to collect fees");
@@ -41,6 +42,8 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
         }
     }
 
+    /// @notice Function to set new receivers
+    /// @dev This function replaces the current receivers and splitBps. Total bps must equal 10_000
     function setSplit(address[] memory _receivers, uint16[] memory _splitBps) public onlyOwner {
         uint8 _length = uint8(_receivers.length);
         require (_length > 0, "FortiFi: Invalid receiver array");
@@ -56,6 +59,7 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
         splitBps = _splitBps;
     }
 
+    /// @notice Validate that total bps in aray equals 10_000
     function _validateBps(uint16[] memory _bps) internal pure returns(bool) {
         uint8 _length = uint8(_bps.length);
         uint16 _totalBps = 0;
@@ -71,6 +75,7 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
         return true;
     }
 
+    /// @notice Emergency function to recover stuck ERC20 tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).transfer(msg.sender, _amount);
     }
