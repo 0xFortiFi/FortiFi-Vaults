@@ -84,7 +84,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
         if (_depositTokenBalance > 0) {
             _info.deposit -= _depositTokenBalance;
-            require(_depositToken.transfer(msg.sender, _depositToken.balanceOf(address(this))), "FortiFi: Failed to refund ERC20");
+            require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
         }
 
         if (address(this).balance > 0) {
@@ -108,7 +108,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
         if (_depositTokenBalance > 0) {
             _info.deposit -= _depositTokenBalance;
-            require(_depositToken.transfer(msg.sender, _depositToken.balanceOf(address(this))), "FortiFi: Failed to refund ERC20");
+            require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
         }
 
         if (address(this).balance > 0) {

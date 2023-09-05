@@ -80,8 +80,10 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _deposit(_amount, _tokenId, false);
         _info = tokenInfo[_tokenId];
 
-        if (_depositToken.balanceOf(address(this)) > 0) {
-            require(_depositToken.transfer(msg.sender, _depositToken.balanceOf(address(this))), "FortiFi: Failed to refund ERC20");
+        uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
+        if (_depositTokenBalance > 0) {
+            _info.deposit -= _depositTokenBalance;
+            require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
         }
 
         if (address(this).balance > 0) {
@@ -105,7 +107,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
         if (_depositTokenBalance > 0) {
             _info.deposit -= _depositTokenBalance;
-            require(_depositToken.transfer(msg.sender, _depositToken.balanceOf(address(this))), "FortiFi: Failed to refund ERC20");
+            require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
         }
 
         if (address(this).balance > 0) {
