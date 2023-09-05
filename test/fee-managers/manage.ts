@@ -29,16 +29,16 @@ describe("Fee Manager Tests", function () {
 
     ERC20 = await facMockERC20.deploy();
 
-    await ERC20.deployed();
+    await ERC20.waitForDeployment();
 
-    await ERC20.mint(owner.address, ethers.utils.parseEther("10000"));
+    await ERC20.mint(owner.getAddress(), ethers.parseEther("10000"));
 
   });
 
   it("Check that ERC20 tokens are minted to addresses", async function () {
-    let balance1 = await ERC20.balanceOf(owner.address);
+    let balance1 = await ERC20.balanceOf(owner.getAddress());
     expect(Number(balance1)).to.equal(
-      Number(ethers.utils.parseEther("10000"))
+      Number(ethers.parseEther("10000"))
     );
   });
 
@@ -47,37 +47,37 @@ describe("Fee Manager Tests", function () {
       ethers.getContractFactory("contracts/fee-managers/FortiFiFeeManager.sol:FortiFiFeeManager"),
     ]);
 
-    Mgr = await facMgr.deploy([addr1.address], [10000]);
+    Mgr = await facMgr.deploy([addr1.getAddress()], [10000]);
 
-    await ERC20.connect(owner).approve(Mgr.address, ethers.utils.parseEther("10000"));
+    await ERC20.connect(owner).approve(Mgr.getAddress(), ethers.parseEther("10000"));
 
-    await Mgr.connect(owner).collectFees(ERC20.address, 500);
+    await Mgr.connect(owner).collectFees(ERC20.getAddress(), 500);
 
-    let balance1 = await ERC20.balanceOf(Mgr.address);
+    let balance1 = await ERC20.balanceOf(Mgr.getAddress());
     expect(Number(balance1)).to.equal(
       500 
     );
 
-    let ownerBalance = Number(ethers.utils.parseEther("10000")) - 500;
+    let ownerBalance = Number(ethers.parseEther("10000")) - 500;
 
-    let balance2 = await ERC20.balanceOf(owner.address);
+    let balance2 = await ERC20.balanceOf(owner.getAddress());
     expect(Number(balance2)).to.equal(
       (ownerBalance)
     );
 
-    await Mgr.connect(owner).collectFees(ERC20.address, 500);
+    await Mgr.connect(owner).collectFees(ERC20.getAddress(), 500);
 
-    let balance3 = await ERC20.balanceOf(Mgr.address);
+    let balance3 = await ERC20.balanceOf(Mgr.getAddress());
     expect(Number(balance3)).to.equal(
       0
     );
 
-    let balance4 = await ERC20.balanceOf(owner.address);
+    let balance4 = await ERC20.balanceOf(owner.getAddress());
     expect(Number(balance4)).to.equal(
       (ownerBalance - 500) 
     );
 
-    let balance5 = await ERC20.balanceOf(addr1.address);
+    let balance5 = await ERC20.balanceOf(addr1.getAddress());
     expect(Number(balance5)).to.equal(
       1000
     );
@@ -89,47 +89,47 @@ describe("Fee Manager Tests", function () {
       ethers.getContractFactory("contracts/fee-managers/FortiFiFeeManager.sol:FortiFiFeeManager"),
     ]);
 
-    Mgr = await facMgr.deploy([addr1.address, addr2.address, addr3.address], [2500, 2500, 5000]);
+    Mgr = await facMgr.deploy([addr1.getAddress(), addr2.getAddress(), addr3.getAddress()], [2500, 2500, 5000]);
 
-    await ERC20.connect(owner).approve(Mgr.address, ethers.utils.parseEther("10000"));
+    await ERC20.connect(owner).approve(Mgr.getAddress(), ethers.parseEther("10000"));
 
-    await Mgr.connect(owner).collectFees(ERC20.address, 500);
+    await Mgr.connect(owner).collectFees(ERC20.getAddress(), 500);
 
-    let balance1 = await ERC20.balanceOf(Mgr.address);
+    let balance1 = await ERC20.balanceOf(Mgr.getAddress());
     expect(Number(balance1)).to.equal(
       500 
     );
 
-    let ownerBalance = Number(ethers.utils.parseEther("10000")) - 500;
+    let ownerBalance = Number(ethers.parseEther("10000")) - 500;
 
-    let balance2 = await ERC20.balanceOf(owner.address);
+    let balance2 = await ERC20.balanceOf(owner.getAddress());
     expect(Number(balance2)).to.equal(
       (ownerBalance)
     );
 
-    await Mgr.connect(owner).collectFees(ERC20.address, 500);
+    await Mgr.connect(owner).collectFees(ERC20.getAddress(), 500);
 
-    let balance3 = await ERC20.balanceOf(Mgr.address);
+    let balance3 = await ERC20.balanceOf(Mgr.getAddress());
     expect(Number(balance3)).to.equal(
       0
     );
 
-    let balance4 = await ERC20.balanceOf(owner.address);
+    let balance4 = await ERC20.balanceOf(owner.getAddress());
     expect(Number(balance4)).to.equal(
       (ownerBalance - 500) 
     );
 
-    let balance5 = await ERC20.balanceOf(addr1.address);
+    let balance5 = await ERC20.balanceOf(addr1.getAddress());
     expect(Number(balance5)).to.equal(
       250
     );
 
-    let balance6 = await ERC20.balanceOf(addr2.address);
+    let balance6 = await ERC20.balanceOf(addr2.getAddress());
     expect(Number(balance6)).to.equal(
       250
     );
 
-    let balance7 = await ERC20.balanceOf(addr3.address);
+    let balance7 = await ERC20.balanceOf(addr3.getAddress());
     expect(Number(balance7)).to.equal(
       500
     );
@@ -150,15 +150,15 @@ describe("Fee Manager Tests", function () {
     ).to.be.revertedWith("FortiFi: Invalid receiver address");
 
     await expect(
-      facMgr.deploy([addr1.address], [2500, 2500, 5000])
+      facMgr.deploy([addr1.getAddress()], [2500, 2500, 5000])
     ).to.be.revertedWith("FortiFi: Invalid array lengths");
 
     await expect(
-      facMgr.deploy([addr1.address], [0])
+      facMgr.deploy([addr1.getAddress()], [0])
     ).to.be.revertedWith("FortiFi: Invalid bps amount");
 
     await expect(
-      facMgr.deploy([addr1.address], [5000])
+      facMgr.deploy([addr1.getAddress()], [5000])
     ).to.be.revertedWith("FortiFi: Invalid total bps");
 
   });

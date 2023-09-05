@@ -44,118 +44,118 @@ describe("Basic MASS Vault Tests", function () {
     ]);
 
     MockERC20 = await facMockERC20.deploy();
-    await MockERC20.deployed();
+    await MockERC20.waitForDeployment();
 
-    await MockERC20.mint(addr2.address, ethers.utils.parseEther("1000"));
-    await MockERC20.mint(addr3.address, ethers.utils.parseEther("2000"));
-    await MockERC20.mint(addr4.address, ethers.utils.parseEther("5000"));
+    await MockERC20.mint(addr2.getAddress(), ethers.parseEther("1000"));
+    await MockERC20.mint(addr3.getAddress(), ethers.parseEther("2000"));
+    await MockERC20.mint(addr4.getAddress(), ethers.parseEther("5000"));
 
     NFT1 = await facNFT.deploy();
 
-    await NFT1.deployed();
+    await NFT1.waitForDeployment();
 
-    await NFT1.mint(addr2.address, 3);
-    await NFT1.mint(addr3.address, 10);
+    await NFT1.mint(addr2.getAddress(), 3);
+    await NFT1.mint(addr3.getAddress(), 10);
 
-    MockStrat = await facMockStrat.deploy(MockERC20.address);
-    await MockStrat.deployed();
+    MockStrat = await facMockStrat.deploy(MockERC20.getAddress());
+    await MockStrat.waitForDeployment();
 
-    MockStrat2 = await facMockStrat.deploy(MockERC20.address);
-    await MockStrat2.deployed();
+    MockStrat2 = await facMockStrat.deploy(MockERC20.getAddress());
+    await MockStrat2.waitForDeployment();
 
-    MockStrat3 = await facMockStrat.deploy(MockERC20.address);
-    await MockStrat3.deployed();
+    MockStrat3 = await facMockStrat.deploy(MockERC20.getAddress());
+    await MockStrat3.waitForDeployment();
 
-    FeeMgr = await facMgr.deploy([addr1.address], [10000]);
+    FeeMgr = await facMgr.deploy([addr1.getAddress()], [10000]);
 
-    FeeCalc = await facCalc.deploy([NFT1.address], [0,1,3,5,10], [700,600,500,400,300], false);
+    FeeCalc = await facCalc.deploy([NFT1.getAddress()], [0,1,3,5,10], [700,600,500,400,300], false);
 
     SAMS = await facSAMS.deploy("Basic Vault", 
                                   "ffBasic", 
                                   "ipfs://metadata",
-                                  MockERC20.address,
-                                  FeeMgr.address,
-                                  FeeCalc.address,
+                                  MockERC20.getAddress(),
+                                  FeeMgr.getAddress(),
+                                  FeeCalc.getAddress(),
                                   10000,
                                   [
-                                    {strategy: MockStrat.address, isVector: false, bps: 2000}, 
-                                    {strategy: MockStrat2.address, isVector: false, bps: 5000},
-                                    {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                                    {strategy: MockStrat.getAddress(), isVector: false, bps: 2000}, 
+                                    {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
+                                    {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
                                   ]);
-    await SAMS.deployed();
+    await SAMS.waitForDeployment();
 
     await SAMS.connect(owner).flipPaused();
 
     SAMS2 = await facSAMS.deploy("Basic Vault", 
                                   "ffBasic", 
                                   "ipfs://metadata",
-                                  MockERC20.address,
-                                  FeeMgr.address,
-                                  FeeCalc.address,
+                                  MockERC20.getAddress(),
+                                  FeeMgr.getAddress(),
+                                  FeeCalc.getAddress(),
                                   10000,
                                   [
-                                    {strategy: MockStrat.address, isVector: false, bps: 5000}, 
-                                    {strategy: MockStrat2.address, isVector: false, bps: 5000}
+                                    {strategy: MockStrat.getAddress(), isVector: false, bps: 5000}, 
+                                    {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000}
                                   ]);
-    await SAMS2.deployed();
+    await SAMS2.waitForDeployment();
 
     await SAMS2.connect(owner).flipPaused();
 
     SAMS3 = await facSAMS.deploy("Basic Vault", 
                                   "ffBasic", 
                                   "ipfs://metadata",
-                                  MockERC20.address,
-                                  FeeMgr.address,
-                                  FeeCalc.address,
+                                  MockERC20.getAddress(),
+                                  FeeMgr.getAddress(),
+                                  FeeCalc.getAddress(),
                                   10000,
                                   [
-                                    {strategy: MockStrat2.address, isVector: false, bps: 5000},
-                                    {strategy: MockStrat3.address, isVector: false, bps: 5000}
+                                    {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
+                                    {strategy: MockStrat3.getAddress(), isVector: false, bps: 5000}
                                   ]);
-    await SAMS3.deployed();
+    await SAMS3.waitForDeployment();
 
     await SAMS3.connect(owner).flipPaused();
 
     MASS = await facMASS.deploy("Basic Vault", 
                                   "ffBasic", 
                                   "ipfs://metadata",
-                                  MockERC20.address,
-                                  FeeMgr.address,
-                                  FeeCalc.address,
+                                  MockERC20.getAddress(),
+                                  FeeMgr.getAddress(),
+                                  FeeCalc.getAddress(),
                                   [
                                     {
-                                      strategy: SAMS.address, 
-                                      depositToken: MockERC20.address,
-                                      router: owner.address, 
+                                      strategy: SAMS.getAddress(), 
+                                      depositToken: MockERC20.getAddress(),
+                                      router: owner.getAddress(), 
                                       routeETH: false, 
                                       isVector: false, 
                                       isSAMS: true,
                                       bps: 4000
                                     }, 
                                     {
-                                      strategy: SAMS2.address, 
-                                      depositToken: MockERC20.address,
-                                      router: owner.address, 
+                                      strategy: SAMS2.getAddress(), 
+                                      depositToken: MockERC20.getAddress(),
+                                      router: owner.getAddress(), 
                                       routeETH: false, 
                                       isVector: false, 
                                       isSAMS: true,
                                       bps: 1000
                                     }, 
                                     {
-                                      strategy: SAMS3.address, 
-                                      depositToken: MockERC20.address,
-                                      router: owner.address, 
+                                      strategy: SAMS3.getAddress(), 
+                                      depositToken: MockERC20.getAddress(),
+                                      router: owner.getAddress(), 
                                       routeETH: false, 
                                       isVector: false, 
                                       isSAMS: true,
                                       bps: 5000
                                     }
                                   ]);
-    await MASS.deployed();
+    await MASS.waitForDeployment();
 
-    await SAMS.connect(owner).setNoFeesFor(MASS.address, true);
-    await SAMS2.connect(owner).setNoFeesFor(MASS.address, true);
-    await SAMS3.connect(owner).setNoFeesFor(MASS.address, true);
+    await SAMS.connect(owner).setNoFeesFor(MASS.getAddress(), true);
+    await SAMS2.connect(owner).setNoFeesFor(MASS.getAddress(), true);
+    await SAMS3.connect(owner).setNoFeesFor(MASS.getAddress(), true);
 
     //  Vault Strategy Allocations
     //
@@ -178,29 +178,29 @@ describe("Basic MASS Vault Tests", function () {
   });
 
   it("Check that ERC20 tokens are minted to addresses", async function () {
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance2 = await MockERC20.balanceOf(addr3.address);
+    let balance2 = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance2)).to.equal(
-      Number(ethers.utils.parseEther("2000"))
+      Number(ethers.parseEther("2000"))
     );
 
-    let balance3 = await MockERC20.balanceOf(addr4.address);
+    let balance3 = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance3)).to.equal(
-      Number(ethers.utils.parseEther("5000"))
+      Number(ethers.parseEther("5000"))
     );
   });
 
   it("Check that NFT1 tokens are minted to addresses", async function () {
-    let balance1 = await NFT1.balanceOf(addr2.address);
+    let balance1 = await NFT1.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       3
     );
 
-    let balance2 = await NFT1.balanceOf(addr3.address);
+    let balance2 = await NFT1.balanceOf(addr3.getAddress());
     expect(Number(balance2)).to.equal(
       10
     );
@@ -208,38 +208,38 @@ describe("Basic MASS Vault Tests", function () {
 
   it("Check that ERC20 tokens can be deposited and withdrawn", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(MASS.address, ethers.utils.parseEther("1000"));
+    await MockERC20.connect(addr2).approve(MASS.getAddress(), ethers.parseEther("1000"));
 
     // Can't deposit while paused
     await expect(
-      MASS.connect(addr2).deposit(ethers.utils.parseEther("1000"))
+      MASS.connect(addr2).deposit(ethers.parseEther("1000"))
     ).to.be.revertedWith("FortiFi: Contract paused");
 
     // Unpause and deposit
     await MASS.connect(owner).flipPaused();
-    await MASS.connect(addr2).deposit(ethers.utils.parseEther("1000"));
+    await MASS.connect(addr2).deposit(ethers.parseEther("1000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("130"))
+      Number(ethers.parseEther("130"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("500"))
+      Number(ethers.parseEther("500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("370"))
+      Number(ethers.parseEther("370"))
     );
 
-    let balance2 = await MASS.balanceOf(addr2.address, 1);
+    let balance2 = await MASS.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
@@ -256,27 +256,27 @@ describe("Basic MASS Vault Tests", function () {
     // withdraw
     await MASS.connect(addr2).withdraw(1);
 
-    let balance3 = await MockERC20.balanceOf(addr2.address);
+    let balance3 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance3)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
       0
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
       0
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
       0
     );
 
-    let balance4 = await MASS.balanceOf(addr2.address, 1);
+    let balance4 = await MASS.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance4)).to.equal(
       0
     );
@@ -285,69 +285,69 @@ describe("Basic MASS Vault Tests", function () {
 
   it("Check that vault can handle profits and fees", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(MASS.address, ethers.utils.parseEther("1000"));
+    await MockERC20.connect(addr2).approve(MASS.getAddress(), ethers.parseEther("1000"));
 
     // Unpause and deposit
     await MASS.connect(owner).flipPaused();
-    await MASS.connect(addr2).deposit(ethers.utils.parseEther("1000"));
+    await MASS.connect(addr2).deposit(ethers.parseEther("1000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("130"))
+      Number(ethers.parseEther("130"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("500"))
+      Number(ethers.parseEther("500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("370"))
+      Number(ethers.parseEther("370"))
     );
 
-    let balance2 = await MASS.balanceOf(addr2.address, 1);
+    let balance2 = await MASS.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
 
     // Add yield to contract
-    await MockERC20.mint(MockStrat.address, ethers.utils.parseEther("100"));
+    await MockERC20.mint(MockStrat.getAddress(), ethers.parseEther("100"));
 
     // withdraw
     await MASS.connect(addr2).withdraw(1);
 
-    let balance3 = await MockERC20.balanceOf(addr2.address);
+    let balance3 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance3)).to.equal(
-      Number(ethers.utils.parseEther("1095")) // 100 (profit) * .95 = 95 + 1000 (original deposit) = 1095
+      Number(ethers.parseEther("1095")) // 100 (profit) * .95 = 95 + 1000 (original deposit) = 1095
     );
 
-    let balance3f = await MockERC20.balanceOf(addr1.address);
+    let balance3f = await MockERC20.balanceOf(addr1.getAddress());
     expect(Number(balance3f)).to.equal(
-      Number(ethers.utils.parseEther("5")) // 100 * .05 = 5
+      Number(ethers.parseEther("5")) // 100 * .05 = 5
     );
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
       0
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
       0
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
       0
     );
 
-    let balance4 = await MASS.balanceOf(addr2.address, 1);
+    let balance4 = await MASS.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance4)).to.equal(
       0
     );
@@ -356,57 +356,57 @@ describe("Basic MASS Vault Tests", function () {
 
   it("Check that users can add to position", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(MASS.address, ethers.utils.parseEther("1000"));
-    await MockERC20.connect(addr3).approve(MASS.address, ethers.utils.parseEther("2000"));
-    await MockERC20.connect(addr4).approve(MASS.address, ethers.utils.parseEther("5000"));
+    await MockERC20.connect(addr2).approve(MASS.getAddress(), ethers.parseEther("1000"));
+    await MockERC20.connect(addr3).approve(MASS.getAddress(), ethers.parseEther("2000"));
+    await MockERC20.connect(addr4).approve(MASS.getAddress(), ethers.parseEther("5000"));
 
     // Unpause and deposit
     await MASS.connect(owner).flipPaused();
-    await MASS.connect(addr2).deposit(ethers.utils.parseEther("1000"));
-    await MASS.connect(addr3).deposit(ethers.utils.parseEther("2000"));
-    await MASS.connect(addr4).deposit(ethers.utils.parseEther("2000"));
+    await MASS.connect(addr2).deposit(ethers.parseEther("1000"));
+    await MASS.connect(addr3).deposit(ethers.parseEther("2000"));
+    await MASS.connect(addr4).deposit(ethers.parseEther("2000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1b = await MockERC20.balanceOf(addr3.address);
+    let balance1b = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance1b)).to.equal(
       0
     );
 
-    let balance1c = await MockERC20.balanceOf(addr4.address);
+    let balance1c = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance1c)).to.equal(
-      Number(ethers.utils.parseEther("3000"))
+      Number(ethers.parseEther("3000"))
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("650"))
+      Number(ethers.parseEther("650"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("2500"))
+      Number(ethers.parseEther("2500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("1850"))
+      Number(ethers.parseEther("1850"))
     );
 
-    let balance2 = await MASS.balanceOf(addr2.address, 1);
+    let balance2 = await MASS.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
 
-    let balance2b = await MASS.balanceOf(addr3.address, 2);
+    let balance2b = await MASS.balanceOf(addr3.getAddress(), 2);
     expect(Number(balance2b)).to.equal(
       Number(1)
     );
 
-    let balance2c = await MASS.balanceOf(addr4.address, 3);
+    let balance2c = await MASS.balanceOf(addr4.getAddress(), 3);
     expect(Number(balance2c)).to.equal(
       Number(1)
     );
@@ -414,89 +414,89 @@ describe("Basic MASS Vault Tests", function () {
     // withdraw
     await MASS.connect(addr2).withdraw(1);
 
-    let balance3 = await MockERC20.balanceOf(addr2.address);
+    let balance3 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance3)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
-      Number(ethers.utils.parseEther("520"))
+      Number(ethers.parseEther("520"))
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
-      Number(ethers.utils.parseEther("2000"))
+      Number(ethers.parseEther("2000"))
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
-      Number(ethers.utils.parseEther("1480"))
+      Number(ethers.parseEther("1480"))
     );
 
-    let balance4 = await MASS.balanceOf(addr2.address, 1);
+    let balance4 = await MASS.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance4)).to.equal(
       0
     );
 
     // add to addr4 position
-    await MASS.connect(addr4).add(ethers.utils.parseEther("3000"), 3);
+    await MASS.connect(addr4).add(ethers.parseEther("3000"), 3);
 
-    let balance5 = await MockERC20.balanceOf(addr4.address);
+    let balance5 = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance5)).to.equal(
       0
     );
 
-    let balance5s = await MockERC20.balanceOf(MockStrat.address);
+    let balance5s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance5s)).to.equal(
-      Number(ethers.utils.parseEther("910"))
+      Number(ethers.parseEther("910"))
     );
 
-    let balance5s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance5s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance5s2)).to.equal(
-      Number(ethers.utils.parseEther("3500"))
+      Number(ethers.parseEther("3500"))
     );
 
-    let balance5s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance5s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance5s3)).to.equal(
-      Number(ethers.utils.parseEther("2590"))
+      Number(ethers.parseEther("2590"))
     );
 
     // withdraw all positions
     await MASS.connect(addr3).withdraw(2);
     await MASS.connect(addr4).withdraw(3);
 
-    let balance6 = await MockERC20.balanceOf(addr3.address);
+    let balance6 = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance6)).to.equal(
-      Number(ethers.utils.parseEther("2000"))
+      Number(ethers.parseEther("2000"))
     );
 
-    let balance6b = await MockERC20.balanceOf(addr4.address);
+    let balance6b = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance6b)).to.equal(
-      Number(ethers.utils.parseEther("5000"))
+      Number(ethers.parseEther("5000"))
     );
 
-    let balance6s = await MockERC20.balanceOf(MockStrat.address);
+    let balance6s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance6s)).to.equal(
       0
     );
 
-    let balance6s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance6s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance6s2)).to.equal(
       0
     );
 
-    let balance6s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance6s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance6s3)).to.equal(
       0
     );
 
-    let balance7 = await MASS.balanceOf(addr3.address, 2);
+    let balance7 = await MASS.balanceOf(addr3.getAddress(), 2);
     expect(Number(balance7)).to.equal(
       0
     );
 
-    let balance7b = await MASS.balanceOf(addr4.address, 3);
+    let balance7b = await MASS.balanceOf(addr4.getAddress(), 3);
     expect(Number(balance7b)).to.equal(
       0
     );
@@ -505,160 +505,160 @@ describe("Basic MASS Vault Tests", function () {
 
   it("Check that users can rebalance positions", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(MASS.address, ethers.utils.parseEther("1000"));
-    await MockERC20.connect(addr3).approve(MASS.address, ethers.utils.parseEther("2000"));
-    await MockERC20.connect(addr4).approve(MASS.address, ethers.utils.parseEther("5000"));
+    await MockERC20.connect(addr2).approve(MASS.getAddress(), ethers.parseEther("1000"));
+    await MockERC20.connect(addr3).approve(MASS.getAddress(), ethers.parseEther("2000"));
+    await MockERC20.connect(addr4).approve(MASS.getAddress(), ethers.parseEther("5000"));
 
     // Unpause and deposit
     await MASS.connect(owner).flipPaused();
-    await MASS.connect(addr2).deposit(ethers.utils.parseEther("1000"));
-    await MASS.connect(addr3).deposit(ethers.utils.parseEther("2000"));
-    await MASS.connect(addr4).deposit(ethers.utils.parseEther("2000"));
+    await MASS.connect(addr2).deposit(ethers.parseEther("1000"));
+    await MASS.connect(addr3).deposit(ethers.parseEther("2000"));
+    await MASS.connect(addr4).deposit(ethers.parseEther("2000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1b = await MockERC20.balanceOf(addr3.address);
+    let balance1b = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance1b)).to.equal(
       0
     );
 
-    let balance1c = await MockERC20.balanceOf(addr4.address);
+    let balance1c = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance1c)).to.equal(
-      Number(ethers.utils.parseEther("3000"))
+      Number(ethers.parseEther("3000"))
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("650"))
+      Number(ethers.parseEther("650"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("2500"))
+      Number(ethers.parseEther("2500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("1850"))
+      Number(ethers.parseEther("1850"))
     );
 
-    let balance2 = await MASS.balanceOf(addr2.address, 1);
+    let balance2 = await MASS.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
 
-    let balance2b = await MASS.balanceOf(addr3.address, 2);
+    let balance2b = await MASS.balanceOf(addr3.getAddress(), 2);
     expect(Number(balance2b)).to.equal(
       Number(1)
     );
 
-    let balance2c = await MASS.balanceOf(addr4.address, 3);
+    let balance2c = await MASS.balanceOf(addr4.getAddress(), 3);
     expect(Number(balance2c)).to.equal(
       Number(1)
     );
 
     // Add yield to contract
-    await MockERC20.mint(MockStrat.address, ethers.utils.parseEther("100"));
+    await MockERC20.mint(MockStrat.getAddress(), ethers.parseEther("100"));
 
     // rebalance
     await MASS.connect(addr2).rebalance(1);
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
-      Number(ethers.utils.parseEther("732.6")) // 750 - 150 + 132.6
+      Number(ethers.parseEther("732.6")) // 750 - 150 + 132.6
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
-      Number(ethers.utils.parseEther("2510")) // 2500 - 500 + 510
+      Number(ethers.parseEther("2510")) // 2500 - 500 + 510
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
-      Number(ethers.utils.parseEther("1857.4")) // 1850 - 370 + 377.4
+      Number(ethers.parseEther("1857.4")) // 1850 - 370 + 377.4
     );
 
   });
 
   it("Check that owner can rebalance positions", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(MASS.address, ethers.utils.parseEther("1000"));
-    await MockERC20.connect(addr3).approve(MASS.address, ethers.utils.parseEther("2000"));
-    await MockERC20.connect(addr4).approve(MASS.address, ethers.utils.parseEther("5000"));
+    await MockERC20.connect(addr2).approve(MASS.getAddress(), ethers.parseEther("1000"));
+    await MockERC20.connect(addr3).approve(MASS.getAddress(), ethers.parseEther("2000"));
+    await MockERC20.connect(addr4).approve(MASS.getAddress(), ethers.parseEther("5000"));
 
     // Unpause and deposit
     await MASS.connect(owner).flipPaused();
-    await MASS.connect(addr2).deposit(ethers.utils.parseEther("1000"));
-    await MASS.connect(addr3).deposit(ethers.utils.parseEther("2000"));
-    await MASS.connect(addr4).deposit(ethers.utils.parseEther("2000"));
+    await MASS.connect(addr2).deposit(ethers.parseEther("1000"));
+    await MASS.connect(addr3).deposit(ethers.parseEther("2000"));
+    await MASS.connect(addr4).deposit(ethers.parseEther("2000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1b = await MockERC20.balanceOf(addr3.address);
+    let balance1b = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance1b)).to.equal(
       0
     );
 
-    let balance1c = await MockERC20.balanceOf(addr4.address);
+    let balance1c = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance1c)).to.equal(
-      Number(ethers.utils.parseEther("3000"))
+      Number(ethers.parseEther("3000"))
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("650"))
+      Number(ethers.parseEther("650"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("2500"))
+      Number(ethers.parseEther("2500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("1850"))
+      Number(ethers.parseEther("1850"))
     );
 
-    let balance2 = await MASS.balanceOf(addr2.address, 1);
+    let balance2 = await MASS.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
 
-    let balance2b = await MASS.balanceOf(addr3.address, 2);
+    let balance2b = await MASS.balanceOf(addr3.getAddress(), 2);
     expect(Number(balance2b)).to.equal(
       Number(1)
     );
 
-    let balance2c = await MASS.balanceOf(addr4.address, 3);
+    let balance2c = await MASS.balanceOf(addr4.getAddress(), 3);
     expect(Number(balance2c)).to.equal(
       Number(1)
     );
 
     // Add yield to contract
-    await MockERC20.mint(MockStrat.address, ethers.utils.parseEther("100"));
+    await MockERC20.mint(MockStrat.getAddress(), ethers.parseEther("100"));
 
     // Change strategy allocations
     await MASS.connect(owner).setStrategies(
       [
         {
-          strategy: SAMS2.address, 
-          depositToken: MockERC20.address,
-          router: owner.address, 
+          strategy: SAMS2.getAddress(), 
+          depositToken: MockERC20.getAddress(),
+          router: owner.getAddress(), 
           routeETH: false, 
           isVector: false, 
           isSAMS: true,
           bps: 5000
         }, 
         {
-          strategy: SAMS3.address, 
-          depositToken: MockERC20.address,
-          router: owner.address, 
+          strategy: SAMS3.getAddress(), 
+          depositToken: MockERC20.getAddress(),
+          router: owner.getAddress(), 
           routeETH: false, 
           isVector: false, 
           isSAMS: true,
@@ -670,19 +670,19 @@ describe("Basic MASS Vault Tests", function () {
     // Rebalance
     await MASS.connect(owner).forceRebalance([1]);
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
-      Number(ethers.utils.parseEther("855")) // 750 - 150 + 255
+      Number(ethers.parseEther("855")) // 750 - 150 + 255
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
-      Number(ethers.utils.parseEther("2510")) // 2500 - 500 + 510
+      Number(ethers.parseEther("2510")) // 2500 - 500 + 510
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
-      Number(ethers.utils.parseEther("1735")) // 1850 - 370 + 255
+      Number(ethers.parseEther("1735")) // 1850 - 370 + 255
     );
 
   });
@@ -696,32 +696,32 @@ describe("Basic MASS Vault Tests", function () {
       facMASS.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
-                      FeeCalc.address,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
                       [
                         {
-                          strategy: SAMS.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
                         {
-                          strategy: SAMS2.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS2.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
                         {
-                          strategy: SAMS3.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS3.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
@@ -734,23 +734,23 @@ describe("Basic MASS Vault Tests", function () {
       facMASS.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
-                      FeeCalc.address,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
                       [
                         {
-                          strategy: SAMS.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
                         {
-                          strategy: SAMS2.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS2.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
@@ -758,8 +758,8 @@ describe("Basic MASS Vault Tests", function () {
                         }, 
                         {
                           strategy: NULL_ADDRESS, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
@@ -772,32 +772,32 @@ describe("Basic MASS Vault Tests", function () {
       facMASS.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
-                      FeeCalc.address,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
                       [
                         {
-                          strategy: SAMS.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
                         {
-                          strategy: SAMS2.address, 
+                          strategy: SAMS2.getAddress(), 
                           depositToken: NULL_ADDRESS,
-                          router: owner.address, 
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
                         {
-                          strategy: SAMS3.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS3.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
@@ -811,31 +811,31 @@ describe("Basic MASS Vault Tests", function () {
                       "ffBasic", 
                       "ipfs://metadata",
                       NULL_ADDRESS,
-                      FeeMgr.address,
-                      FeeCalc.address,
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
                       [
                         {
-                          strategy: SAMS.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
                         {
-                          strategy: SAMS2.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS2.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
                         {
-                          strategy: SAMS3.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS3.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
@@ -848,32 +848,32 @@ describe("Basic MASS Vault Tests", function () {
       facMASS.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
+                      MockERC20.getAddress(),
                       NULL_ADDRESS,
-                      FeeCalc.address,
+                      FeeCalc.getAddress(),
                       [
                         {
-                          strategy: SAMS.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
                         {
-                          strategy: SAMS2.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS2.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
                         {
-                          strategy: SAMS3.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS3.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
@@ -886,32 +886,32 @@ describe("Basic MASS Vault Tests", function () {
       facMASS.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
                       NULL_ADDRESS,
                       [
                         {
-                          strategy: SAMS.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
                         {
-                          strategy: SAMS2.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS2.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
                         {
-                          strategy: SAMS3.address, 
-                          depositToken: MockERC20.address,
-                          router: owner.address, 
+                          strategy: SAMS3.getAddress(), 
+                          depositToken: MockERC20.getAddress(),
+                          router: owner.getAddress(), 
                           routeETH: false, 
                           isVector: false, 
                           isSAMS: true,
@@ -924,9 +924,9 @@ describe("Basic MASS Vault Tests", function () {
 
   it("Check that invalid transactions revert", async function () {
         // Approve vault
-        await MockERC20.connect(addr2).approve(MASS.address, ethers.utils.parseEther("1000"));
-        await MockERC20.connect(addr3).approve(MASS.address, ethers.utils.parseEther("2000"));
-        await MockERC20.connect(addr4).approve(MASS.address, ethers.utils.parseEther("5000"));
+        await MockERC20.connect(addr2).approve(MASS.getAddress(), ethers.parseEther("1000"));
+        await MockERC20.connect(addr3).approve(MASS.getAddress(), ethers.parseEther("2000"));
+        await MockERC20.connect(addr4).approve(MASS.getAddress(), ethers.parseEther("5000"));
     
         // Unpause and deposit
         await MASS.connect(owner).flipPaused();
@@ -935,11 +935,11 @@ describe("Basic MASS Vault Tests", function () {
           MASS.connect(addr2).deposit(0)
         ).to.be.revertedWith("FortiFi: Invalid deposit amount");
 
-        await MASS.connect(addr2).deposit(ethers.utils.parseEther("500"));
-        await MASS.connect(addr3).deposit(ethers.utils.parseEther("500"));
+        await MASS.connect(addr2).deposit(ethers.parseEther("500"));
+        await MASS.connect(addr3).deposit(ethers.parseEther("500"));
 
         await expect(
-          MASS.connect(addr2).add(ethers.utils.parseEther("500"), 2)
+          MASS.connect(addr2).add(ethers.parseEther("500"), 2)
         ).to.be.revertedWith("FortiFi: Not the owner of token");
 
         await expect(
@@ -953,18 +953,18 @@ describe("Basic MASS Vault Tests", function () {
         await MASS.connect(owner).setStrategies(
           [
             {
-              strategy: SAMS2.address, 
-              depositToken: MockERC20.address,
-              router: owner.address, 
+              strategy: SAMS2.getAddress(), 
+              depositToken: MockERC20.getAddress(),
+              router: owner.getAddress(), 
               routeETH: false, 
               isVector: false, 
               isSAMS: true,
               bps: 5000
             }, 
             {
-              strategy: SAMS3.address, 
-              depositToken: MockERC20.address,
-              router: owner.address, 
+              strategy: SAMS3.getAddress(), 
+              depositToken: MockERC20.getAddress(),
+              router: owner.getAddress(), 
               routeETH: false, 
               isVector: false, 
               isSAMS: true,
@@ -974,7 +974,7 @@ describe("Basic MASS Vault Tests", function () {
         );
 
         await expect(
-          MASS.connect(addr2).add(ethers.utils.parseEther("500"), 1)
+          MASS.connect(addr2).add(ethers.parseEther("500"), 1)
         ).to.be.revertedWith("FortiFi: Can't add to receipt");
 
   });

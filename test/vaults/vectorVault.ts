@@ -41,72 +41,72 @@ describe("Vector SAMS Vault Tests", function () {
     ]);
 
     MockERC20 = await facMockERC20.deploy();
-    await MockERC20.deployed();
+    await MockERC20.waitForDeployment();
 
-    await MockERC20.mint(addr2.address, ethers.utils.parseEther("1000"));
-    await MockERC20.mint(addr3.address, ethers.utils.parseEther("2000"));
-    await MockERC20.mint(addr4.address, ethers.utils.parseEther("5000"));
+    await MockERC20.mint(addr2.getAddress(), ethers.parseEther("1000"));
+    await MockERC20.mint(addr3.getAddress(), ethers.parseEther("2000"));
+    await MockERC20.mint(addr4.getAddress(), ethers.parseEther("5000"));
 
     NFT1 = await facNFT.deploy();
 
-    await NFT1.deployed();
+    await NFT1.waitForDeployment();
 
-    await NFT1.mint(addr2.address, 3);
-    await NFT1.mint(addr3.address, 10);
+    await NFT1.mint(addr2.getAddress(), 3);
+    await NFT1.mint(addr3.getAddress(), 10);
 
-    MockStrat = await facVectorStrat.deploy(MockERC20.address);
-    await MockStrat.deployed();
+    MockStrat = await facVectorStrat.deploy(MockERC20.getAddress());
+    await MockStrat.waitForDeployment();
 
-    MockStrat2 = await facVectorStrat.deploy(MockERC20.address);
-    await MockStrat2.deployed();
+    MockStrat2 = await facVectorStrat.deploy(MockERC20.getAddress());
+    await MockStrat2.waitForDeployment();
 
-    MockStrat3 = await facMockStrat.deploy(MockERC20.address);
-    await MockStrat3.deployed();
+    MockStrat3 = await facMockStrat.deploy(MockERC20.getAddress());
+    await MockStrat3.waitForDeployment();
 
-    FeeMgr = await facMgr.deploy([addr1.address], [10000]);
+    FeeMgr = await facMgr.deploy([addr1.getAddress()], [10000]);
 
-    FeeCalc = await facCalc.deploy([NFT1.address], [0,1,3,5,10], [700,600,500,400,300], false);
+    FeeCalc = await facCalc.deploy([NFT1.getAddress()], [0,1,3,5,10], [700,600,500,400,300], false);
 
     Vault = await facVault.deploy("Basic Vault", 
                                   "ffBasic", 
                                   "ipfs://metadata",
-                                  MockERC20.address,
-                                  FeeMgr.address,
-                                  FeeCalc.address,
+                                  MockERC20.getAddress(),
+                                  FeeMgr.getAddress(),
+                                  FeeCalc.getAddress(),
                                   10000,
                                   [
-                                    {strategy: MockStrat.address, isVector: true, bps: 2000}, 
-                                    {strategy: MockStrat2.address, isVector: true, bps: 5000},
-                                    {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                                    {strategy: MockStrat.getAddress(), isVector: true, bps: 2000}, 
+                                    {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+                                    {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
                                   ]);
-    await Vault.deployed();
+    await Vault.waitForDeployment();
 
   });
 
   it("Check that ERC20 tokens are minted to addresses", async function () {
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance2 = await MockERC20.balanceOf(addr3.address);
+    let balance2 = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance2)).to.equal(
-      Number(ethers.utils.parseEther("2000"))
+      Number(ethers.parseEther("2000"))
     );
 
-    let balance3 = await MockERC20.balanceOf(addr4.address);
+    let balance3 = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance3)).to.equal(
-      Number(ethers.utils.parseEther("5000"))
+      Number(ethers.parseEther("5000"))
     );
   });
 
   it("Check that NFT1 tokens are minted to addresses", async function () {
-    let balance1 = await NFT1.balanceOf(addr2.address);
+    let balance1 = await NFT1.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       3
     );
 
-    let balance2 = await NFT1.balanceOf(addr3.address);
+    let balance2 = await NFT1.balanceOf(addr3.getAddress());
     expect(Number(balance2)).to.equal(
       10
     );
@@ -114,38 +114,38 @@ describe("Vector SAMS Vault Tests", function () {
 
   it("Check that ERC20 tokens can be deposited and withdrawn", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(Vault.address, ethers.utils.parseEther("1000"));
+    await MockERC20.connect(addr2).approve(Vault.getAddress(), ethers.parseEther("1000"));
 
     // Can't deposit while paused
     await expect(
-      Vault.connect(addr2).deposit(ethers.utils.parseEther("1000"))
+      Vault.connect(addr2).deposit(ethers.parseEther("1000"))
     ).to.be.revertedWith("FortiFi: Contract paused");
 
     // Unpause and deposit
     await Vault.connect(owner).flipPaused();
-    await Vault.connect(addr2).deposit(ethers.utils.parseEther("1000"));
+    await Vault.connect(addr2).deposit(ethers.parseEther("1000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("200"))
+      Number(ethers.parseEther("200"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("500"))
+      Number(ethers.parseEther("500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("300"))
+      Number(ethers.parseEther("300"))
     );
 
-    let balance2 = await Vault.balanceOf(addr2.address, 1);
+    let balance2 = await Vault.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
@@ -162,27 +162,27 @@ describe("Vector SAMS Vault Tests", function () {
     // withdraw
     await Vault.connect(addr2).withdraw(1);
 
-    let balance3 = await MockERC20.balanceOf(addr2.address);
+    let balance3 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance3)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
       0
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
       0
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
       0
     );
 
-    let balance4 = await Vault.balanceOf(addr2.address, 1);
+    let balance4 = await Vault.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance4)).to.equal(
       0
     );
@@ -191,69 +191,69 @@ describe("Vector SAMS Vault Tests", function () {
 
   it("Check that vault can handle profits and fees", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(Vault.address, ethers.utils.parseEther("1000"));
+    await MockERC20.connect(addr2).approve(Vault.getAddress(), ethers.parseEther("1000"));
 
     // Unpause and deposit
     await Vault.connect(owner).flipPaused();
-    await Vault.connect(addr2).deposit(ethers.utils.parseEther("1000"));
+    await Vault.connect(addr2).deposit(ethers.parseEther("1000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("200"))
+      Number(ethers.parseEther("200"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("500"))
+      Number(ethers.parseEther("500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("300"))
+      Number(ethers.parseEther("300"))
     );
 
-    let balance2 = await Vault.balanceOf(addr2.address, 1);
+    let balance2 = await Vault.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
 
     // Add yield to contract
-    await MockERC20.mint(MockStrat.address, ethers.utils.parseEther("100"));
+    await MockERC20.mint(MockStrat.getAddress(), ethers.parseEther("100"));
 
     // withdraw
     await Vault.connect(addr2).withdraw(1);
 
-    let balance3 = await MockERC20.balanceOf(addr2.address);
+    let balance3 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance3)).to.equal(
-      Number(ethers.utils.parseEther("1095")) // 100 (profit) * .95 = 95 + 1000 (original deposit) = 1095
+      Number(ethers.parseEther("1095")) // 100 (profit) * .95 = 95 + 1000 (original deposit) = 1095
     );
 
-    let balance3f = await MockERC20.balanceOf(addr1.address);
+    let balance3f = await MockERC20.balanceOf(addr1.getAddress());
     expect(Number(balance3f)).to.equal(
-      Number(ethers.utils.parseEther("5")) // 100 * .05 = 5
+      Number(ethers.parseEther("5")) // 100 * .05 = 5
     );
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
       0
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
       0
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
       0
     );
 
-    let balance4 = await Vault.balanceOf(addr2.address, 1);
+    let balance4 = await Vault.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance4)).to.equal(
       0
     );
@@ -262,57 +262,57 @@ describe("Vector SAMS Vault Tests", function () {
 
   it("Check that users can add to position", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(Vault.address, ethers.utils.parseEther("1000"));
-    await MockERC20.connect(addr3).approve(Vault.address, ethers.utils.parseEther("2000"));
-    await MockERC20.connect(addr4).approve(Vault.address, ethers.utils.parseEther("5000"));
+    await MockERC20.connect(addr2).approve(Vault.getAddress(), ethers.parseEther("1000"));
+    await MockERC20.connect(addr3).approve(Vault.getAddress(), ethers.parseEther("2000"));
+    await MockERC20.connect(addr4).approve(Vault.getAddress(), ethers.parseEther("5000"));
 
     // Unpause and deposit
     await Vault.connect(owner).flipPaused();
-    await Vault.connect(addr2).deposit(ethers.utils.parseEther("1000"));
-    await Vault.connect(addr3).deposit(ethers.utils.parseEther("2000"));
-    await Vault.connect(addr4).deposit(ethers.utils.parseEther("2000"));
+    await Vault.connect(addr2).deposit(ethers.parseEther("1000"));
+    await Vault.connect(addr3).deposit(ethers.parseEther("2000"));
+    await Vault.connect(addr4).deposit(ethers.parseEther("2000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1b = await MockERC20.balanceOf(addr3.address);
+    let balance1b = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance1b)).to.equal(
       0
     );
 
-    let balance1c = await MockERC20.balanceOf(addr4.address);
+    let balance1c = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance1c)).to.equal(
-      Number(ethers.utils.parseEther("3000"))
+      Number(ethers.parseEther("3000"))
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("2500"))
+      Number(ethers.parseEther("2500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("1500"))
+      Number(ethers.parseEther("1500"))
     );
 
-    let balance2 = await Vault.balanceOf(addr2.address, 1);
+    let balance2 = await Vault.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
 
-    let balance2b = await Vault.balanceOf(addr3.address, 2);
+    let balance2b = await Vault.balanceOf(addr3.getAddress(), 2);
     expect(Number(balance2b)).to.equal(
       Number(1)
     );
 
-    let balance2c = await Vault.balanceOf(addr4.address, 3);
+    let balance2c = await Vault.balanceOf(addr4.getAddress(), 3);
     expect(Number(balance2c)).to.equal(
       Number(1)
     );
@@ -320,89 +320,89 @@ describe("Vector SAMS Vault Tests", function () {
     // withdraw
     await Vault.connect(addr2).withdraw(1);
 
-    let balance3 = await MockERC20.balanceOf(addr2.address);
+    let balance3 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance3)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
-      Number(ethers.utils.parseEther("800"))
+      Number(ethers.parseEther("800"))
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
-      Number(ethers.utils.parseEther("2000"))
+      Number(ethers.parseEther("2000"))
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
-      Number(ethers.utils.parseEther("1200"))
+      Number(ethers.parseEther("1200"))
     );
 
-    let balance4 = await Vault.balanceOf(addr2.address, 1);
+    let balance4 = await Vault.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance4)).to.equal(
       0
     );
 
     // add to addr4 position
-    await Vault.connect(addr4).add(ethers.utils.parseEther("3000"), 3);
+    await Vault.connect(addr4).add(ethers.parseEther("3000"), 3);
 
-    let balance5 = await MockERC20.balanceOf(addr4.address);
+    let balance5 = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance5)).to.equal(
       0
     );
 
-    let balance5s = await MockERC20.balanceOf(MockStrat.address);
+    let balance5s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance5s)).to.equal(
-      Number(ethers.utils.parseEther("1400"))
+      Number(ethers.parseEther("1400"))
     );
 
-    let balance5s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance5s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance5s2)).to.equal(
-      Number(ethers.utils.parseEther("3500"))
+      Number(ethers.parseEther("3500"))
     );
 
-    let balance5s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance5s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance5s3)).to.equal(
-      Number(ethers.utils.parseEther("2100"))
+      Number(ethers.parseEther("2100"))
     );
 
     // withdraw all positions
     await Vault.connect(addr3).withdraw(2);
     await Vault.connect(addr4).withdraw(3);
 
-    let balance6 = await MockERC20.balanceOf(addr3.address);
+    let balance6 = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance6)).to.equal(
-      Number(ethers.utils.parseEther("2000"))
+      Number(ethers.parseEther("2000"))
     );
 
-    let balance6b = await MockERC20.balanceOf(addr4.address);
+    let balance6b = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance6b)).to.equal(
-      Number(ethers.utils.parseEther("5000"))
+      Number(ethers.parseEther("5000"))
     );
 
-    let balance6s = await MockERC20.balanceOf(MockStrat.address);
+    let balance6s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance6s)).to.equal(
       0
     );
 
-    let balance6s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance6s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance6s2)).to.equal(
       0
     );
 
-    let balance6s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance6s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance6s3)).to.equal(
       0
     );
 
-    let balance7 = await Vault.balanceOf(addr3.address, 2);
+    let balance7 = await Vault.balanceOf(addr3.getAddress(), 2);
     expect(Number(balance7)).to.equal(
       0
     );
 
-    let balance7b = await Vault.balanceOf(addr4.address, 3);
+    let balance7b = await Vault.balanceOf(addr4.getAddress(), 3);
     expect(Number(balance7b)).to.equal(
       0
     );
@@ -411,166 +411,166 @@ describe("Vector SAMS Vault Tests", function () {
 
   it("Check that users can rebalance positions", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(Vault.address, ethers.utils.parseEther("1000"));
-    await MockERC20.connect(addr3).approve(Vault.address, ethers.utils.parseEther("2000"));
-    await MockERC20.connect(addr4).approve(Vault.address, ethers.utils.parseEther("5000"));
+    await MockERC20.connect(addr2).approve(Vault.getAddress(), ethers.parseEther("1000"));
+    await MockERC20.connect(addr3).approve(Vault.getAddress(), ethers.parseEther("2000"));
+    await MockERC20.connect(addr4).approve(Vault.getAddress(), ethers.parseEther("5000"));
 
     // Unpause and deposit
     await Vault.connect(owner).flipPaused();
-    await Vault.connect(addr2).deposit(ethers.utils.parseEther("1000"));
-    await Vault.connect(addr3).deposit(ethers.utils.parseEther("2000"));
-    await Vault.connect(addr4).deposit(ethers.utils.parseEther("2000"));
+    await Vault.connect(addr2).deposit(ethers.parseEther("1000"));
+    await Vault.connect(addr3).deposit(ethers.parseEther("2000"));
+    await Vault.connect(addr4).deposit(ethers.parseEther("2000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1b = await MockERC20.balanceOf(addr3.address);
+    let balance1b = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance1b)).to.equal(
       0
     );
 
-    let balance1c = await MockERC20.balanceOf(addr4.address);
+    let balance1c = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance1c)).to.equal(
-      Number(ethers.utils.parseEther("3000"))
+      Number(ethers.parseEther("3000"))
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("2500"))
+      Number(ethers.parseEther("2500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("1500"))
+      Number(ethers.parseEther("1500"))
     );
 
-    let balance2 = await Vault.balanceOf(addr2.address, 1);
+    let balance2 = await Vault.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
 
-    let balance2b = await Vault.balanceOf(addr3.address, 2);
+    let balance2b = await Vault.balanceOf(addr3.getAddress(), 2);
     expect(Number(balance2b)).to.equal(
       Number(1)
     );
 
-    let balance2c = await Vault.balanceOf(addr4.address, 3);
+    let balance2c = await Vault.balanceOf(addr4.getAddress(), 3);
     expect(Number(balance2c)).to.equal(
       Number(1)
     );
 
     // Add yield to contract
-    await MockERC20.mint(MockStrat.address, ethers.utils.parseEther("100"));
+    await MockERC20.mint(MockStrat.getAddress(), ethers.parseEther("100"));
 
     // rebalance
     await Vault.connect(addr2).rebalance(1);
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
-      Number(ethers.utils.parseEther("1084")) // 1100 - 220 + 204
+      Number(ethers.parseEther("1084")) // 1100 - 220 + 204
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
-      Number(ethers.utils.parseEther("2510")) // 2500 - 500 + 510
+      Number(ethers.parseEther("2510")) // 2500 - 500 + 510
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
-      Number(ethers.utils.parseEther("1506")) // 1500 - 300 + 306
+      Number(ethers.parseEther("1506")) // 1500 - 300 + 306
     );
 
   });
 
   it("Check that owner can rebalance positions", async function () {
     // Approve vault
-    await MockERC20.connect(addr2).approve(Vault.address, ethers.utils.parseEther("1000"));
-    await MockERC20.connect(addr3).approve(Vault.address, ethers.utils.parseEther("2000"));
-    await MockERC20.connect(addr4).approve(Vault.address, ethers.utils.parseEther("5000"));
+    await MockERC20.connect(addr2).approve(Vault.getAddress(), ethers.parseEther("1000"));
+    await MockERC20.connect(addr3).approve(Vault.getAddress(), ethers.parseEther("2000"));
+    await MockERC20.connect(addr4).approve(Vault.getAddress(), ethers.parseEther("5000"));
 
     // Unpause and deposit
     await Vault.connect(owner).flipPaused();
-    await Vault.connect(addr2).deposit(ethers.utils.parseEther("1000"));
-    await Vault.connect(addr3).deposit(ethers.utils.parseEther("2000"));
-    await Vault.connect(addr4).deposit(ethers.utils.parseEther("2000"));
+    await Vault.connect(addr2).deposit(ethers.parseEther("1000"));
+    await Vault.connect(addr3).deposit(ethers.parseEther("2000"));
+    await Vault.connect(addr4).deposit(ethers.parseEther("2000"));
 
-    let balance1 = await MockERC20.balanceOf(addr2.address);
+    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance1)).to.equal(
       0
     );
 
-    let balance1b = await MockERC20.balanceOf(addr3.address);
+    let balance1b = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance1b)).to.equal(
       0
     );
 
-    let balance1c = await MockERC20.balanceOf(addr4.address);
+    let balance1c = await MockERC20.balanceOf(addr4.getAddress());
     expect(Number(balance1c)).to.equal(
-      Number(ethers.utils.parseEther("3000"))
+      Number(ethers.parseEther("3000"))
     );
 
-    let balance1s = await MockERC20.balanceOf(MockStrat.address);
+    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance1s)).to.equal(
-      Number(ethers.utils.parseEther("1000"))
+      Number(ethers.parseEther("1000"))
     );
 
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance1s2)).to.equal(
-      Number(ethers.utils.parseEther("2500"))
+      Number(ethers.parseEther("2500"))
     );
 
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance1s3)).to.equal(
-      Number(ethers.utils.parseEther("1500"))
+      Number(ethers.parseEther("1500"))
     );
 
-    let balance2 = await Vault.balanceOf(addr2.address, 1);
+    let balance2 = await Vault.balanceOf(addr2.getAddress(), 1);
     expect(Number(balance2)).to.equal(
       Number(1)
     );
 
-    let balance2b = await Vault.balanceOf(addr3.address, 2);
+    let balance2b = await Vault.balanceOf(addr3.getAddress(), 2);
     expect(Number(balance2b)).to.equal(
       Number(1)
     );
 
-    let balance2c = await Vault.balanceOf(addr4.address, 3);
+    let balance2c = await Vault.balanceOf(addr4.getAddress(), 3);
     expect(Number(balance2c)).to.equal(
       Number(1)
     );
 
     // Add yield to contract
-    await MockERC20.mint(MockStrat.address, ethers.utils.parseEther("100"));
+    await MockERC20.mint(MockStrat.getAddress(), ethers.parseEther("100"));
 
     // Change strategy allocations
     await Vault.connect(owner).setStrategies([
-        {strategy: MockStrat2.address, isVector: true, bps: 5000},
-        {strategy: MockStrat3.address, isVector: false, bps: 5000}
+        {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+        {strategy: MockStrat3.getAddress(), isVector: false, bps: 5000}
       ]);
 
     // Rebalance
     await Vault.connect(owner).forceRebalance([1]);
 
-    let balance3s = await MockERC20.balanceOf(MockStrat.address);
+    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
     expect(Number(balance3s)).to.equal(
-      Number(ethers.utils.parseEther("880")) // 1100 - 220
+      Number(ethers.parseEther("880")) // 1100 - 220
     );
 
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.address);
+    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
     expect(Number(balance3s2)).to.equal(
-      Number(ethers.utils.parseEther("2510")) // 2500 - 500 + 510
+      Number(ethers.parseEther("2510")) // 2500 - 500 + 510
     );
 
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.address);
+    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
-      Number(ethers.utils.parseEther("1710")) // 1500 - 300 + 510
+      Number(ethers.parseEther("1710")) // 1500 - 300 + 510
     );
 
   });
@@ -585,14 +585,14 @@ describe("Vector SAMS Vault Tests", function () {
       facVault.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
-                      FeeCalc.address,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
                       10000,
                       [
-                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
-                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
-                        {strategy: MockStrat3.address, isVector: false, bps: 1000}
+                        {strategy: MockStrat.getAddress(), isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 1000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid total bps");
 
@@ -600,14 +600,14 @@ describe("Vector SAMS Vault Tests", function () {
       facVault.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
-                      FeeCalc.address,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
                       10000,
                       [
                         {strategy: NULL_ADDRESS, isVector: true, bps: 2000}, 
-                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
-                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                        {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid strat address");
 
@@ -616,13 +616,13 @@ describe("Vector SAMS Vault Tests", function () {
                       "ffBasic", 
                       "ipfs://metadata",
                       NULL_ADDRESS,
-                      FeeMgr.address,
-                      FeeCalc.address,
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
                       10000,
                       [
-                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
-                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
-                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                        {strategy: MockStrat.getAddress(), isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid deposit token");
 
@@ -630,14 +630,14 @@ describe("Vector SAMS Vault Tests", function () {
       facVault.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
+                      MockERC20.getAddress(),
                       NULL_ADDRESS,
-                      FeeCalc.address,
+                      FeeCalc.getAddress(),
                       10000,
                       [
-                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
-                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
-                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                        {strategy: MockStrat.getAddress(), isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid feeManager");
 
@@ -645,14 +645,14 @@ describe("Vector SAMS Vault Tests", function () {
       facVault.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
                       NULL_ADDRESS,
                       10000,
                       [
-                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
-                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
-                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                        {strategy: MockStrat.getAddress(), isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid feeCalculator");
 
@@ -660,14 +660,14 @@ describe("Vector SAMS Vault Tests", function () {
       facVault.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
-                      MockERC20.address,
-                      FeeMgr.address,
-                      FeeCalc.address,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
                       100,
                       [
-                        {strategy: MockStrat.address, isVector: true, bps: 2000}, 
-                        {strategy: MockStrat2.address, isVector: true, bps: 5000},
-                        {strategy: MockStrat3.address, isVector: false, bps: 3000}
+                        {strategy: MockStrat.getAddress(), isVector: true, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid min deposit");
 
@@ -675,9 +675,9 @@ describe("Vector SAMS Vault Tests", function () {
 
   it("Check that invalid transactions revert", async function () {
         // Approve vault
-        await MockERC20.connect(addr2).approve(Vault.address, ethers.utils.parseEther("1000"));
-        await MockERC20.connect(addr3).approve(Vault.address, ethers.utils.parseEther("2000"));
-        await MockERC20.connect(addr4).approve(Vault.address, ethers.utils.parseEther("5000"));
+        await MockERC20.connect(addr2).approve(Vault.getAddress(), ethers.parseEther("1000"));
+        await MockERC20.connect(addr3).approve(Vault.getAddress(), ethers.parseEther("2000"));
+        await MockERC20.connect(addr4).approve(Vault.getAddress(), ethers.parseEther("5000"));
     
         // Unpause and deposit
         await Vault.connect(owner).flipPaused();
@@ -686,11 +686,11 @@ describe("Vector SAMS Vault Tests", function () {
           Vault.connect(addr2).deposit(0)
         ).to.be.revertedWith("FortiFi: Invalid deposit amount");
 
-        await Vault.connect(addr2).deposit(ethers.utils.parseEther("500"));
-        await Vault.connect(addr3).deposit(ethers.utils.parseEther("500"));
+        await Vault.connect(addr2).deposit(ethers.parseEther("500"));
+        await Vault.connect(addr3).deposit(ethers.parseEther("500"));
 
         await expect(
-          Vault.connect(addr2).add(ethers.utils.parseEther("500"), 2)
+          Vault.connect(addr2).add(ethers.parseEther("500"), 2)
         ).to.be.revertedWith("FortiFi: Not the owner of token");
 
         await expect(
@@ -703,13 +703,13 @@ describe("Vector SAMS Vault Tests", function () {
 
         await Vault.connect(owner).setStrategies(
           [
-            {strategy: MockStrat2.address, isVector: true, bps: 5000},
-            {strategy: MockStrat3.address, isVector: false, bps: 5000}
+            {strategy: MockStrat2.getAddress(), isVector: true, bps: 5000},
+            {strategy: MockStrat3.getAddress(), isVector: false, bps: 5000}
           ]
         );
 
         await expect(
-          Vault.connect(addr2).add(ethers.utils.parseEther("500"), 1)
+          Vault.connect(addr2).add(ethers.parseEther("500"), 1)
         ).to.be.revertedWith("FortiFi: Can't add to receipt");
 
   });

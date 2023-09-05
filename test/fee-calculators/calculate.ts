@@ -31,73 +31,73 @@ describe("Fee Calculator Tests", function () {
 
     NFT1 = await facMockERC721.deploy();
 
-    await NFT1.deployed();
+    await NFT1.waitForDeployment();
 
-    await NFT1.mint(addr1.address, 3);
-    await NFT1.mint(addr2.address, 10);
+    await NFT1.mint(addr1.getAddress(), 3);
+    await NFT1.mint(addr2.getAddress(), 10);
 
     NFT2 = await facMockERC721.deploy();
 
-    await NFT2.deployed();
+    await NFT2.waitForDeployment();
 
-    await NFT2.mint(addr1.address, 10);
-    await NFT2.mint(addr3.address, 3);
+    await NFT2.mint(addr1.getAddress(), 10);
+    await NFT2.mint(addr3.getAddress(), 3);
 
     NFT3 = await facMockERC721.deploy();
 
-    await NFT3.deployed();
+    await NFT3.waitForDeployment();
 
-    await NFT3.mint(addr1.address, 3);
-    await NFT3.mint(addr3.address, 3);
+    await NFT3.mint(addr1.getAddress(), 3);
+    await NFT3.mint(addr3.getAddress(), 3);
 
   });
 
   it("Check that NFT1 tokens are minted to addresses", async function () {
-    let balance1 = await NFT1.balanceOf(addr1.address);
+    let balance1 = await NFT1.balanceOf(addr1.getAddress());
     expect(Number(balance1)).to.equal(
       3
     );
 
-    let balance2 = await NFT1.balanceOf(addr2.address);
+    let balance2 = await NFT1.balanceOf(addr2.getAddress());
     expect(Number(balance2)).to.equal(
       10
     );
 
-    let balance3 = await NFT1.balanceOf(addr3.address);
+    let balance3 = await NFT1.balanceOf(addr3.getAddress());
     expect(Number(balance3)).to.equal(
       0
     );
   });
 
   it("Check that NFT2 tokens are minted to addresses", async function () {
-    let balance1 = await NFT2.balanceOf(addr1.address);
+    let balance1 = await NFT2.balanceOf(addr1.getAddress());
     expect(Number(balance1)).to.equal(
       10
     );
 
-    let balance2 = await NFT2.balanceOf(addr2.address);
+    let balance2 = await NFT2.balanceOf(addr2.getAddress());
     expect(Number(balance2)).to.equal(
       0
     );
 
-    let balance3 = await NFT2.balanceOf(addr3.address);
+    let balance3 = await NFT2.balanceOf(addr3.getAddress());
     expect(Number(balance3)).to.equal(
       3
     );
   });
 
   it("Check that NFT3 tokens are minted to addresses", async function () {
-    let balance1 = await NFT3.balanceOf(addr1.address);
+    let balance1 = await NFT3.balanceOf(addr1.getAddress());
     expect(Number(balance1)).to.equal(
       3
     );
 
-    let balance2 = await NFT3.balanceOf(addr2.address);
+    let balance2 = await NFT3.balanceOf(addr2.getAddress());
     expect(Number(balance2)).to.equal(
       0
     );
 
-    let balance3 = await NFT3.balanceOf(addr3.address);
+    let balance3 = await NFT3.balanceOf(addr3.getAddress());
     expect(Number(balance3)).to.equal(
       3
     );
@@ -108,25 +108,25 @@ describe("Fee Calculator Tests", function () {
       ethers.getContractFactory("contracts/fee-calculators/FortiFiFeeCalculator.sol:FortiFiFeeCalculator"),
     ]);
 
-    Calc = await facCalc.deploy([NFT1.address], [0,1,3,5,10], [700,600,500,400,300], false);
+    Calc = await facCalc.deploy([NFT1.getAddress()], [0,1,3,5,10], [700,600,500,400,300], false);
 
-    let fee1 = await Calc.getFees(addr1.address, 10000);
+    let fee1 = await Calc.getFees(addr1.getAddress(), 10000);
     expect(Number(fee1)).to.equal(
       500 
     );
 
-    let fee2 = await Calc.getFees(addr2.address, 10000);
+    let fee2 = await Calc.getFees(addr2.getAddress(), 10000);
     expect(Number(fee2)).to.equal(
       300
     );
 
-    let fee3 = await Calc.getFees(addr3.address, 10000);
+    let fee3 = await Calc.getFees(addr3.getAddress(), 10000);
     expect(Number(fee3)).to.equal(
       700
     );
 
     // Amounts that are too small have 0 fees
-    let fee4 = await Calc.getFees(addr1.address, 10);
+    let fee4 = await Calc.getFees(addr1.getAddress(), 10);
     expect(Number(fee4)).to.equal(
       0
     );
@@ -137,25 +137,25 @@ describe("Fee Calculator Tests", function () {
       ethers.getContractFactory("contracts/fee-calculators/FortiFiFeeCalculator.sol:FortiFiFeeCalculator"),
     ]);
 
-    Calc = await facCalc.deploy([NFT1.address, NFT2.address, NFT3.address], [0,1,3,5,10], [700,600,500,400,300], false);
+    Calc = await facCalc.deploy([NFT1.getAddress(), NFT2.getAddress(), NFT3.getAddress()], [0,1,3,5,10], [700,600,500,400,300], false);
 
-    let fee1 = await Calc.getFees(addr1.address, 10000);
+    let fee1 = await Calc.getFees(addr1.getAddress(), 10000);
     expect(Number(fee1)).to.equal(
       300 
     );
 
-    let fee2 = await Calc.getFees(addr2.address, 10000);
+    let fee2 = await Calc.getFees(addr2.getAddress(), 10000);
     expect(Number(fee2)).to.equal(
       300
     );
 
-    let fee3 = await Calc.getFees(addr3.address, 10000);
+    let fee3 = await Calc.getFees(addr3.getAddress(), 10000);
     expect(Number(fee3)).to.equal(
       500
     );
 
     // Amounts that are too small have 0 fees
-    let fee4 = await Calc.getFees(addr1.address, 10);
+    let fee4 = await Calc.getFees(addr1.getAddress(), 10);
     expect(Number(fee4)).to.equal(
       0
     );
@@ -166,25 +166,25 @@ describe("Fee Calculator Tests", function () {
       ethers.getContractFactory("contracts/fee-calculators/FortiFiFeeCalculator.sol:FortiFiFeeCalculator"),
     ]);
 
-    Calc = await facCalc.deploy([NFT1.address, NFT2.address, NFT3.address], [0,1,3,5,10], [700,600,500,400,300], true);
+    Calc = await facCalc.deploy([NFT1.getAddress(), NFT2.getAddress(), NFT3.getAddress()], [0,1,3,5,10], [700,600,500,400,300], true);
 
-    let fee1 = await Calc.getFees(addr1.address, 10000);
+    let fee1 = await Calc.getFees(addr1.getAddress(), 10000);
     expect(Number(fee1)).to.equal(
       300 
     );
 
-    let fee2 = await Calc.getFees(addr2.address, 10000);
+    let fee2 = await Calc.getFees(addr2.getAddress(), 10000);
     expect(Number(fee2)).to.equal(
       300
     );
 
-    let fee3 = await Calc.getFees(addr3.address, 10000);
+    let fee3 = await Calc.getFees(addr3.getAddress(), 10000);
     expect(Number(fee3)).to.equal(
       400
     );
 
     // Amounts that are too small have 0 fees
-    let fee4 = await Calc.getFees(addr1.address, 10);
+    let fee4 = await Calc.getFees(addr1.getAddress(), 10);
     expect(Number(fee4)).to.equal(
       0
     );
@@ -204,19 +204,19 @@ describe("Fee Calculator Tests", function () {
     ).to.be.revertedWith("FortiFi: Invalid NFT address");
 
     await expect(
-      facCalc.deploy([NFT1.address], [], [700,600,500,400,300], true)
+      facCalc.deploy([NFT1.getAddress()], [], [700,600,500,400,300], true)
     ).to.be.revertedWith("FortiFi: Invalid amounts or bps");
 
     await expect(
-      facCalc.deploy([NFT1.address], [], [], true)
+      facCalc.deploy([NFT1.getAddress()], [], [], true)
     ).to.be.revertedWith("FortiFi: Invalid amounts array");
 
     await expect(
-      facCalc.deploy([NFT1.address], [1,3,5,10], [600,500,400,300], true)
+      facCalc.deploy([NFT1.getAddress()], [1,3,5,10], [600,500,400,300], true)
     ).to.be.revertedWith("FortiFi: Invalid amounts array");
 
     await expect(
-      facCalc.deploy([NFT1.address], [0,1,3,5,10], [700,800,500,400,300], true)
+      facCalc.deploy([NFT1.getAddress()], [0,1,3,5,10], [700,800,500,400,300], true)
     ).to.be.revertedWith("FortiFi: Invalid bps array");
   });
 

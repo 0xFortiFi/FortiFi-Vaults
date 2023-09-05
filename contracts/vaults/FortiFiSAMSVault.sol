@@ -66,16 +66,31 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         setStrategies(_strategies);
     }
 
+    receive() external payable { 
+    }
+
     /// @notice This function is used when a user does not already have a receipt (ERC1155). 
     /// @dev The user must deposit at least the minDeposit, and will receive an ERC1155 non-fungible receipt token. 
     /// The receipt token will be mapped to a TokenInfo containing the amount deposited as well as the strategy receipt 
     /// tokens received for later withdrawal.
     function deposit(uint256 _amount) external override nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
-        require(IERC20(depositToken).transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
+        IERC20 _depositToken = IERC20(depositToken);
+        require(_depositToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
         _tokenId = _mintReceipt();
         _deposit(_amount, _tokenId, false);
         _info = tokenInfo[_tokenId];
+
+        uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
+        if (_depositTokenBalance > 0) {
+            _info.deposit -= _depositTokenBalance;
+            require(_depositToken.transfer(msg.sender, _depositToken.balanceOf(address(this))), "FortiFi: Failed to refund ERC20");
+        }
+
+        if (address(this).balance > 0) {
+            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
+		    require(success, "FortiFi: Failed to refund native");
+        }
 
         emit Deposit(msg.sender, _tokenId, _amount, _info);
     }
@@ -84,10 +99,22 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// deposit without needing to burn/withdraw first. 
     function add(uint256 _amount, uint256 _tokenId) external override nonReentrant whileNotPaused returns(TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
-        require(IERC20(depositToken).transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
+        IERC20 _depositToken = IERC20(depositToken);
+        require(_depositToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
         require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
         _deposit(_amount, _tokenId, true);
         _info = tokenInfo[_tokenId];
+
+        uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
+        if (_depositTokenBalance > 0) {
+            _info.deposit -= _depositTokenBalance;
+            require(_depositToken.transfer(msg.sender, _depositToken.balanceOf(address(this))), "FortiFi: Failed to refund ERC20");
+        }
+
+        if (address(this).balance > 0) {
+            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
+		    require(success, "FortiFi: Failed to refund native");
+        }
 
         emit Add(msg.sender, _tokenId, _amount, _info);
     }
@@ -108,6 +135,12 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         }
         
         require(IERC20(depositToken).transfer(msg.sender, _amount - _fee), "FortiFi: Failed to send proceeds");
+
+        if (address(this).balance > 0) {
+            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
+		    require(success, "FortiFi: Failed to refund native");
+        }
+
         emit Withdrawal(msg.sender, _tokenId, _amount, _profit, _fee);
     }
 
@@ -211,6 +244,19 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         _deposit(_amount, _tokenId, false);
         tokenInfo[_tokenId].deposit = _originalDeposit;
         TokenInfo memory _info = tokenInfo[_tokenId];
+
+        if (address(this).balance > 0) {
+            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
+		    require(success, "FortiFi: Failed to refund native");
+        }
+
+        IERC20 _depositToken = IERC20(depositToken);
+        uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
+
+        if (_depositTokenBalance > 0) {
+            tokenInfo[_tokenId].deposit = _originalDeposit - _depositTokenBalance;
+            require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+        }
 
         emit Rebalance(_tokenId, _amount, _info);
         return _info;

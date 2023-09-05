@@ -30,51 +30,51 @@ describe("Base Test Setup", function () {
 
     MockERC20 = await facMockERC20.deploy();
 
-    await MockERC20.deployed();
+    await MockERC20.waitForDeployment();
 
-    await MockERC20.mint(addr1.address, ethers.utils.parseEther("1000"));
-    await MockERC20.mint(addr2.address, ethers.utils.parseEther("2000"));
-    await MockERC20.mint(addr3.address, ethers.utils.parseEther("5000"));
+    await MockERC20.mint(addr1.getAddress(), ethers.utils.parseEther("1000"));
+    await MockERC20.mint(addr2.getAddress(), ethers.utils.parseEther("2000"));
+    await MockERC20.mint(addr3.getAddress(), ethers.utils.parseEther("5000"));
 
     MockERC721 = await facMockERC721.deploy();
 
-    await MockERC721.deployed();
+    await MockERC721.waitForDeployment();
 
-    await MockERC721.mint(addr1.address, 1);
-    await MockERC721.mint(addr2.address, 5);
-    await MockERC721.mint(addr3.address, 10);
+    await MockERC721.mint(addr1.getAddress(), 1);
+    await MockERC721.mint(addr2.getAddress(), 5);
+    await MockERC721.mint(addr3.getAddress(), 10);
 
   });
 
   it("Check that ERC20 tokens are minted to addresses", async function () {
-    let balance1 = await MockERC20.balanceOf(addr1.address);
+    let balance1 = await MockERC20.balanceOf(addr1.getAddress());
     expect(Number(balance1)).to.equal(
       Number(ethers.utils.parseEther("1000"))
     );
 
-    let balance2 = await MockERC20.balanceOf(addr2.address);
+    let balance2 = await MockERC20.balanceOf(addr2.getAddress());
     expect(Number(balance2)).to.equal(
       Number(ethers.utils.parseEther("2000"))
     );
 
-    let balance3 = await MockERC20.balanceOf(addr3.address);
+    let balance3 = await MockERC20.balanceOf(addr3.getAddress());
     expect(Number(balance3)).to.equal(
       Number(ethers.utils.parseEther("5000"))
     );
   });
 
   it("Check that ERC721 tokens are minted to addresses", async function () {
-    let balance1 = await MockERC721.balanceOf(addr1.address);
+    let balance1 = await MockERC721.balanceOf(addr1.getAddress());
     expect(Number(balance1)).to.equal(
       1
     );
 
-    let balance2 = await MockERC721.balanceOf(addr2.address);
+    let balance2 = await MockERC721.balanceOf(addr2.getAddress());
     expect(Number(balance2)).to.equal(
       5
     );
 
-    let balance3 = await MockERC721.balanceOf(addr3.address);
+    let balance3 = await MockERC721.balanceOf(addr3.getAddress());
     expect(Number(balance3)).to.equal(
       10
     );

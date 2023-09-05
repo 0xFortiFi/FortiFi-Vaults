@@ -2,6 +2,9 @@
 import "@nomiclabs/hardhat-waffle";
 import "solidity-coverage";
 import "@nomiclabs/hardhat-etherscan";
+import '@nomicfoundation/hardhat-ethers';
+import 'hardhat-deploy';
+import 'hardhat-deploy-ethers';
 /* eslint-disable node/no-path-concat */
 require("dotenv").config({ path: __dirname + "/.env" });
 
@@ -24,6 +27,9 @@ export default {
         },
       },
     ],
+  },
+  namedAccounts: {
+    deployer: `privatekey://${process.env.PRIVATE_KEY}`,
   },
   networks: {
     hardhat: {
@@ -62,6 +68,7 @@ export default {
       chainId: 43114,
       allowUnlimitedContractSize: true,
       accounts: [account],
+      deploy: ['deploy'],
     },
   },
 };
