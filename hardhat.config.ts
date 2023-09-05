@@ -51,14 +51,14 @@ export default {
     },
     fuji: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
-      gasPrice: 225000000000,
+      gasPrice: 75000000000,
       chainId: 43113,
       allowUnlimitedContractSize: true,
       accounts: [account],
     },
     mainnet: {
       url: "https://api.avax.network/ext/bc/C/rpc",
-      gasPrice: 225000000000,
+      gasPrice: 25000000000,
       chainId: 43114,
       allowUnlimitedContractSize: true,
       accounts: [account],
