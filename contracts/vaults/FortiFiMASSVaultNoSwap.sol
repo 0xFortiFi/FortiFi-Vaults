@@ -190,15 +190,17 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         );
     }
 
+    /// @notice Function to set max approvals for router and strategies. 
+    /// @dev Since contract never holds deposit tokens max approvals should not matter. 
     function refreshApprovals() public {
         uint8 _length = uint8(strategies.length);
-
-        for(uint8 i = 0; i < _length; i++) {
-            IERC20 _depositToken = IERC20(strategies[i].depositToken);
-            _depositToken.approve(strategies[i].strategy, type(uint256).max);
-        }
+        IERC20 _depositToken = IERC20(depositToken);
 
         IERC20(depositToken).approve(address(feeMgr), type(uint256).max);
+        for(uint8 i = 0; i < _length; i++) {
+            IERC20(strategies[i].depositToken).approve(strategies[i].strategy, type(uint256).max);
+            _depositToken.approve(strategies[i].router, type(uint256).max);
+        }
     }
 
     /// @notice This function sets up the underlying strategies used by the vault.
