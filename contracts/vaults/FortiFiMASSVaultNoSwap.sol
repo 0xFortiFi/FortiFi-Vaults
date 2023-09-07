@@ -19,7 +19,8 @@ pragma solidity ^0.8.2;
 /// @title Contract for FortiFi MASS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
-contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, ReentrancyGuard {
+/// @dev THIS IS A TEST CONTRACT WITH NO SWAP FEATURE FOR BASIC TESTING - DO NOT DEPLOY
+contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, ReentrancyGuard {
     string public name;
     string public symbol;
     address public depositToken;
@@ -266,27 +267,10 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     }
 
     /// @notice Internal swap function.
-    /// @dev This function can use any uniswap-style router to swap from deposited tokens to the strategy deposit tokens.
-    /// since this contract does not hold strategy deposit tokens, return contract balance after swap.
+    /// @dev This function will use YakSwap's router to determine the best swap from deposited tokens to the strategy
+    /// deposit tokens. 
     function _swap(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
-        address _depositToken = _strat.depositToken;
-        IRouter _router = IRouter(_strat.router);
-        address[] memory _route = new address[](3);
-        _route[0] = depositToken;
-        _route[1] = wrappedNative;
-        _route[2] = _depositToken;
-        uint256[] memory _amounts = _router.getAmountsOut(_amount, _route);
-
-        _router.swapExactTokensForTokens(_amount, 
-            (_amounts[_amounts.length - 1] * (BPS - slippageBps) / BPS), 
-            _route, 
-            address(this), 
-            block.timestamp + 1800);
-
-        uint256 _depositTokenBalance = IERC20(_depositToken).balanceOf(address(this));
-        require(_depositTokenBalance > 0, "FortiFi: Failed to swap");
-
-        return _depositTokenBalance;
+        return _amount; 
     }
 
     /// @notice Internal deposit function.

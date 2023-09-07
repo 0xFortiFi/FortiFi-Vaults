@@ -9,7 +9,6 @@ interface IMASS {
         address strategy;
         address depositToken;
         address router;
-        bool routeETH;
         bool isVector;
         bool isSAMS;
         uint16 bps;
