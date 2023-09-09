@@ -9,7 +9,7 @@ interface IMASS {
         address strategy;
         address depositToken;
         address router;
-        bool isVector;
+        bool isFortiFi;
         bool isSAMS;
         uint16 bps;
     }

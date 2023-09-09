@@ -78,9 +78,9 @@ describe("Basic MASS Vault Tests", function () {
                                   FeeCalc.getAddress(),
                                   10000,
                                   [
-                                    {strategy: MockStrat.getAddress(), isVector: false, bps: 2000}, 
-                                    {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                                    {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
+                                    {strategy: MockStrat.getAddress(), isFortiFi: false, bps: 2000}, 
+                                    {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                                    {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                                   ]);
     await SAMS.waitForDeployment();
 
@@ -94,8 +94,8 @@ describe("Basic MASS Vault Tests", function () {
                                   FeeCalc.getAddress(),
                                   10000,
                                   [
-                                    {strategy: MockStrat.getAddress(), isVector: false, bps: 5000}, 
-                                    {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000}
+                                    {strategy: MockStrat.getAddress(), isFortiFi: false, bps: 5000}, 
+                                    {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000}
                                   ]);
     await SAMS2.waitForDeployment();
 
@@ -109,8 +109,8 @@ describe("Basic MASS Vault Tests", function () {
                                   FeeCalc.getAddress(),
                                   10000,
                                   [
-                                    {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                                    {strategy: MockStrat3.getAddress(), isVector: false, bps: 5000}
+                                    {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                                    {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 5000}
                                   ]);
     await SAMS3.waitForDeployment();
 
@@ -128,7 +128,7 @@ describe("Basic MASS Vault Tests", function () {
                                       strategy: SAMS.getAddress(), 
                                       depositToken: MockERC20.getAddress(),
                                       router: owner.getAddress(), 
-                                      isVector: false, 
+                                      isFortiFi: false, 
                                       isSAMS: true,
                                       bps: 4000
                                     }, 
@@ -136,7 +136,7 @@ describe("Basic MASS Vault Tests", function () {
                                       strategy: SAMS2.getAddress(), 
                                       depositToken: MockERC20.getAddress(),
                                       router: owner.getAddress(), 
-                                      isVector: false, 
+                                      isFortiFi: false, 
                                       isSAMS: true,
                                       bps: 1000
                                     }, 
@@ -144,7 +144,7 @@ describe("Basic MASS Vault Tests", function () {
                                       strategy: SAMS3.getAddress(), 
                                       depositToken: MockERC20.getAddress(),
                                       router: owner.getAddress(), 
-                                      isVector: false, 
+                                      isFortiFi: false, 
                                       isSAMS: true,
                                       bps: 5000
                                     }
@@ -648,7 +648,7 @@ describe("Basic MASS Vault Tests", function () {
           strategy: SAMS2.getAddress(), 
           depositToken: MockERC20.getAddress(),
           router: owner.getAddress(), 
-          isVector: false, 
+          isFortiFi: false, 
           isSAMS: true,
           bps: 5000
         }, 
@@ -656,7 +656,7 @@ describe("Basic MASS Vault Tests", function () {
           strategy: SAMS3.getAddress(), 
           depositToken: MockERC20.getAddress(),
           router: owner.getAddress(),
-          isVector: false, 
+          isFortiFi: false, 
           isSAMS: true,
           bps: 5000
         }
@@ -701,7 +701,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
@@ -709,7 +709,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
@@ -717,7 +717,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 1000
                         }
@@ -737,7 +737,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
@@ -745,7 +745,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
@@ -753,7 +753,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: NULL_ADDRESS, 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 5000
                         }
@@ -773,7 +773,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
@@ -781,7 +781,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS2.getAddress(), 
                           depositToken: NULL_ADDRESS,
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
@@ -789,7 +789,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 5000
                         }
@@ -809,7 +809,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
@@ -817,7 +817,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
@@ -825,7 +825,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 5000
                         }
@@ -845,7 +845,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
@@ -853,7 +853,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
@@ -861,7 +861,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 5000
                         }
@@ -881,7 +881,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
@@ -889,7 +889,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
@@ -897,7 +897,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 5000
                         }
@@ -917,7 +917,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 4000
                         }, 
@@ -925,7 +925,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 1000
                         }, 
@@ -933,7 +933,7 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
-                          isVector: false, 
+                          isFortiFi: false, 
                           isSAMS: true,
                           bps: 5000
                         }
@@ -976,7 +976,7 @@ describe("Basic MASS Vault Tests", function () {
               strategy: SAMS2.getAddress(), 
               depositToken: MockERC20.getAddress(),
               router: owner.getAddress(), 
-              isVector: false, 
+              isFortiFi: false, 
               isSAMS: true,
               bps: 5000
             }, 
@@ -984,7 +984,7 @@ describe("Basic MASS Vault Tests", function () {
               strategy: SAMS3.getAddress(), 
               depositToken: MockERC20.getAddress(),
               router: owner.getAddress(), 
-              isVector: false, 
+              isFortiFi: false, 
               isSAMS: true,
               bps: 5000
             }

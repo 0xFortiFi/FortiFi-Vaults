@@ -268,10 +268,14 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         nextToken += 1;
     }
 
-    /// @notice Internal swap function.
-    /// @dev This function will use YakSwap's router to determine the best swap from deposited tokens to the strategy
-    /// deposit tokens. 
+    /// @notice Internal swap function for deposits.
     function _swap(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
+        return _amount; 
+    }
+
+    /// @notice Internal swap function for withdrawals.
+
+    function _swapOut(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
         return _amount; 
     }
 
@@ -355,21 +359,20 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
     function _withdraw(uint256 _tokenId) internal returns(uint256 _proceeds, uint256 _profit) {
         TokenInfo memory _info = tokenInfo[_tokenId];
         uint8 _length = uint8(_info.positions.length);
+        _proceeds = 0;
 
         for (uint8 i = 0 ; i < _length; i++) {
             if (_info.positions[i].strategy.isSAMS) {
                 ISAMS _strat = ISAMS(_info.positions[i].strategy.strategy);
                 _strat.withdraw(_info.positions[i].receipt);
-            } else if (_info.positions[i].strategy.isVector) {
-                IVectorStrategy _strat = IVectorStrategy(_info.positions[i].strategy.strategy);
-                uint256 _tokensForShares = _strat.getDepositTokensForShares(_info.positions[i].receipt);
-                uint256 _minAmount = _tokensForShares * (BPS - slippageBps) / BPS;
-                
-                _strat.withdraw(_tokensForShares, _minAmount);
             } else {
                 IStrategy _strat = IStrategy(_info.positions[i].strategy.strategy);
                 _strat.withdraw(_info.positions[i].receipt);
             }
+
+            // swap returns same token so this test contract cannot use this logic
+            //uint256 _depositTokenProceeds = IERC20(depositToken).balanceOf(address(this));
+            //_proceeds += _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
         }
 
         _proceeds = IERC20(depositToken).balanceOf(address(this));
