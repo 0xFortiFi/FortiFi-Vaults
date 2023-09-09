@@ -7,7 +7,7 @@ pragma solidity ^0.8.2;
 interface ISAMS {
     struct Strategy {
         address strategy;
-        bool isVector;
+        bool isFortiFi;
         uint16 bps;
     }
 

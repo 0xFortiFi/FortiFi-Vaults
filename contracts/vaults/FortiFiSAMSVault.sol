@@ -21,7 +21,6 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     string public symbol;
     address public depositToken;
     uint16 public constant BPS = 10_000;
-    uint16 public slippageBps = 100;
     uint256 public minDeposit;
     uint256 public nextToken = 1;
     bool public paused = true;
@@ -161,11 +160,6 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         minDeposit = _amount;
     }
 
-    /// @notice Setter for slippageBps state variable
-    function setSlippage(uint16 _amount) external onlyOwner {
-        slippageBps = _amount;
-    }
-
     /// @notice Setter for contract fee manager
     /// @dev Contract address specified should implement IFortiFiFeeManager
     function setFeeManager(address _contract) external onlyOwner {
@@ -293,11 +287,19 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
             uint256 _receiptBalance = _strat.balanceOf(address(this));
 
             if (i == (_length - 1)) {
-                _strat.deposit(_remainder);
+                if (_strategy.isFortiFi) {
+                    _strat.depositToFortress(_remainder, msg.sender);
+                } else {
+                    _strat.deposit(_remainder);
+                }
             } else {
                 uint256 _split = _amount * _strategy.bps / BPS;
                 _remainder -= _split;
-                _strat.deposit(_split);
+                if (_strategy.isFortiFi) {
+                    _strat.depositToFortress(_split, msg.sender);
+                } else {
+                    _strat.deposit(_split);
+                }
             }
 
             if (_isAdd) {
@@ -316,14 +318,10 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         uint8 _length = uint8(_info.positions.length);
 
         for (uint8 i = 0 ; i < _length; i++) {
-            if (_info.positions[i].strategy.isVector) {
-                IVectorStrategy _strat = IVectorStrategy(_info.positions[i].strategy.strategy);
-                uint256 _tokensForShares = _strat.getDepositTokensForShares(_info.positions[i].receipt);
-                uint256 _minAmount = _tokensForShares * (BPS - slippageBps) / BPS;
-                
-                _strat.withdraw(_tokensForShares, _minAmount);
+            IStrategy _strat = IStrategy(_info.positions[i].strategy.strategy);
+            if (_info.positions[i].strategy.isFortiFi) {
+                _strat.withdrawFromFortress(_info.positions[i].receipt, msg.sender);
             } else {
-                IStrategy _strat = IStrategy(_info.positions[i].strategy.strategy);
                 _strat.withdraw(_info.positions[i].receipt);
             }
         }

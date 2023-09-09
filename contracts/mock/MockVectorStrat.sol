@@ -3,7 +3,6 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-
 /// @title A mock Vector strategy contract
 /// @notice You can use this contract for only the most basic simulation since this contract
 /// does not keep track of deposits. 

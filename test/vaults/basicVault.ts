@@ -76,9 +76,9 @@ describe("Basic SAMS Vault Tests", function () {
                                   FeeCalc.getAddress(),
                                   10000,
                                   [
-                                    {strategy: MockStrat.getAddress(), isVector: false, bps: 2000}, 
-                                    {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                                    {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
+                                    {strategy: MockStrat.getAddress(), isFortiFi: false, bps: 2000}, 
+                                    {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                                    {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                                   ]);
     await Vault.waitForDeployment();
 
@@ -552,8 +552,8 @@ describe("Basic SAMS Vault Tests", function () {
 
     // Change strategy allocations
     await Vault.connect(owner).setStrategies([
-      {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-      {strategy: MockStrat3.getAddress(), isVector: false, bps: 5000}
+      {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+      {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 5000}
     ]);
 
     // Rebalance
@@ -590,9 +590,9 @@ describe("Basic SAMS Vault Tests", function () {
                       FeeCalc.getAddress(),
                       10000,
                       [
-                        {strategy: MockStrat.getAddress(), isVector: false, bps: 2000}, 
-                        {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 1000}
+                        {strategy: MockStrat.getAddress(), isFortiFi: false, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 1000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid total bps");
 
@@ -605,9 +605,9 @@ describe("Basic SAMS Vault Tests", function () {
                       FeeCalc.getAddress(),
                       10000,
                       [
-                        {strategy: NULL_ADDRESS, isVector: false, bps: 2000}, 
-                        {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
+                        {strategy: NULL_ADDRESS, isFortiFi: false, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid strat address");
 
@@ -620,9 +620,9 @@ describe("Basic SAMS Vault Tests", function () {
                       FeeCalc.getAddress(),
                       10000,
                       [
-                        {strategy: MockStrat.getAddress(), isVector: false, bps: 2000}, 
-                        {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
+                        {strategy: MockStrat.getAddress(), isFortiFi: false, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid deposit token");
 
@@ -635,9 +635,9 @@ describe("Basic SAMS Vault Tests", function () {
                       FeeCalc.getAddress(),
                       10000,
                       [
-                        {strategy: MockStrat.getAddress(), isVector: false, bps: 2000}, 
-                        {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
+                        {strategy: MockStrat.getAddress(), isFortiFi: false, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid feeManager");
 
@@ -650,9 +650,9 @@ describe("Basic SAMS Vault Tests", function () {
                       NULL_ADDRESS,
                       10000,
                       [
-                        {strategy: MockStrat.getAddress(), isVector: false, bps: 2000}, 
-                        {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
+                        {strategy: MockStrat.getAddress(), isFortiFi: false, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid feeCalculator");
 
@@ -665,9 +665,9 @@ describe("Basic SAMS Vault Tests", function () {
                       FeeCalc.getAddress(),
                       100,
                       [
-                        {strategy: MockStrat.getAddress(), isVector: false, bps: 2000}, 
-                        {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-                        {strategy: MockStrat3.getAddress(), isVector: false, bps: 3000}
+                        {strategy: MockStrat.getAddress(), isFortiFi: false, bps: 2000}, 
+                        {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
     ).to.be.revertedWith("FortiFi: Invalid min deposit");
 
@@ -702,8 +702,8 @@ describe("Basic SAMS Vault Tests", function () {
         ).to.be.revertedWith("FortiFi: Invalid message sender");
 
         await Vault.connect(owner).setStrategies([
-          {strategy: MockStrat2.getAddress(), isVector: false, bps: 5000},
-          {strategy: MockStrat3.getAddress(), isVector: false, bps: 5000}
+          {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+          {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 5000}
         ],);
 
         await expect(
