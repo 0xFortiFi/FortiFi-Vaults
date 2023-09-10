@@ -90,6 +90,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
         }
 
+        uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
+        if (_wrappedNativeTokenBalance > 0) {
+            require(IERC20(wrappedNative).transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
+        }
+
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
 		    require(success, "FortiFi: Failed to refund native");
@@ -112,6 +117,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         if (_depositTokenBalance > 0) {
             _info.deposit -= _depositTokenBalance;
             require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+        }
+
+        uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
+        if (_wrappedNativeTokenBalance > 0) {
+            require(IERC20(wrappedNative).transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
         }
 
         if (address(this).balance > 0) {
@@ -198,6 +208,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         IERC20(depositToken).approve(address(feeMgr), type(uint256).max);
         for(uint8 i = 0; i < _length; i++) {
             IERC20(strategies[i].depositToken).approve(strategies[i].strategy, type(uint256).max);
+            IERC20(strategies[i].depositToken).approve(strategies[i].router, type(uint256).max);
             _depositToken.approve(strategies[i].router, type(uint256).max);
         }
     }

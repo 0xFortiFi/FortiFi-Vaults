@@ -20,6 +20,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     string public name;
     string public symbol;
     address public depositToken;
+    address public wrappedNative = 0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7; // WAVAX
     uint16 public constant BPS = 10_000;
     uint256 public minDeposit;
     uint256 public nextToken = 1;
@@ -86,6 +87,11 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
             require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
         }
 
+        uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
+        if (_wrappedNativeTokenBalance > 0) {
+            require(IERC20(wrappedNative).transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
+        }
+
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
 		    require(success, "FortiFi: Failed to refund native");
@@ -108,6 +114,11 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         if (_depositTokenBalance > 0) {
             _info.deposit -= _depositTokenBalance;
             require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+        }
+
+        uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
+        if (_wrappedNativeTokenBalance > 0) {
+            require(IERC20(wrappedNative).transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
         }
 
         if (address(this).balance > 0) {
