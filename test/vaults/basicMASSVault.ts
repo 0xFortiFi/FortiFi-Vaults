@@ -74,6 +74,7 @@ describe("Basic MASS Vault Tests", function () {
                                   "ffBasic", 
                                   "ipfs://metadata",
                                   MockERC20.getAddress(),
+                                  MockERC20.getAddress(),
                                   FeeMgr.getAddress(),
                                   FeeCalc.getAddress(),
                                   10000,
@@ -90,6 +91,7 @@ describe("Basic MASS Vault Tests", function () {
                                   "ffBasic", 
                                   "ipfs://metadata",
                                   MockERC20.getAddress(),
+                                  MockERC20.getAddress(),
                                   FeeMgr.getAddress(),
                                   FeeCalc.getAddress(),
                                   10000,
@@ -104,6 +106,7 @@ describe("Basic MASS Vault Tests", function () {
     SAMS3 = await facSAMS.deploy("Basic Vault", 
                                   "ffBasic", 
                                   "ipfs://metadata",
+                                  MockERC20.getAddress(),
                                   MockERC20.getAddress(),
                                   FeeMgr.getAddress(),
                                   FeeCalc.getAddress(),
@@ -577,108 +580,6 @@ describe("Basic MASS Vault Tests", function () {
     let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
     expect(Number(balance3s3)).to.equal(
       Number(ethers.parseEther("1857.4")) // 1850 - 370 + 377.4
-    );
-
-  });
-
-  it("Check that owner can rebalance positions", async function () {
-    // Approve vault
-    await MockERC20.connect(addr2).approve(MASS.getAddress(), ethers.parseEther("1000"));
-    await MockERC20.connect(addr3).approve(MASS.getAddress(), ethers.parseEther("2000"));
-    await MockERC20.connect(addr4).approve(MASS.getAddress(), ethers.parseEther("5000"));
-
-    // Unpause and deposit
-    await MASS.connect(owner).flipPaused();
-    await MASS.connect(addr2).deposit(ethers.parseEther("1000"));
-    await MASS.connect(addr3).deposit(ethers.parseEther("2000"));
-    await MASS.connect(addr4).deposit(ethers.parseEther("2000"));
-
-    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
-    expect(Number(balance1)).to.equal(
-      0
-    );
-
-    let balance1b = await MockERC20.balanceOf(addr3.getAddress());
-    expect(Number(balance1b)).to.equal(
-      0
-    );
-
-    let balance1c = await MockERC20.balanceOf(addr4.getAddress());
-    expect(Number(balance1c)).to.equal(
-      Number(ethers.parseEther("3000"))
-    );
-
-    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
-    expect(Number(balance1s)).to.equal(
-      Number(ethers.parseEther("650"))
-    );
-
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
-    expect(Number(balance1s2)).to.equal(
-      Number(ethers.parseEther("2500"))
-    );
-
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
-    expect(Number(balance1s3)).to.equal(
-      Number(ethers.parseEther("1850"))
-    );
-
-    let balance2 = await MASS.balanceOf(addr2.getAddress(), 1);
-    expect(Number(balance2)).to.equal(
-      Number(1)
-    );
-
-    let balance2b = await MASS.balanceOf(addr3.getAddress(), 2);
-    expect(Number(balance2b)).to.equal(
-      Number(1)
-    );
-
-    let balance2c = await MASS.balanceOf(addr4.getAddress(), 3);
-    expect(Number(balance2c)).to.equal(
-      Number(1)
-    );
-
-    // Add yield to contract
-    await MockERC20.mint(MockStrat.getAddress(), ethers.parseEther("100"));
-
-    // Change strategy allocations
-    await MASS.connect(owner).setStrategies(
-      [
-        {
-          strategy: SAMS2.getAddress(), 
-          depositToken: MockERC20.getAddress(),
-          router: owner.getAddress(), 
-          isFortiFi: false, 
-          isSAMS: true,
-          bps: 5000
-        }, 
-        {
-          strategy: SAMS3.getAddress(), 
-          depositToken: MockERC20.getAddress(),
-          router: owner.getAddress(),
-          isFortiFi: false, 
-          isSAMS: true,
-          bps: 5000
-        }
-      ]
-    );
-
-    // Rebalance
-    await MASS.connect(owner).forceRebalance([1]);
-
-    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
-    expect(Number(balance3s)).to.equal(
-      Number(ethers.parseEther("855")) // 750 - 150 + 255
-    );
-
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
-    expect(Number(balance3s2)).to.equal(
-      Number(ethers.parseEther("2510")) // 2500 - 500 + 510
-    );
-
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
-    expect(Number(balance3s3)).to.equal(
-      Number(ethers.parseEther("1735")) // 1850 - 370 + 255
     );
 
   });

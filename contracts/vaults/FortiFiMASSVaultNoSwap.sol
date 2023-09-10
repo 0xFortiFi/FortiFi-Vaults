@@ -128,18 +128,6 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         emit Withdrawal(msg.sender, _tokenId, _amount, _profit, _fee);
     }
 
-    /// @notice This function can be used to force the rebalance of deposits. Should only be used in situations
-    /// where an exploit of an underlying strategy requires immediate removal of that strategy. 
-    function forceRebalance(uint256[] calldata _tokenIds) external onlyOwner {
-        uint256 _length = _tokenIds.length;
-        for (uint256 i = 0; i < _length; i++) {
-            uint256 _tokenId = _tokenIds[i];
-            if (exists(_tokenId)) {
-                rebalance(_tokenId);
-            }
-        }
-    }
-
     function setMinDeposit(uint256 _amount) external onlyOwner {
         minDeposit = _amount;
     }

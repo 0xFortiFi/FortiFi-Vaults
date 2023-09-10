@@ -80,6 +80,7 @@ describe("Vector SAMS Vault Tests", function () {
                                   "ffBasic", 
                                   "ipfs://metadata",
                                   MockERC20.getAddress(),
+                                  MockERC20.getAddress(),
                                   FeeMgr.getAddress(),
                                   FeeCalc.getAddress(),
                                   10000,
@@ -498,92 +499,6 @@ describe("Vector SAMS Vault Tests", function () {
 
   });
 
-  it("Check that owner can rebalance positions", async function () {
-    // Approve vault
-    await MockERC20.connect(addr2).approve(Vault.getAddress(), ethers.parseEther("1000"));
-    await MockERC20.connect(addr3).approve(Vault.getAddress(), ethers.parseEther("2000"));
-    await MockERC20.connect(addr4).approve(Vault.getAddress(), ethers.parseEther("5000"));
-
-    // Unpause and deposit
-    await Vault.connect(owner).flipPaused();
-    await Vault.connect(addr2).deposit(ethers.parseEther("1000"));
-    await Vault.connect(addr3).deposit(ethers.parseEther("2000"));
-    await Vault.connect(addr4).deposit(ethers.parseEther("2000"));
-
-    let balance1 = await MockERC20.balanceOf(addr2.getAddress());
-    expect(Number(balance1)).to.equal(
-      0
-    );
-
-    let balance1b = await MockERC20.balanceOf(addr3.getAddress());
-    expect(Number(balance1b)).to.equal(
-      0
-    );
-
-    let balance1c = await MockERC20.balanceOf(addr4.getAddress());
-    expect(Number(balance1c)).to.equal(
-      Number(ethers.parseEther("3000"))
-    );
-
-    let balance1s = await MockERC20.balanceOf(MockStrat.getAddress());
-    expect(Number(balance1s)).to.equal(
-      Number(ethers.parseEther("1000"))
-    );
-
-    let balance1s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
-    expect(Number(balance1s2)).to.equal(
-      Number(ethers.parseEther("2500"))
-    );
-
-    let balance1s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
-    expect(Number(balance1s3)).to.equal(
-      Number(ethers.parseEther("1500"))
-    );
-
-    let balance2 = await Vault.balanceOf(addr2.getAddress(), 1);
-    expect(Number(balance2)).to.equal(
-      Number(1)
-    );
-
-    let balance2b = await Vault.balanceOf(addr3.getAddress(), 2);
-    expect(Number(balance2b)).to.equal(
-      Number(1)
-    );
-
-    let balance2c = await Vault.balanceOf(addr4.getAddress(), 3);
-    expect(Number(balance2c)).to.equal(
-      Number(1)
-    );
-
-    // Add yield to contract
-    await MockERC20.mint(MockStrat.getAddress(), ethers.parseEther("100"));
-
-    // Change strategy allocations
-    await Vault.connect(owner).setStrategies([
-        {strategy: VectorStrat2.getAddress(), isFortiFi: true, bps: 5000},
-        {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 5000}
-      ]);
-
-    // Rebalance
-    await Vault.connect(owner).forceRebalance([1]);
-
-    let balance3s = await MockERC20.balanceOf(MockStrat.getAddress());
-    expect(Number(balance3s)).to.equal(
-      Number(ethers.parseEther("880")) // 1100 - 220
-    );
-
-    let balance3s2 = await MockERC20.balanceOf(MockStrat2.getAddress());
-    expect(Number(balance3s2)).to.equal(
-      Number(ethers.parseEther("2510")) // 2500 - 500 + 510
-    );
-
-    let balance3s3 = await MockERC20.balanceOf(MockStrat3.getAddress());
-    expect(Number(balance3s3)).to.equal(
-      Number(ethers.parseEther("1710")) // 1500 - 300 + 510
-    );
-
-  });
-
   it("Check that invalid configurations revert", async function () {
     const [facVault] = await Promise.all([
       ethers.getContractFactory("contracts/vaults/FortiFiSAMSVault.sol:FortiFiSAMSVault"),
@@ -594,6 +509,7 @@ describe("Vector SAMS Vault Tests", function () {
       facVault.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
+                      MockERC20.getAddress(),
                       MockERC20.getAddress(),
                       FeeMgr.getAddress(),
                       FeeCalc.getAddress(),
@@ -610,6 +526,7 @@ describe("Vector SAMS Vault Tests", function () {
                       "ffBasic", 
                       "ipfs://metadata",
                       MockERC20.getAddress(),
+                      MockERC20.getAddress(),
                       FeeMgr.getAddress(),
                       FeeCalc.getAddress(),
                       10000,
@@ -624,6 +541,23 @@ describe("Vector SAMS Vault Tests", function () {
       facVault.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
+                      NULL_ADDRESS,
+                      MockERC20.getAddress(),
+                      FeeMgr.getAddress(),
+                      FeeCalc.getAddress(),
+                      10000,
+                      [
+                        {strategy: NULL_ADDRESS, isFortiFi: true, bps: 2000}, 
+                        {strategy: VectorStrat2.getAddress(), isFortiFi: true, bps: 5000},
+                        {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
+                      ])
+    ).to.be.revertedWith("FortiFi: Invalid native token");
+
+    await expect(
+      facVault.deploy("Basic Vault", 
+                      "ffBasic", 
+                      "ipfs://metadata",
+                      MockERC20.getAddress(),
                       NULL_ADDRESS,
                       FeeMgr.getAddress(),
                       FeeCalc.getAddress(),
@@ -640,6 +574,7 @@ describe("Vector SAMS Vault Tests", function () {
                       "ffBasic", 
                       "ipfs://metadata",
                       MockERC20.getAddress(),
+                      MockERC20.getAddress(),
                       NULL_ADDRESS,
                       FeeCalc.getAddress(),
                       10000,
@@ -655,6 +590,7 @@ describe("Vector SAMS Vault Tests", function () {
                       "ffBasic", 
                       "ipfs://metadata",
                       MockERC20.getAddress(),
+                      MockERC20.getAddress(),
                       FeeMgr.getAddress(),
                       NULL_ADDRESS,
                       10000,
@@ -669,6 +605,7 @@ describe("Vector SAMS Vault Tests", function () {
       facVault.deploy("Basic Vault", 
                       "ffBasic", 
                       "ipfs://metadata",
+                      MockERC20.getAddress(),
                       MockERC20.getAddress(),
                       FeeMgr.getAddress(),
                       FeeCalc.getAddress(),
