@@ -85,21 +85,8 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         _deposit(_amount, _tokenId, false);
         _info = tokenInfo[_tokenId];
 
-        uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
-        if (_depositTokenBalance > 0) {
-            _info.deposit -= _depositTokenBalance;
-            require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
-        }
-
-        uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
-        if (_wrappedNativeTokenBalance > 0) {
-            require(IERC20(wrappedNative).transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
-        }
-
-        if (address(this).balance > 0) {
-            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
-        }
+        // refund left over tokens, if any
+        _refund(_info);
 
         emit Deposit(msg.sender, _tokenId, _amount, _info);
     }
@@ -114,21 +101,8 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         _deposit(_amount, _tokenId, true);
         _info = tokenInfo[_tokenId];
 
-        uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
-        if (_depositTokenBalance > 0) {
-            _info.deposit -= _depositTokenBalance;
-            require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
-        }
-
-        uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
-        if (_wrappedNativeTokenBalance > 0) {
-            require(IERC20(wrappedNative).transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
-        }
-
-        if (address(this).balance > 0) {
-            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
-        }
+        // refund left over tokens, if any
+        _refund(_info);
 
         emit Add(msg.sender, _tokenId, _amount, _info);
     }
@@ -252,18 +226,8 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         tokenInfo[_tokenId].deposit = _originalDeposit;
         TokenInfo memory _info = tokenInfo[_tokenId];
 
-        if (address(this).balance > 0) {
-            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
-        }
-
-        IERC20 _depositToken = IERC20(depositToken);
-        uint256 _depositTokenBalance = _depositToken.balanceOf(address(this));
-
-        if (_depositTokenBalance > 0) {
-            tokenInfo[_tokenId].deposit = _originalDeposit - _depositTokenBalance;
-            require(_depositToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
-        }
+        // refund left over tokens, if any
+        _refund(_info);
 
         emit Rebalance(_tokenId, _amount, _info);
         return _info;
@@ -392,6 +356,28 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
             _profit = _proceeds - _info.deposit;
         } else {
             _profit = 0;
+        }
+    }
+
+    /// @notice Internal function to refund left over tokens from deposit/add/rebalance transactions
+    function _refund(TokenInfo memory _info) internal {
+        // Refund left over deposit tokens, if any
+        uint256 _depositTokenBalance = IERC20(depositToken).balanceOf(address(this));
+        if (_depositTokenBalance > 0) {
+            _info.deposit -= _depositTokenBalance;
+            require(IERC20(depositToken).transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+        }
+
+        // Refund left over wrapped native tokens, if any
+        uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
+        if (_wrappedNativeTokenBalance > 0) {
+            require(IERC20(wrappedNative).transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
+        }
+
+        // Refund left over native tokens, if any
+        if (address(this).balance > 0) {
+            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
+		    require(success, "FortiFi: Failed to refund native");
         }
     }
 
