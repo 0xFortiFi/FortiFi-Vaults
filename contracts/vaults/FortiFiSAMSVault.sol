@@ -116,6 +116,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         (uint256 _amount, uint256 _profit) = _withdraw(_tokenId);
         uint256 _fee = 0;
 
+        // MASS vaults don't pay fees to SAMS
         if (!noFeesFor[msg.sender]) {
             _fee = feeCalc.getFees(msg.sender, _profit);
             feeMgr.collectFees(depositToken, _fee);
@@ -123,6 +124,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         
         require(IERC20(depositToken).transfer(msg.sender, _amount - _fee), "FortiFi: Failed to send proceeds");
 
+        // Refund excess native token, if any
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
 		    require(success, "FortiFi: Failed to refund native");
@@ -209,9 +211,14 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         require((balanceOf(msg.sender, _tokenId) > 0 && !paused) ||
                           msg.sender == owner(), "FortiFi: Invalid message sender");
         uint256 _originalDeposit = tokenInfo[_tokenId].deposit;
+
+        // withdraw from strategies first
         (uint256 _amount, ) = _withdraw(_tokenId);
+        // delete token info
         delete tokenInfo[_tokenId];
+        // deposit to (possibly new) strategies
         _deposit(_amount, _tokenId, false);
+        // set deposit to original deposit to ensure withdrawal profit calculations are correct
         tokenInfo[_tokenId].deposit = _originalDeposit;
         TokenInfo memory _info = tokenInfo[_tokenId];
 
@@ -245,6 +252,8 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         uint8 _length = uint8(strategies.length);
         for (uint8 i = 0; i < _length; i++) {
             Strategy memory _strategy = strategies[i];
+
+            // cannot add to position if strategies have changed. must rebalance first
             if (_isAdd) {
                 require(_strategy.strategy == _info.positions[i].strategy.strategy, "FortiFi: Can't add to receipt");
             }
