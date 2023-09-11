@@ -11,17 +11,20 @@ contract FortiFiFortress is Ownable, ERC20 {
     IStrategy private _strat;
     IERC20 private _dToken;
 
-    constructor(address _strategy, address _depositToken) ERC20("FortiFi Fortress Receipt", "FFFR") {
+    constructor(address _strategy, address _depositToken, address _owner) ERC20("FortiFi Fortress Receipt", "FFFR") {
         require(_strategy != address(0), "FortiFi: Invalid strategy");
         require(_depositToken != address(0), "FortiFi: Invalid deposit token");
+        require(_owner != address(0), "FortiFi: Invalid owner");
         _strat = IStrategy(_strategy);
         _dToken = IERC20(_depositToken);
 
         // grant approvals
         _dToken.approve(_strategy, type(uint256).max);
+
+        _transferOwnership(_owner);
     }
 
-    function deposit(uint256 _amount) external virtual {
+    function deposit(uint256 _amount) external virtual onlyOwner {
         require(_amount > 0, "FortiFi: 0 deposit");
         require(_dToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to transfer dep.");
         uint256 _beforeBalance = _strat.balanceOf(address(this));
@@ -29,7 +32,7 @@ contract FortiFiFortress is Ownable, ERC20 {
         _mint(msg.sender, (_strat.balanceOf(address(this)) - _beforeBalance));
     }
 
-    function withdraw(uint256 _amount) external virtual {
+    function withdraw(uint256 _amount) external virtual onlyOwner {
         require(_amount > 0, "FortiFi: 0 withdraw");
         _burn(msg.sender, _amount);
         _strat.withdraw(_amount);

@@ -12,17 +12,20 @@ contract FortiFiDPFortress is FortiFiFortress {
     IStrategy private _strat;
     IERC20 private _dToken;
 
-    constructor(address _strategy, address _depositToken) FortiFiFortress(_strategy, _depositToken) {
+    constructor(address _strategy, address _depositToken, address _owner) FortiFiFortress(_strategy, _depositToken, _owner) {
         require(_strategy != address(0), "FortiFi: Invalid strategy");
         require(_depositToken != address(0), "FortiFi: Invalid deposit token");
+        require(_owner != address(0), "FortiFi: Invalid owner");
         _strat = IStrategy(_strategy);
         _dToken = IERC20(_depositToken);
 
         // grant approvals
         _dToken.approve(_strategy, type(uint256).max);
+
+        _transferOwnership(_owner);
     }
 
-    function withdraw(uint256 _amount) external override {
+    function withdraw(uint256 _amount) external override onlyOwner {
         require(_amount > 0, "FortiFi: 0 withdraw");
         _burn(msg.sender, _amount);
         uint256 _balance = _strat.balanceOf(address(this));

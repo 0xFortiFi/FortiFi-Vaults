@@ -26,7 +26,7 @@ contract FortiFiDPStrategy is FortiFiStrategy {
         FortiFiDPFortress _fortress;
 
         if (userToFortress[_user] == address(0)) {
-            _fortress = new FortiFiDPFortress(_strat, address(_dToken));
+            _fortress = new FortiFiDPFortress(_strat, address(_dToken), address(this));
             userToFortress[_user] = address(_fortress);
         } else {
             _fortress = FortiFiDPFortress(userToFortress[_user]);

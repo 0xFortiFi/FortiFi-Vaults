@@ -26,8 +26,8 @@ describe("Basic Strategy Tests", function () {
     [owner, addr1, addr2, addr3] = await ethers.getSigners();
     const [facMockERC20, facMockStrat, facStrategy] = await Promise.all([
       ethers.getContractFactory("contracts/mock/MockERC20.sol:MockERC20"),
-      ethers.getContractFactory("contracts//mock/MockBasicStrat.sol:MockBasicStrat"),
-      ethers.getContractFactory("contracts/strategies/FortiFiStrategy.sol:FortiFiStrategy"),
+      ethers.getContractFactory("contracts/mock/MockBasicStrat.sol:MockBasicStrat"),
+      ethers.getContractFactory("contracts/strategies/FortiFiStrategyNoOwner.sol:FortiFiStrategy"),
     ]);
 
     MockERC20 = await facMockERC20.deploy();
@@ -55,7 +55,7 @@ describe("Basic Strategy Tests", function () {
   it("Check that ERC20 tokens can be deposited and withdrawn", async function () {
     // Approve strategy and deposit
     await MockERC20.connect(addr1).approve(Strategy.getAddress(), ethers.parseEther("1000"));
-    await Strategy.connect(addr1).deposit(ethers.parseEther("1000"), addr1.getAddress());
+    await Strategy.connect(addr1).depositToFortress(ethers.parseEther("1000"), addr1.getAddress());
 
     let balance1 = await MockERC20.balanceOf(addr1.getAddress());
     expect(Number(balance1)).to.equal(
@@ -74,16 +74,16 @@ describe("Basic Strategy Tests", function () {
 
     // Don't allow 0 deposit or withdraw
     await expect(
-      Strategy.connect(addr1).deposit(0, addr1.getAddress())
+      Strategy.connect(addr1).depositToFortress(0, addr1.getAddress())
     ).to.be.revertedWith("FortiFi: 0 deposit");
 
     await expect(
-      Strategy.connect(addr1).withdraw(0, addr1.getAddress())
+      Strategy.connect(addr1).withdrawFromFortress(0, addr1.getAddress())
     ).to.be.revertedWith("FortiFi: 0 withdraw");
 
     // Approve receipt token and withdraw
     await MockStrat.connect(addr1).approve(Strategy.getAddress(), ethers.parseEther("1000"));
-    await Strategy.connect(addr1).withdraw(ethers.parseEther("1000"), addr1.getAddress());
+    await Strategy.connect(addr1).withdrawFromFortress(ethers.parseEther("1000"), addr1.getAddress());
 
     let balance3 = await MockERC20.balanceOf(addr1.getAddress());
     expect(Number(balance3)).to.equal(
@@ -105,7 +105,7 @@ describe("Basic Strategy Tests", function () {
   it("Check that withdrawal works when there is yield", async function () {
     // Approve strategy and deposit
     await MockERC20.connect(addr1).approve(Strategy.getAddress(), ethers.parseEther("1000"));
-    await Strategy.connect(addr1).deposit(ethers.parseEther("1000"), addr1.getAddress());
+    await Strategy.connect(addr1).depositToFortress(ethers.parseEther("1000"), addr1.getAddress());
 
     let balance1 = await MockERC20.balanceOf(addr1.getAddress());
     expect(Number(balance1)).to.equal(
@@ -127,7 +127,7 @@ describe("Basic Strategy Tests", function () {
 
     // Approve receipt token and withdraw
     await MockStrat.connect(addr1).approve(Strategy.getAddress(), ethers.parseEther("1000"));
-    await Strategy.connect(addr1).withdraw(ethers.parseEther("1000"), addr1.getAddress());
+    await Strategy.connect(addr1).withdrawFromFortress(ethers.parseEther("1000"), addr1.getAddress());
 
     let balance3 = await MockERC20.balanceOf(addr1.getAddress());
     expect(Number(balance3)).to.equal(

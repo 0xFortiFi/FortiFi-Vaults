@@ -40,7 +40,7 @@ describe("Basic MASS Vault Tests", function () {
       ethers.getContractFactory("contracts/fee-managers/FortiFiFeeManager.sol:FortiFiFeeManager"),
       ethers.getContractFactory("contracts/fee-calculators/FortiFiFeeCalculator.sol:FortiFiFeeCalculator"),
       ethers.getContractFactory("contracts/vaults/FortiFiSAMSVault.sol:FortiFiSAMSVault"),
-      ethers.getContractFactory("contracts/vaults/FortiFiMASSVaultNoSwap.sol:FortiFiMASSVaultNoSwap"),
+      ethers.getContractFactory("contracts/mock/FortiFiMASSVaultNoSwap.sol:FortiFiMASSVaultNoSwap"),
     ]);
 
     MockERC20 = await facMockERC20.deploy();
@@ -586,7 +586,7 @@ describe("Basic MASS Vault Tests", function () {
 
   it("Check that invalid configurations revert", async function () {
     const [facMASS] = await Promise.all([
-      ethers.getContractFactory("contracts/vaults/FortiFiMASSVaultNoSwap.sol:FortiFiMASSVaultNoSwap"),
+      ethers.getContractFactory("contracts/mock/FortiFiMASSVaultNoSwap.sol:FortiFiMASSVaultNoSwap"),
     ]);
 
     await expect(

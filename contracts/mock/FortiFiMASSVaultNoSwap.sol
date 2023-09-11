@@ -10,9 +10,9 @@ import "../strategies/interfaces/IStrategy.sol";
 import "../strategies/interfaces/IVectorStrategy.sol";
 import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
-import "./interfaces/IMASS.sol";
-import "./interfaces/ISAMS.sol";
-import "./interfaces/IRouter.sol";
+import "../vaults/interfaces/IMASS.sol";
+import "../vaults/interfaces/ISAMS.sol";
+import "../vaults/interfaces/IRouter.sol";
 
 pragma solidity ^0.8.2;
 

@@ -28,7 +28,7 @@ contract FortiFiStrategy is Ownable, ERC20 {
         FortiFiFortress _fortress;
 
         if (userToFortress[_user] == address(0)) {
-            _fortress = new FortiFiFortress(_strat, address(_dToken));
+            _fortress = new FortiFiFortress(_strat, address(_dToken), address(this));
             userToFortress[_user] = address(_fortress);
         } else {
             _fortress = FortiFiFortress(userToFortress[_user]);

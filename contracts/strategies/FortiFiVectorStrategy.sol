@@ -26,7 +26,7 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
         FortiFiVectorFortress _fortress;
 
         if (userToFortress[_user] == address(0)) {
-            _fortress = new FortiFiVectorFortress(_strat, address(_dToken));
+            _fortress = new FortiFiVectorFortress(_strat, address(_dToken), address(this));
             userToFortress[_user] = address(_fortress);
         } else {
             _fortress = FortiFiVectorFortress(userToFortress[_user]);
