@@ -3,16 +3,15 @@
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./interfaces/IStrategy.sol";
 import "./interfaces/IFortress.sol";
 import "./FortiFiFortress.sol";
 
 pragma solidity ^0.8.2;
 
 contract FortiFiStrategy is Ownable, ERC20 {
-    address private _strat;
-    IERC20 private _dToken;
-    IERC20 private _wNative;
+    address internal _strat;
+    IERC20 internal _dToken;
+    IERC20 internal _wNative;
 
     mapping(address => address) public userToFortress;
 
@@ -63,6 +62,18 @@ contract FortiFiStrategy is Ownable, ERC20 {
 
     function recoverFromFortress(address _fortress, address _token, uint256 _amount) external onlyOwner {
         IFortress(_fortress).recoverERC20(msg.sender, _token, _amount);
+    }
+
+    function wrappedNativeToken() external view returns(address) {
+        return address(_wNative);
+    }
+
+    function depositToken() external view returns(address) {
+        return address(_dToken);
+    }
+
+    function strategy() external view returns(address) {
+        return _strat;
     }
 
     /// @notice Internal function to refund left over tokens from transactions

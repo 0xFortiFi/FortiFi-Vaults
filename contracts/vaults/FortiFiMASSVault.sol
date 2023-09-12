@@ -296,7 +296,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             }
             
             bool _isSAMS = _strategy.isSAMS;
-            uint256 _receiptBalance;
+            uint256 _receiptBalance = 0;
 
             IStrategy _strat;
             ISAMS _sams;
@@ -308,7 +308,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
                 _receiptBalance = _strat.balanceOf(address(this));
             }
 
-            uint256 _depositAmount;
+            uint256 _depositAmount = 0;
 
             if (i == (_length - 1)) {
                 if (depositToken != _strategy.depositToken) {
@@ -326,7 +326,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
                 _remainder -= _split;
             }
 
-            uint256 _receiptToken;
+            uint256 _receiptToken = 0;
             ISAMS.TokenInfo memory _receiptInfo;
 
             if (_isSAMS) {

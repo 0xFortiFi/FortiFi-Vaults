@@ -1,26 +1,15 @@
 // SPDX-License-Identifier: MIT
 // FortiFiDPStrategy by FortiFi
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "./interfaces/IStrategy.sol";
 import "./FortiFiStrategy.sol";
 import "./FortiFiDPFortress.sol";
 
 pragma solidity ^0.8.2;
 
 contract FortiFiDPStrategy is FortiFiStrategy {
-    address private _strat;
-    IERC20 private _dToken;
-    IERC20 private _wNative;
 
-    constructor(address _strategy, address _depositToken, address _wrappedNative) FortiFiStrategy(_strategy, _depositToken, _wrappedNative) {
-        require(_strategy != address(0), "FortiFi: Invalid strategy");
-        require(_depositToken != address(0), "FortiFi: Invalid deposit token");
-        require(_wrappedNative != address(0), "FortiFi: Invalid native token");
-        _strat = _strategy;
-        _dToken = IERC20(_depositToken);
-        _wNative = IERC20(_wrappedNative);
+    constructor(address _strategy, address _depositToken, address _wrappedNative) 
+        FortiFiStrategy(_strategy, _depositToken, _wrappedNative) {
     }
 
     function depositToFortress(uint256 _amount, address _user) external override {

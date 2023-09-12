@@ -8,9 +8,9 @@ import "./interfaces/IStrategy.sol";
 pragma solidity ^0.8.2;
 
 contract FortiFiFortress is Ownable, ERC20 {
-    IStrategy private _strat;
-    IERC20 private _dToken;
-    IERC20 private _wNative;
+    IStrategy internal _strat;
+    IERC20 internal _dToken;
+    IERC20 internal _wNative;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative, address _owner) ERC20("FortiFi Fortress Receipt", "FFFR") {
         require(_strategy != address(0), "FortiFi: Invalid strategy");
@@ -49,6 +49,10 @@ contract FortiFiFortress is Ownable, ERC20 {
 
     function refreshApproval() external {
         _dToken.approve(address(_strat), type(uint256).max);
+    }
+
+    function wrappedNativeToken() external view returns(address) {
+        return address(_wNative);
     }
 
     function depositToken() external view returns(address) {
