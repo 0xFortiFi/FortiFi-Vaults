@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // IVectorStrategy Interface by FortiFi
 
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.17;
 
 /// @title Interface for Vector strategies used by FortiFi SAMS Vaults
 interface IVectorStrategy {

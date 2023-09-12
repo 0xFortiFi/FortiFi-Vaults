@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // IRouter Interface by FortiFi
 
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.17;
 
 /// @title Simple router interface for FortiFi MASS Vaults
 interface IRouter {

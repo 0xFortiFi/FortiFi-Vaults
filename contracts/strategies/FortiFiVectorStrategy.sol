@@ -4,7 +4,7 @@
 import "./FortiFiStrategy.sol";
 import "./FortiFiVectorFortress.sol";
 
-pragma solidity ^0.8.2;
+pragma solidity ^0.8.17;
 
 contract FortiFiVectorStrategy is FortiFiStrategy {
 
