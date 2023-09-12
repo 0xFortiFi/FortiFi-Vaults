@@ -10,7 +10,7 @@ import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
 import "./interfaces/ISAMS.sol";
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 /// @title Contract for FortiFi SAMS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then split and deposited in to 

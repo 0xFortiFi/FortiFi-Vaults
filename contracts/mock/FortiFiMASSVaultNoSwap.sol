@@ -14,7 +14,7 @@ import "../vaults/interfaces/IMASS.sol";
 import "../vaults/interfaces/ISAMS.sol";
 import "../vaults/interfaces/IRouter.sol";
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 /// @title Contract for FortiFi MASS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 

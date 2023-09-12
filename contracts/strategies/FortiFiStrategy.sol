@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interfaces/IFortress.sol";
 import "./FortiFiFortress.sol";
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 contract FortiFiStrategy is Ownable, ERC20 {
     address internal _strat;

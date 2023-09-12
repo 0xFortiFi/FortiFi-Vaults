@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 /// @title Contract to calculate fees for FortiFi Vaults
 /// @notice This contract is used by FortiFi Vaults to calculate fees based on a user's NFT holdings. 

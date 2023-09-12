@@ -4,7 +4,7 @@
 import "./FortiFiFortress.sol";
 import "./interfaces/IVectorStrategy.sol";
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 contract FortiFiVectorFortress is FortiFiFortress {
     uint16 private constant BPS = 10_000;

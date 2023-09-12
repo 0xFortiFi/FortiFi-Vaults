@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interfaces/IStrategy.sol";
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 contract FortiFiFortress is Ownable, ERC20 {
     IStrategy internal _strat;

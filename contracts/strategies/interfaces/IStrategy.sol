@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // IStrategy Interface by FortiFi
 
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 /// @title Interface for basic strategies used by FortiFi SAMS Vaults
 interface IStrategy {
