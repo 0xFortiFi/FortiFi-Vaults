@@ -4,9 +4,8 @@ coverage
 coverage.json
 typechain
 package-lock.json
-deploy_scripts
-deployments
-deploy
+deployments/mainnet/solcInputs
+deployments/mainnet/.chainId
 
 #Hardhat files
 cache
