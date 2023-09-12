@@ -7,5 +7,6 @@ pragma solidity ^0.8.2;
 interface IFortress {
     function deposit(uint amount) external;
     function withdraw(uint amount) external;
+    function balanceOf(address holder) external view returns(uint256);
     function recoverERC20(address to, address token, uint amount) external;
 }

@@ -40,7 +40,7 @@ describe("Vector Fortress Tests", function () {
     MockStrat = await facMockStrat.deploy(MockERC20.getAddress());
     await MockStrat.waitForDeployment();
 
-    Fort = await facFort.deploy(MockStrat.getAddress(), MockERC20.getAddress());
+    Fort = await facFort.deploy(MockStrat.getAddress(), MockERC20.getAddress(), MockERC20.getAddress(), addr1.getAddress());
     await Fort.waitForDeployment();
 
   });

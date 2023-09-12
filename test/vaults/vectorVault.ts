@@ -60,13 +60,13 @@ describe("Vector SAMS Vault Tests", function () {
     MockStrat = await facVectorStrat.deploy(MockERC20.getAddress());
     await MockStrat.waitForDeployment();
 
-    VectorStrat = await facFortiFiStrat.deploy(MockStrat.getAddress(), MockERC20.getAddress());
+    VectorStrat = await facFortiFiStrat.deploy(MockStrat.getAddress(), MockERC20.getAddress(), MockERC20.getAddress());
     await VectorStrat.waitForDeployment();
 
     MockStrat2 = await facVectorStrat.deploy(MockERC20.getAddress());
     await MockStrat2.waitForDeployment();
 
-    VectorStrat2 = await facFortiFiStrat.deploy(MockStrat2.getAddress(), MockERC20.getAddress());
+    VectorStrat2 = await facFortiFiStrat.deploy(MockStrat2.getAddress(), MockERC20.getAddress(), MockERC20.getAddress());
     await VectorStrat2.waitForDeployment().then(() => {})
 
     MockStrat3 = await facMockStrat.deploy(MockERC20.getAddress());

@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../strategies/interfaces/IStrategy.sol";
-import "../strategies/interfaces/IVectorStrategy.sol";
 import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
 import "./interfaces/ISAMS.sol";

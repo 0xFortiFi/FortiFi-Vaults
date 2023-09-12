@@ -27,7 +27,7 @@ describe("Basic Strategy Tests", function () {
     const [facMockERC20, facMockStrat, facStrategy] = await Promise.all([
       ethers.getContractFactory("contracts/mock/MockERC20.sol:MockERC20"),
       ethers.getContractFactory("contracts/mock/MockBasicStrat.sol:MockBasicStrat"),
-      ethers.getContractFactory("contracts/strategies/FortiFiStrategyNoOwner.sol:FortiFiStrategy"),
+      ethers.getContractFactory("contracts/strategies/FortiFiStrategy.sol:FortiFiStrategy"),
     ]);
 
     MockERC20 = await facMockERC20.deploy();
@@ -40,7 +40,7 @@ describe("Basic Strategy Tests", function () {
     MockStrat = await facMockStrat.deploy(MockERC20.getAddress());
     await MockStrat.waitForDeployment();
 
-    Strategy = await facStrategy.deploy(MockStrat.getAddress(), MockERC20.getAddress());
+    Strategy = await facStrategy.deploy(MockStrat.getAddress(), MockERC20.getAddress(), MockERC20.getAddress());
     await Strategy.waitForDeployment();
 
   });
