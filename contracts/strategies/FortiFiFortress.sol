@@ -12,11 +12,11 @@ contract FortiFiFortress is Ownable, ERC20 {
     IERC20 internal _dToken;
     IERC20 internal _wNative;
 
-    constructor(address _strategy, address _depositToken, address _wrappedNative, address _owner) ERC20("FortiFi Fortress Receipt", "FFFR") {
+    constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) ERC20("FortiFi Fortress Receipt", "FFFR") {
         require(_strategy != address(0), "FortiFi: Invalid strategy");
         require(_depositToken != address(0), "FortiFi: Invalid deposit token");
         require(_wrappedNative != address(0), "FortiFi: Invalid native token");
-        require(_owner != address(0), "FortiFi: Invalid owner");
+        require(_fortiFiStrat != address(0), "FortiFi: Invalid owner");
         _strat = IStrategy(_strategy);
         _dToken = IERC20(_depositToken);
         _wNative = IERC20(_wrappedNative);
@@ -24,7 +24,7 @@ contract FortiFiFortress is Ownable, ERC20 {
         // grant approvals
         _dToken.approve(_strategy, type(uint256).max);
 
-        _transferOwnership(_owner);
+        _transferOwnership(_fortiFiStrat);
     }
 
     receive() external payable { 

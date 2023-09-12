@@ -11,8 +11,8 @@ contract FortiFiVectorFortress is FortiFiFortress {
     uint256 private slippageBps = 100;
     IVectorStrategy private _vectorStrat;
 
-    constructor(address _strategy, address _depositToken, address _wrappedNative, address _owner) 
-        FortiFiFortress(_strategy, _depositToken, _wrappedNative, _owner) {
+    constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) 
+        FortiFiFortress(_strategy, _depositToken, _wrappedNative, _fortiFiStrat) {
         _vectorStrat = IVectorStrategy(_strategy);
     }
 

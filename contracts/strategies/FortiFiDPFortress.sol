@@ -9,8 +9,8 @@ pragma solidity ^0.8.2;
 contract FortiFiDPFortress is FortiFiFortress {
     uint16 private constant BPS = 10_000;
 
-    constructor(address _strategy, address _depositToken, address _wrappedNative, address _owner) 
-        FortiFiFortress(_strategy, _depositToken, _wrappedNative, _owner) {
+    constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) 
+        FortiFiFortress(_strategy, _depositToken, _wrappedNative, _fortiFiStrat) {
     }
 
     function withdraw(uint256 _amount) external override onlyOwner {
