@@ -4,7 +4,7 @@
 
 ## Authors
 
-- [@xrpant](https://www.github.com/anthonybautista)
+- [@xrpant](https://www.x.com/xrpant)
 
 
 ## Introduction
@@ -96,6 +96,7 @@ Our test scripts utilize mock contracts that may not give you the full context f
 **Strategies**
 
 YieldYak: 
+
 https://snowtrace.io/address/0xf9cD4Db17a3FB8bc9ec0CbB34780C91cE13ce767#code
 
 https://snowtrace.io/address/0xd0f41b1c9338eb9d374c83cc76b684ba3bb71557#code
