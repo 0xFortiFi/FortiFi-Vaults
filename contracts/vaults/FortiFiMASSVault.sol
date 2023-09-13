@@ -127,30 +127,40 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         emit Withdrawal(msg.sender, _tokenId, _amount, _profit, _fee);
     }
 
+    /// @notice Function to set minimum deposit
     function setMinDeposit(uint256 _amount) external onlyOwner {
+        require(_amount > 30_000, "FortiFi: Invalid amount");
         minDeposit = _amount;
     }
 
+    /// @notice Function to set slippage used in swap functions
     function setSlippage(uint16 _amount) external onlyOwner {
         slippageBps = _amount;
     }
 
+    /// @notice Function to set new FortiFiFeeManager contract
     function setFeeManager(address _contract) external onlyOwner {
+        require(_contract != address(0), "FortiFi: Invalid contract");
         feeMgr = IFortiFiFeeManager(_contract);
     }
 
+    /// @notice Function to set new FortiFiFeeCalculator contract
     function setFeeCalculator(address _contract) external onlyOwner {
+        require(_contract != address(0), "FortiFi: Invalid contract");
         feeCalc = IFortiFiFeeCalculator(_contract);
     }
 
+    /// @notice Function to flip paused state
     function flipPaused() external onlyOwner {
         paused = !paused;
     }
 
+    /// @notice Emergency function to recover stuck ERC20 tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).transfer(msg.sender, _amount);
     }
 
+    /// @notice Emergency function to recover stuck ERC1155 tokens
     function recoverERC1155(address _token, uint256[] calldata _tokenIds, uint256[] calldata _amounts) external onlyOwner {
         IERC1155(_token).safeBatchTransferFrom(
             address(this),
@@ -207,9 +217,17 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         require((balanceOf(msg.sender, _tokenId) > 0 && !paused) ||
                           msg.sender == owner(), "FortiFi: Invalid message sender");
         uint256 _originalDeposit = tokenInfo[_tokenId].deposit;
+
+        // withdraw from strategies first
         (uint256 _amount, ) = _withdraw(_tokenId);
+
+        //delete token info
         delete tokenInfo[_tokenId];
+
+        // deposit to (possibly new) strategies
         _deposit(_amount, _tokenId, false);
+
+        // set deposit to original deposit to ensure withdrawal profit calculations are correct
         tokenInfo[_tokenId].deposit = _originalDeposit;
         TokenInfo memory _info = tokenInfo[_tokenId];
 
@@ -220,10 +238,12 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         return _info;
     }
 
+    /// @notice View function to get token information
     function getTokenInfo(uint256 _tokenId) public view override returns(TokenInfo memory) {
         return tokenInfo[_tokenId];
     }
 
+    /// @notice Internal function to mint ERC1155 receipts and advance nextToken state variable
     function _mintReceipt() internal returns(uint256 _tokenId) {
         _tokenId = nextToken;
         _mint(msg.sender, _tokenId, 1, "");
@@ -231,7 +251,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     }
 
     /// @notice Internal swap function for deposits.
-    /// @dev This function can use any uniswap-style router to swap from deposited tokens to the strategy deposit tokens.
+    /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
     /// since this contract does not hold strategy deposit tokens, return contract balance after swap.
     function _swap(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
         address _depositToken = _strat.depositToken;
@@ -255,8 +275,8 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         return _depositTokenBalance;
     }
 
-        /// @notice Internal swap function for withdrawals.
-    /// @dev This function can use any uniswap-style router to swap from deposited tokens to the strategy deposit tokens.
+    /// @notice Internal swap function for withdrawals.
+    /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
     /// since this contract does not hold strategy deposit tokens, return contract balance after swap.
     function _swapOut(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
         address _depositToken = _strat.depositToken;
@@ -291,6 +311,8 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         uint8 _length = uint8(strategies.length);
         for (uint8 i = 0; i < _length; i++) {
             Strategy memory _strategy = strategies[i];
+
+            // cannot add to deposit if strategies have changed. must rebalance first
             if (_isAdd) {
                 require(_strategy.strategy == _info.positions[i].strategy.strategy, "FortiFi: Can't add to receipt");
             }
@@ -301,6 +323,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             IStrategy _strat;
             ISAMS _sams;
 
+            // set up ISAMS or IStrategy. if not SAMS then set current receipt balance
             if (_isSAMS) {
                 _sams = ISAMS(_strategy.strategy);
             } else {
@@ -310,6 +333,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
             uint256 _depositAmount = 0;
 
+            // split deposit and swap if necessary
             if (i == (_length - 1)) {
                 if (depositToken != _strategy.depositToken) {
                     _depositAmount = _swap(_remainder, _strategy);
@@ -329,6 +353,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             uint256 _receiptToken = 0;
             ISAMS.TokenInfo memory _receiptInfo;
 
+            // deposit based on type of strategy, if not SAMS check if FortiFi strategy
             if (_isSAMS) {
                 if (_isAdd) {
                     _receiptInfo = _sams.add(_depositAmount, _info.positions[i].receipt);
@@ -336,7 +361,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
                     (_receiptToken, _receiptInfo) = _sams.deposit(_depositAmount);
                 }
             } else {
-                _strat.deposit(_depositAmount);
+                if (_strategy.isFortiFi) {
+                    _strat.depositToFortress(_depositAmount, msg.sender);
+                } else {
+                    _strat.deposit(_depositAmount);
+                }
             }
 
             if (_isAdd) {
@@ -363,14 +392,20 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _proceeds = 0;
 
         for (uint8 i = 0 ; i < _length; i++) {
+            // withdraw based on the type of underlying strategy, if not SAMS check if FortiFi strategy
             if (_info.positions[i].strategy.isSAMS) {
                 ISAMS _strat = ISAMS(_info.positions[i].strategy.strategy);
                 _strat.withdraw(_info.positions[i].receipt);
             } else {
                 IStrategy _strat = IStrategy(_info.positions[i].strategy.strategy);
-                _strat.withdraw(_info.positions[i].receipt);
+                if (_info.positions[i].strategy.isFortiFi) {
+                    _strat.withdrawFromFortress(_info.positions[i].receipt, msg.sender);
+                } else {
+                    _strat.withdraw(_info.positions[i].receipt);
+                }
             }
 
+            // swap out for deposit tokens
             uint256 _depositTokenProceeds = IERC20(depositToken).balanceOf(address(this));
             _proceeds += _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
         }

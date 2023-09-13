@@ -213,10 +213,13 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
         // withdraw from strategies first
         (uint256 _amount, ) = _withdraw(_tokenId);
+
         // delete token info
         delete tokenInfo[_tokenId];
+
         // deposit to (possibly new) strategies
         _deposit(_amount, _tokenId, false);
+        
         // set deposit to original deposit to ensure withdrawal profit calculations are correct
         tokenInfo[_tokenId].deposit = _originalDeposit;
         TokenInfo memory _info = tokenInfo[_tokenId];

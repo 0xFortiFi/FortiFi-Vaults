@@ -7,6 +7,9 @@ import "./interfaces/IStrategy.sol";
 
 pragma solidity ^0.8.18;
 
+/// @title Base FortiFi Fortress contract
+/// @notice Fortresses are vault contracts that are specific to an individual user. By isolating deposits,
+/// Fortresses allow for balance-specific logic from underlying strategies.
 contract FortiFiFortress is Ownable, ERC20 {
     IStrategy internal _strat;
     IERC20 internal _dToken;
@@ -24,45 +27,65 @@ contract FortiFiFortress is Ownable, ERC20 {
         // grant approvals
         _dToken.approve(_strategy, type(uint256).max);
 
+        // owner is the FortiFiStrategy contract that creates this Fortress
         _transferOwnership(_fortiFiStrat);
     }
 
     receive() external payable { 
     }
 
+    /// @notice Function to deposit
     function deposit(uint256 _amount) external virtual onlyOwner {
         require(_amount > 0, "FortiFi: 0 deposit");
         require(_dToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to transfer dep.");
         uint256 _beforeBalance = _strat.balanceOf(address(this));
+
+        // deposit to underlying strategy
         _strat.deposit(_amount);
+
+        // mint receipt tokens equal to receipts received from underlying strategy
         _mint(msg.sender, (_strat.balanceOf(address(this)) - _beforeBalance));
+
+        // refund left over tokens, if any
         _refund();
     }
 
+    /// @notice Function to withdraw
     function withdraw(uint256 _amount) external virtual onlyOwner {
         require(_amount > 0, "FortiFi: 0 withdraw");
+
+        // burn receipt tokens and withdraw from underlying strategy
         _burn(msg.sender, _amount);
         _strat.withdraw(_amount);
+
+        // transfer received deposit tokens and refund left over tokens, if any
         require(_dToken.transfer(msg.sender, _dToken.balanceOf(address(this))), "FortiFi: Failed to transfer dep.");
         _refund();
     }
 
+    /// @notice Grant max approval to underlying strategy for deposit token
+    /// @dev Since Fortresses do not hold deposit tokens for longer than it takes to complete the 
+    /// transaction there should be no risk in granting max approval
     function refreshApproval() external {
         _dToken.approve(address(_strat), type(uint256).max);
     }
 
+    /// @notice View function returns specified wrapped native token address
     function wrappedNativeToken() external view returns(address) {
         return address(_wNative);
     }
 
+    /// @notice View function returns specified deposit token address
     function depositToken() external view returns(address) {
         return address(_dToken);
     }
 
+    /// @notice View function returns specified underlying strategy address
     function strategy() external view returns(address) {
         return address(_strat);
     }
 
+    /// @notice Emergency function to recover stuck tokens. 
     function recoverERC20(address _to, address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).transfer(_to, _amount);
     }

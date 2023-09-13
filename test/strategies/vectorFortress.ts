@@ -78,12 +78,17 @@ describe("Vector Fortress Tests", function () {
     ).to.be.revertedWith("FortiFi: 0 deposit");
 
     await expect(
-      Fort.connect(addr1).withdraw(0)
+      Fort.connect(addr1).withdrawVector(0, 100)
     ).to.be.revertedWith("FortiFi: 0 withdraw");
+
+    // Don't allow invalid withdraw function for Vector Fortress
+    await expect(
+      Fort.connect(addr1).withdraw(0)
+    ).to.be.revertedWith("FortiFi: Invalid withdraw");
 
     // Approve receipt token and withdraw
     await MockStrat.connect(addr1).approve(Fort.getAddress(), ethers.parseEther("900"));
-    await Fort.connect(addr1).withdraw(ethers.parseEther("900"));
+    await Fort.connect(addr1).withdrawVector(ethers.parseEther("900"), 100);
 
     let balance3 = await MockERC20.balanceOf(addr1.getAddress());
     expect(Number(balance3)).to.equal(
