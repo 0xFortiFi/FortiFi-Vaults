@@ -11,9 +11,9 @@ pragma solidity ^0.8.18;
 /// @notice Fortresses are vault contracts that are specific to an individual user. By isolating deposits,
 /// Fortresses allow for balance-specific logic from underlying strategies.
 contract FortiFiFortress is Ownable, ERC20 {
-    IStrategy internal _strat;
-    IERC20 internal _dToken;
-    IERC20 internal _wNative;
+    IStrategy internal immutable _strat;
+    IERC20 internal immutable _dToken;
+    IERC20 internal immutable _wNative;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) ERC20("FortiFi Fortress Receipt", "FFFR") {
         require(_strategy != address(0), "FortiFi: Invalid strategy");

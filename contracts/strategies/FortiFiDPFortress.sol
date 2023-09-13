@@ -9,7 +9,6 @@ pragma solidity ^0.8.18;
 /// @title FortiFi Fortress contract for Delta Prime strategies
 /// @notice This Fortress contract is specifically made to interact with Delta Prime strategies
 contract FortiFiDPFortress is FortiFiFortress {
-    uint16 private constant BPS = 10_000;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) 
         FortiFiFortress(_strategy, _depositToken, _wrappedNative, _fortiFiStrat) {

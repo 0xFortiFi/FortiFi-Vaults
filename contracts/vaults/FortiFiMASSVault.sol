@@ -22,8 +22,8 @@ pragma solidity ^0.8.18;
 contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, ReentrancyGuard {
     string public name;
     string public symbol;
-    address public depositToken;
-    address public wrappedNative;
+    address public immutable depositToken;
+    address public immutable wrappedNative;
     uint16 public constant BPS = 10_000;
     uint16 public slippageBps = 100;
     uint256 public minDeposit = 30_000;

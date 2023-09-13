@@ -12,9 +12,9 @@ pragma solidity ^0.8.18;
 /// @notice This contract should be used when a yield strategy requires special logic beyond
 /// simple deposit(amount deposit token) and withdraw(receipt tokens to burn)
 contract FortiFiStrategy is Ownable, ERC20 {
-    address internal _strat;
-    IERC20 internal _dToken;
-    IERC20 internal _wNative;
+    address internal immutable _strat;
+    IERC20 internal immutable _dToken;
+    IERC20 internal immutable _wNative;
 
     mapping(address => address) public userToFortress;
 

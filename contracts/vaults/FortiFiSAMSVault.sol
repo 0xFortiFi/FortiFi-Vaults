@@ -18,8 +18,8 @@ pragma solidity ^0.8.18;
 contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     string public name;
     string public symbol;
-    address public depositToken;
-    address public wrappedNative; 
+    address public immutable depositToken;
+    address public immutable wrappedNative; 
     uint16 public constant BPS = 10_000;
     uint256 public minDeposit;
     uint256 public nextToken = 1;

@@ -10,7 +10,7 @@ pragma solidity ^0.8.18;
 /// @notice This Fortress contract is specifically made to interact with Vector Finance strategies
 contract FortiFiVectorFortress is FortiFiFortress {
     uint16 private constant BPS = 10_000;
-    IVectorStrategy private _vectorStrat;
+    IVectorStrategy private immutable _vectorStrat;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) 
         FortiFiFortress(_strategy, _depositToken, _wrappedNative, _fortiFiStrat) {
