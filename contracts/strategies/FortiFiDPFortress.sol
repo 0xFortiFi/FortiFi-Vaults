@@ -18,19 +18,22 @@ contract FortiFiDPFortress is FortiFiFortress {
     /// @dev Delta Prime strategies mint new receipt tokens as accrued interest so in order to calculate total tokens to be burned
     /// you must call balanceOf on the strategy, which returns the total balance including interest.
     /// This means that total balance will be withdrawn every time withdraw is called.
-    function withdraw(uint256 _amount) external override onlyOwner {
-        require(_amount > 0, "FortiFi: 0 withdraw");
-        
-        // burn all receipt tokens and get total balance from strategy
-        _burn(msg.sender, balanceOf(msg.sender));
+    function withdraw(address _user) external override onlyOwner {
         uint256 _balance = _strat.balanceOf(address(this));
+        require(_balance > 0, "FortiFi: 0 withdraw");
         
         // withdraw from strategy
         _strat.withdraw(_balance);
 
+        // ensure no strategy receipt tokens remain
+        _balance = _strat.balanceOf(address(this));
+        if (_balance > 0) {
+            require(_strat.transfer(_user, _balance));
+        }
+
         // transfer received deposit tokens and refund left over tokens, if any
         require(_dToken.transfer(msg.sender, _dToken.balanceOf(address(this))), "FortiFi: Failed to transfer dep.");
-        _refund();
+        _refund(_user);
     }
 
 }

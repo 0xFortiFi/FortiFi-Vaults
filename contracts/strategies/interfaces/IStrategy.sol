@@ -7,10 +7,10 @@ pragma solidity ^0.8.18;
 interface IStrategy {
     function approve(address spender, uint amount) external returns (bool);
     function deposit(uint amount) external;
-    function depositToFortress(uint amount, address user) external;
+    function depositToFortress(uint amount, address user, uint tokenId) external;
     function transferFrom(address from, address to, uint amount) external returns(bool);
     function transfer(address to, uint amount) external returns(bool);
     function withdraw(uint amount) external;
-    function withdrawFromFortress(uint amount, address user) external;
+    function withdrawFromFortress(uint amount, address user, uint tokenId) external;
     function balanceOf(address holder) external view returns(uint256);
 }

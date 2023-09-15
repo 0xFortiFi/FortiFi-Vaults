@@ -243,6 +243,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         return tokenInfo[_tokenId];
     }
 
+    /// @notice View function that returns all strategies
+    function getStrategies() public view override returns(Strategy[] memory) {
+        return strategies;
+    }
+
     /// @notice Internal function to mint ERC1155 receipts and advance nextToken state variable
     function _mintReceipt() internal returns(uint256 _tokenId) {
         _tokenId = nextToken;
@@ -318,19 +323,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             }
             
             bool _isSAMS = _strategy.isSAMS;
-            uint256 _receiptBalance = 0;
-
-            IStrategy _strat;
-            ISAMS _sams;
-
-            // set up ISAMS or IStrategy. if not SAMS then set current receipt balance
-            if (_isSAMS) {
-                _sams = ISAMS(_strategy.strategy);
-            } else {
-                _strat = IStrategy(_strategy.strategy);
-                _receiptBalance = _strat.balanceOf(address(this));
-            }
-
+            uint256 _receiptToken = 0;
             uint256 _depositAmount = 0;
 
             // split deposit and swap if necessary
@@ -349,33 +342,30 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
                 }    
                 _remainder -= _split;
             }
-
-            uint256 _receiptToken = 0;
-            ISAMS.TokenInfo memory _receiptInfo;
-
-            // deposit based on type of strategy, if not SAMS check if FortiFi strategy
+            
             if (_isSAMS) {
                 if (_isAdd) {
-                    _receiptInfo = _sams.add(_depositAmount, _info.positions[i].receipt);
+                    _addSAMS(_depositAmount, _strategy.strategy, _info.positions[i].receipt);
                 } else {
-                    (_receiptToken, _receiptInfo) = _sams.deposit(_depositAmount);
+                    // if position is new, deposit and push to positions
+                    _receiptToken = _depositSAMS(_depositAmount, _strategy.strategy);
+                    _info.positions.push(Position({strategy: _strategy, receipt: _receiptToken}));
                 }
             } else {
+                IStrategy _strat = IStrategy(_strategy.strategy);
+
+                // set current receipt balance
+                uint256 _receiptBalance = _strat.balanceOf(address(this));
+
+                // deposit based on type of strategy
                 if (_strategy.isFortiFi) {
-                    _strat.depositToFortress(_depositAmount, msg.sender);
+                    _strat.depositToFortress(_depositAmount, msg.sender, _tokenId);
                 } else {
                     _strat.deposit(_depositAmount);
                 }
-            }
 
-            if (_isAdd) {
-                // SAMS vaults use ERC1155 receipts and position.receipt is a tokenId so no need to update
-                if(!_strategy.isSAMS) {
+                if (_isAdd) {
                     _info.positions[i].receipt += _strat.balanceOf(address(this)) - _receiptBalance;
-                }
-            } else {
-                if (_isSAMS) {
-                    _info.positions.push(Position({strategy: _strategy, receipt: _receiptToken}));
                 } else {
                     _info.positions.push(Position({strategy: _strategy, receipt: _strat.balanceOf(address(this)) - _receiptBalance}));
                 }
@@ -383,6 +373,22 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         }
 
         _info.deposit += _amount;
+    }
+
+    /// @notice internal function to deposit to SAMS vault
+    function _depositSAMS(uint256 _amount, address _strategy) internal returns (uint256 _receiptToken) {
+        ISAMS _sams = ISAMS(_strategy);
+        ISAMS.TokenInfo memory _receiptInfo;
+
+        (_receiptToken, _receiptInfo) = _sams.deposit(_amount);
+    }
+
+    /// @notice internal function to add to SAMS vault
+    function _addSAMS(uint256 _amount, address _strategy, uint256 _tokenId) internal {
+        ISAMS _sams = ISAMS(_strategy);
+        ISAMS.TokenInfo memory _receiptInfo;
+
+        _receiptInfo = _sams.add(_amount, _tokenId);
     }
 
     /// @notice Internal withdraw function that withdraws from strategies and calculates profits.
@@ -399,7 +405,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             } else {
                 IStrategy _strat = IStrategy(_info.positions[i].strategy.strategy);
                 if (_info.positions[i].strategy.isFortiFi) {
-                    _strat.withdrawFromFortress(_info.positions[i].receipt, msg.sender);
+                    _strat.withdrawFromFortress(_info.positions[i].receipt, msg.sender, _tokenId);
                 } else {
                     _strat.withdraw(_info.positions[i].receipt);
                 }

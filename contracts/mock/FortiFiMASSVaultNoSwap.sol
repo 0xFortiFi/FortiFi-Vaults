@@ -225,6 +225,11 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         return tokenInfo[_tokenId];
     }
 
+    /// @notice View function that returns all strategies
+    function getStrategies() public view override returns(Strategy[] memory) {
+        return strategies;
+    }
+
     function _mintReceipt() internal returns(uint256 _tokenId) {
         _tokenId = nextToken;
         _mint(msg.sender, _tokenId, 1, "");
@@ -253,25 +258,17 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         uint8 _length = uint8(strategies.length);
         for (uint8 i = 0; i < _length; i++) {
             Strategy memory _strategy = strategies[i];
+
+            // cannot add to deposit if strategies have changed. must rebalance first
             if (_isAdd) {
                 require(_strategy.strategy == _info.positions[i].strategy.strategy, "FortiFi: Can't add to receipt");
             }
             
             bool _isSAMS = _strategy.isSAMS;
-            uint256 _receiptBalance;
+            uint256 _receiptToken = 0;
+            uint256 _depositAmount = 0;
 
-            IStrategy _strat;
-            ISAMS _sams;
-
-            if (_isSAMS) {
-                _sams = ISAMS(_strategy.strategy);
-            } else {
-                _strat = IStrategy(_strategy.strategy);
-                _receiptBalance = _strat.balanceOf(address(this));
-            }
-
-            uint256 _depositAmount;
-
+            // split deposit and swap if necessary
             if (i == (_length - 1)) {
                 if (depositToken != _strategy.depositToken) {
                     _depositAmount = _swap(_remainder, _strategy);
@@ -287,28 +284,30 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
                 }    
                 _remainder -= _split;
             }
-
-            uint256 _receiptToken;
-            ISAMS.TokenInfo memory _receiptInfo;
-
+            
             if (_isSAMS) {
                 if (_isAdd) {
-                    _receiptInfo = _sams.add(_depositAmount, _info.positions[i].receipt);
+                    _addSAMS(_depositAmount, _strategy.strategy, _info.positions[i].receipt);
                 } else {
-                    (_receiptToken, _receiptInfo) = _sams.deposit(_depositAmount);
-                }
-            } else {
-                _strat.deposit(_depositAmount);
-            }
-
-            if (_isAdd) {
-                // SAMS vaults use ERC1155 receipts and position.receipt is a tokenId so no need to update
-                if(!_strategy.isSAMS) {
-                    _info.positions[i].receipt += _strat.balanceOf(address(this)) - _receiptBalance;
-                }
-            } else {
-                if (_isSAMS) {
+                    // if position is new, deposit and push to positions
+                    _receiptToken = _depositSAMS(_depositAmount, _strategy.strategy);
                     _info.positions.push(Position({strategy: _strategy, receipt: _receiptToken}));
+                }
+            } else {
+                IStrategy _strat = IStrategy(_strategy.strategy);
+
+                // set current receipt balance
+                uint256 _receiptBalance = _strat.balanceOf(address(this));
+
+                // deposit based on type of strategy
+                if (_strategy.isFortiFi) {
+                    _strat.depositToFortress(_depositAmount, msg.sender, _tokenId);
+                } else {
+                    _strat.deposit(_depositAmount);
+                }
+
+                if (_isAdd) {
+                    _info.positions[i].receipt += _strat.balanceOf(address(this)) - _receiptBalance;
                 } else {
                     _info.positions.push(Position({strategy: _strategy, receipt: _strat.balanceOf(address(this)) - _receiptBalance}));
                 }
@@ -318,6 +317,20 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         _info.deposit += _amount;
     }
 
+    function _depositSAMS(uint256 _amount, address _strategy) internal returns (uint256 _receiptToken) {
+        ISAMS _sams = ISAMS(_strategy);
+        ISAMS.TokenInfo memory _receiptInfo;
+
+        (_receiptToken, _receiptInfo) = _sams.deposit(_amount);
+    }
+
+    function _addSAMS(uint256 _amount, address _strategy, uint256 _tokenId) internal {
+        ISAMS _sams = ISAMS(_strategy);
+        ISAMS.TokenInfo memory _receiptInfo;
+
+        _receiptInfo = _sams.add(_amount, _tokenId);
+    }
+
     /// @notice Internal withdraw function that withdraws from strategies and calculates profits.
     function _withdraw(uint256 _tokenId) internal returns(uint256 _proceeds, uint256 _profit) {
         TokenInfo memory _info = tokenInfo[_tokenId];
@@ -325,20 +338,23 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         _proceeds = 0;
 
         for (uint8 i = 0 ; i < _length; i++) {
+            // withdraw based on the type of underlying strategy, if not SAMS check if FortiFi strategy
             if (_info.positions[i].strategy.isSAMS) {
                 ISAMS _strat = ISAMS(_info.positions[i].strategy.strategy);
                 _strat.withdraw(_info.positions[i].receipt);
             } else {
                 IStrategy _strat = IStrategy(_info.positions[i].strategy.strategy);
-                _strat.withdraw(_info.positions[i].receipt);
+                if (_info.positions[i].strategy.isFortiFi) {
+                    _strat.withdrawFromFortress(_info.positions[i].receipt, msg.sender, _tokenId);
+                } else {
+                    _strat.withdraw(_info.positions[i].receipt);
+                }
             }
 
-            // swap returns same token so this test contract cannot use this logic
-            //uint256 _depositTokenProceeds = IERC20(depositToken).balanceOf(address(this));
-            //_proceeds += _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
+            // swap out for deposit tokens
+            uint256 _depositTokenProceeds = IERC20(depositToken).balanceOf(address(this));
+            _proceeds += _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
         }
-
-        _proceeds = IERC20(depositToken).balanceOf(address(this));
 
         if (_proceeds > _info.deposit) {
             _profit = _proceeds - _info.deposit;

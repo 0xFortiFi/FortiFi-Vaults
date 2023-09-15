@@ -236,6 +236,11 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         return tokenInfo[_tokenId];
     }
 
+    /// @notice View function that returns all strategies
+    function getStrategies() public view override returns(Strategy[] memory) {
+        return strategies;
+    }
+
     /// @notice Internal function to mint receipt and advance nextToken state variable.
     function _mintReceipt() internal returns(uint256 _tokenId) {
         _tokenId = nextToken;
@@ -265,7 +270,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
             if (i == (_length - 1)) {
                 if (_strategy.isFortiFi) {
-                    _strat.depositToFortress(_remainder, msg.sender);
+                    _strat.depositToFortress(_remainder, msg.sender, _tokenId);
                 } else {
                     _strat.deposit(_remainder);
                 }
@@ -273,7 +278,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
                 uint256 _split = _amount * _strategy.bps / BPS;
                 _remainder -= _split;
                 if (_strategy.isFortiFi) {
-                    _strat.depositToFortress(_split, msg.sender);
+                    _strat.depositToFortress(_split, msg.sender, _tokenId);
                 } else {
                     _strat.deposit(_split);
                 }
@@ -297,7 +302,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         for (uint8 i = 0 ; i < _length; i++) {
             IStrategy _strat = IStrategy(_info.positions[i].strategy.strategy);
             if (_info.positions[i].strategy.isFortiFi) {
-                _strat.withdrawFromFortress(_info.positions[i].receipt, msg.sender);
+                _strat.withdrawFromFortress(_info.positions[i].receipt, msg.sender, _tokenId);
             } else {
                 _strat.withdraw(_info.positions[i].receipt);
             }

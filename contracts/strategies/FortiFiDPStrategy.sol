@@ -17,33 +17,33 @@ contract FortiFiDPStrategy is FortiFiStrategy {
     /// @notice Function to deposit
     /// @dev If a user has not deposited previously, this function will deploy a FortiFiDPFortress contract
     /// instead of the base FortiFiFortress contract
-    function depositToFortress(uint256 _amount, address _user) external override {
+    function depositToFortress(uint256 _amount, address _user, uint256 _tokenId) external override {
         require(_amount > 0, "FortiFi: 0 deposit");
+        require(isFortiFiVault[msg.sender], "FortiFi: Invalid vault");
         require(_dToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to transfer dep.");
         IFortress _fortress;
 
-        uint256 _beforeBalance = 0;
-
         // If user has not deposited previously, deploy Fortress
-        if (userToFortress[_user] == address(0)) {
+        if (vaultToTokenToFortress[msg.sender][_tokenId] == address(0)) {
             FortiFiDPFortress _fort = new FortiFiDPFortress(_strat, address(_dToken), address(_wNative), address(this));
             _fortress = IFortress(address(_fort));
-            userToFortress[_user] = address(_fortress);
+            vaultToTokenToFortress[msg.sender][_tokenId] = address(_fortress);
+            emit FortressCreated(msg.sender, _tokenId, address(_strat));
         } else {
-            _fortress = IFortress(userToFortress[_user]);
-            // set before balance since user has deposited previously
-            _beforeBalance = _fortress.balanceOf(address(this));
+            _fortress = IFortress(vaultToTokenToFortress[msg.sender][_tokenId]);
         }
 
         // approve and deposit
         _dToken.approve(address(_fortress), _amount);
-        _fortress.deposit(_amount);
+        uint256 _receipts = _fortress.deposit(_amount, _user);
 
-        // mint receipt tokens = to what was received from Fortress
-        _mint(msg.sender, (_fortress.balanceOf(address(this)) - _beforeBalance));
+        // mint receipt tokens equal to what was received from Fortress
+        _mint(msg.sender, _receipts);
 
         // refund left over tokens, if any
         _refund();
+
+        emit DepositToFortress(msg.sender, _user, address(_strat), _amount);
     }
 
 }
