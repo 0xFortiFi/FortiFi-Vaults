@@ -44,8 +44,11 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
         // mint receipt tokens = to what was received from Fortress
         _mint(msg.sender, _receipts);
 
-        // refund left over tokens, if any
-        _refund();
+        // Refund left over deposit tokens, if any
+        uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
+        if (_depositTokenBalance > 0) {
+            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+        }
 
         emit DepositToFortress(msg.sender, _user, address(_strat), _amount);
     }
@@ -62,9 +65,8 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
 
         uint256 _depositTokenReceived = _dToken.balanceOf(address(this));
 
-        // transfer underlying assets and refund left over tokens, if any
+        // transfer received deposit tokens
         require(_dToken.transfer(msg.sender, _dToken.balanceOf(address(this))), "FortiFi: Failed to transfer dep.");
-        _refund();
 
         emit WithdrawFromFortress(msg.sender, _user, address(_strat), _depositTokenReceived);
     }

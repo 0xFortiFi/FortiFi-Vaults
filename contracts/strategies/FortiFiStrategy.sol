@@ -14,8 +14,9 @@ pragma solidity ^0.8.18;
 /// are designed to only be called by FortiFi SAMS and MASS Vaults.
 contract FortiFiStrategy is Ownable, ERC20 {
     address internal immutable _strat;
+    address internal immutable _wNative;
     IERC20 internal immutable _dToken;
-    IERC20 internal immutable _wNative;
+    
 
     mapping(address => bool) public isFortiFiVault;
     mapping(address => mapping(uint256 => address)) public vaultToTokenToFortress;
@@ -29,11 +30,8 @@ contract FortiFiStrategy is Ownable, ERC20 {
         require(_depositToken != address(0), "FortiFi: Invalid deposit token");
         require(_wrappedNative != address(0), "FortiFi: Invalid native token");
         _strat = _strategy;
+        _wNative = _wrappedNative;
         _dToken = IERC20(_depositToken);
-        _wNative = IERC20(_wrappedNative);
-    }
-
-    receive() external payable { 
     }
 
     /// @notice Function to deposit
@@ -63,8 +61,11 @@ contract FortiFiStrategy is Ownable, ERC20 {
         // mint receipt tokens equal to what was received from Fortress
         _mint(msg.sender, _receipts);
 
-        // refund left over tokens, if any
-        _refund();
+        // Refund left over deposit tokens, if any
+        uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
+        if (_depositTokenBalance > 0) {
+            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+        }
 
         emit DepositToFortress(msg.sender, _user, address(_strat), _amount);
     }
@@ -79,10 +80,9 @@ contract FortiFiStrategy is Ownable, ERC20 {
         IFortress(vaultToTokenToFortress[msg.sender][_tokenId]).withdraw(_user);
 
         uint256 _depositTokenReceived = _dToken.balanceOf(address(this));
-        
-        // transfer underlying assets and refund left over tokens, if any
+
+        // transfer received deposit tokens
         require(_dToken.transfer(msg.sender, _depositTokenReceived), "FortiFi: Failed to transfer dep.");
-        _refund();
 
         emit WithdrawFromFortress(msg.sender, _user, address(_strat), _depositTokenReceived);
     }
@@ -104,7 +104,7 @@ contract FortiFiStrategy is Ownable, ERC20 {
 
     /// @notice View function to return specified wrapped native token address
     function wrappedNativeToken() external view returns(address) {
-        return address(_wNative);
+        return _wNative;
     }
 
     /// @notice View function to return specified deposit token address
@@ -115,27 +115,6 @@ contract FortiFiStrategy is Ownable, ERC20 {
     /// @notice View function to return specified underlying strategy address
     function strategy() external view returns(address) {
         return _strat;
-    }
-
-    /// @notice Internal function to refund left over tokens from transactions
-    function _refund() internal {
-        // Refund left over deposit tokens, if any
-        uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
-        if (_depositTokenBalance > 0) {
-            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
-        }
-
-        // Refund left over wrapped native tokens, if any
-        uint256 _wrappedNativeTokenBalance = _wNative.balanceOf(address(this));
-        if (_wrappedNativeTokenBalance > 0) {
-            require(_wNative.transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
-        }
-
-        // Refund left over native tokens, if any
-        if (address(this).balance > 0) {
-            (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
-        }
     }
 
 }

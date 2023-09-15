@@ -97,19 +97,19 @@ contract FortiFiFortress is Ownable {
 
     /// @notice Internal function to refund left over tokens from transactions to user who initiated vault transaction
     function _refund(address _user) internal {
-        // Refund left over deposit tokens, if any
+        // Refund left over deposit tokens to strategy, if any
         uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
         if (_depositTokenBalance > 0) {
-            require(_dToken.transfer(_user, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
         }
 
-        // Refund left over wrapped native tokens, if any
+        // Refund left over wrapped native tokens to user, if any
         uint256 _wrappedNativeTokenBalance = _wNative.balanceOf(address(this));
         if (_wrappedNativeTokenBalance > 0) {
             require(_wNative.transfer(_user, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
         }
 
-        // Refund left over native tokens, if any
+        // Refund left over native tokens to user, if any
         if (address(this).balance > 0) {
             (bool success, ) = payable(_user).call{ value: address(this).balance }("");
 		    require(success, "FortiFi: Failed to refund native");

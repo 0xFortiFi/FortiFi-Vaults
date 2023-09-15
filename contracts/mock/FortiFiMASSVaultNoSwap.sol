@@ -117,7 +117,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         (uint256 _amount, uint256 _profit) = _withdraw(_tokenId);
         uint256 _fee = feeCalc.getFees(msg.sender, _profit);
         feeMgr.collectFees(depositToken, _fee);
-        
+         
         require(IERC20(depositToken).transfer(msg.sender, _amount - _fee), "FortiFi: Failed to send proceeds");
 
         if (address(this).balance > 0) {
@@ -351,10 +351,12 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
                 }
             }
 
-            // swap out for deposit tokens
-            uint256 _depositTokenProceeds = IERC20(depositToken).balanceOf(address(this));
-            _proceeds += _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
+            // swap out for deposit tokens 
+            uint256 _depositTokenProceeds = IERC20(_info.positions[i].strategy.depositToken).balanceOf(address(this));
+            _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
         }
+
+        _proceeds = IERC20(depositToken).balanceOf(address(this));
 
         if (_proceeds > _info.deposit) {
             _profit = _proceeds - _info.deposit;

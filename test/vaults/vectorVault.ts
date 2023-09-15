@@ -91,6 +91,9 @@ describe("Vector SAMS Vault Tests", function () {
                                   ]);
     await Vault.waitForDeployment();
 
+    await VectorStrat.setVault(Vault.getAddress(), true);
+    await VectorStrat2.setVault(Vault.getAddress(), true);
+
   });
 
   it("Check that ERC20 tokens are minted to addresses", async function () {

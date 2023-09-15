@@ -40,8 +40,11 @@ contract FortiFiDPStrategy is FortiFiStrategy {
         // mint receipt tokens equal to what was received from Fortress
         _mint(msg.sender, _receipts);
 
-        // refund left over tokens, if any
-        _refund();
+        // Refund left over deposit tokens, if any
+        uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
+        if (_depositTokenBalance > 0) {
+            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+        }
 
         emit DepositToFortress(msg.sender, _user, address(_strat), _amount);
     }

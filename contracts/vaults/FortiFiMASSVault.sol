@@ -282,12 +282,12 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
     /// @notice Internal swap function for withdrawals.
     /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
-    /// since this contract does not hold strategy deposit tokens, return contract balance after swap.
-    function _swapOut(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
+    function _swapOut(uint256 _amount, Strategy memory _strat) internal {
         address _depositToken = _strat.depositToken;
         address[] memory _route = new address[](3);
         IRouter _router = IRouter(_strat.router);
-        
+        IERC20 _dToken = IERC20(depositToken);
+
         _route[0] = _depositToken;
         _route[1] = wrappedNative;
         _route[2] = depositToken;
@@ -301,8 +301,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
         uint256 _depositTokenBalance = IERC20(depositToken).balanceOf(address(this));
         require(_depositTokenBalance > 0, "FortiFi: Failed to swap");
-
-        return _depositTokenBalance;
     }
 
     /// @notice Internal deposit function.
@@ -411,11 +409,13 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
                 }
             }
 
-            // swap out for deposit tokens
-            uint256 _depositTokenProceeds = IERC20(depositToken).balanceOf(address(this));
-            _proceeds += _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
+            // swap out for deposit tokens 
+            uint256 _depositTokenProceeds = IERC20(_info.positions[i].strategy.depositToken).balanceOf(address(this));
+            _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
         }
 
+        _proceeds = IERC20(depositToken).balanceOf(address(this));
+        
         if (_proceeds > _info.deposit) {
             _profit = _proceeds - _info.deposit;
         } else {
