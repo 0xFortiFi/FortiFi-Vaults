@@ -22,20 +22,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       "0x03d8137b35206Dda7d6313Ba0FDE02EC4c265414",
       [
         {
-          strategy: "0x7158017cc710585bde7d692144071eF4B4995078", 
+          strategy: "0xf9cD4Db17a3FB8bc9ec0CbB34780C91cE13ce767", 
           depositToken: "0x152b9d0FdC40C096757F570A51E494bd4b943E50",
           router: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", 
           isFortiFi: false, 
-          isSAMS: true,
-          bps: 8000
+          isSAMS: false,
+          bps: 5000
         }, 
         {
-          strategy: "0xFB692D03BBEA21D8665035779dd3082c2B1622d0", 
+          strategy: "0x33aB93b73d45d680f6Ffb6c7915cf20fbac9a11D", 
           depositToken: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
           router: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", 
           isFortiFi: false, 
-          isSAMS: false,
-          bps: 2000
+          isSAMS: true,
+          bps: 5000
         }
       ]
     ],

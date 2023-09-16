@@ -22,9 +22,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       "0x92581e042d0A5029430562C0959aEbdFeCBfFd36",
       10000,
       [
-        {strategy: "0x5DFEe593b135AD1467C4870719d562F6D8132921", isFortiFi: true, bps: 4000}, 
-        {strategy: "0xFB692D03BBEA21D8665035779dd3082c2B1622d0", isFortiFi: false, bps: 2000},
-        {strategy: "0xd174D9b3BBbf82a6D0d7631B7B08EE07B059a15e", isFortiFi: true, bps: 4000}
+        {strategy: "0x14517a26005f3F92AEa60b6619aC0e10E3A718d1", isFortiFi: true, bps: 2000}, 
+        {strategy: "0xFB692D03BBEA21D8665035779dd3082c2B1622d0", isFortiFi: false, bps: 4000},
+        {strategy: "0x45C53FB370CA5066D93FE64913e24B886322bE3B", isFortiFi: true, bps: 4000}
       ]
     ],
     log: true,

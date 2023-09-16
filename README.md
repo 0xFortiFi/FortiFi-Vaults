@@ -67,7 +67,7 @@ Initial strategies inheriting from this contract are:
 FortiFiStrategies isolate user deposits into FortiFiFortress contracts.
 
 ### FortiFiFortress
-FortiFiFortress contracts are used to isolate users' receipt tokens, which is necessary for strategies that have unique deposit or withdraw functions. Fortress contracts are deployed by FortiFiStrategy contracts, and can only be accessed by the contract that deploys them.
+FortiFiFortress contracts are used to isolate users' receipt tokens, which is necessary for strategies that have unique deposit or withdraw functions. Fortress contracts are deployed by FortiFiStrategy contracts, and can only be accessed by the contract that deploys them. A fortress is created for each vault receipt token (1155) used to deposit to the FortiFiStrategy.
 
 Initial fortresses inheriting from this contract are:
 

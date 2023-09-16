@@ -286,7 +286,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         address _depositToken = _strat.depositToken;
         address[] memory _route = new address[](3);
         IRouter _router = IRouter(_strat.router);
-        IERC20 _dToken = IERC20(depositToken);
 
         _route[0] = _depositToken;
         _route[1] = wrappedNative;
@@ -409,9 +408,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
                 }
             }
 
-            // swap out for deposit tokens 
-            uint256 _depositTokenProceeds = IERC20(_info.positions[i].strategy.depositToken).balanceOf(address(this));
-            _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
+            // swap out for deposit tokens if needed
+            if (_info.positions[i].strategy.depositToken != depositToken) {
+                uint256 _depositTokenProceeds = IERC20(_info.positions[i].strategy.depositToken).balanceOf(address(this));
+                _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
+            }  
         }
 
         _proceeds = IERC20(depositToken).balanceOf(address(this));
