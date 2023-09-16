@@ -112,6 +112,7 @@ https://snowtrace.io/address/0x475589b0ed87591a893df42ec6076d2499bb63d0#code
 https://snowtrace.io/address/0x2323dac85c6ab9bd6a8b5fb75b0581e31232d12b#code
 
 Vector Finance: 
+*note: an issue has been seen with vector strategies that utilize Platypus pools where a pool imbalance requires a much higher slippage than 1%. We are uncertain the best way to handle this as setting the default slippage higher may introduce MEV risk. In cases where this issue was seen, a slippage of 8% was required to withdraw from the Vector strategy.*
 
 https://snowtrace.io/address/0x8f9b2a7ae089aa01636996ebaf276f48fefdb916#code
 
