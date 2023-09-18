@@ -23,6 +23,9 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
         setSplit(_receivers, _splitBps);
     }
 
+    event FeesCollected(uint256 amount, address[] receivers, uint16[] split);
+    event FeesChanged(address[] receivers, uint16[] split);
+
     /// @notice Function to collect fees from payer
     function collectFees(address _token, uint256 _amount) external override {
         IERC20 _t = IERC20(_token);
@@ -40,6 +43,8 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
                 }
             }
         }
+
+        emit FeesCollected(_amount, receivers, splitBps);
     }
 
     /// @notice Function to set new receivers
@@ -57,6 +62,8 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
         
         receivers = _receivers;
         splitBps = _splitBps;
+
+        emit FeesChanged(receivers, splitBps);
     }
 
     /// @notice Validate that total bps in aray equals 10_000
