@@ -17,15 +17,15 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
     uint16 public constant BPS = 10_000;
     bool public combineNftHoldings;
     uint8[] public tokenAmounts;
-    uint16[] public threshholdBps;
+    uint16[] public thresholdBps;
     address[] public nftContracts;
     
     constructor(address[] memory _nftContracts,
                 uint8[] memory _tokenAmounts,
-                uint16[] memory _threshholdBps,
+                uint16[] memory _thresholdBps,
                 bool _combineHoldings) {
 
-        setFees(_nftContracts, _tokenAmounts, _threshholdBps);
+        setFees(_nftContracts, _tokenAmounts, _thresholdBps);
         combineNftHoldings = _combineHoldings;
     }
 
@@ -38,11 +38,11 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         return _getFees(_user, _amount);
     }
 
-    /// @notice Function to set new values for NFT contracts, threshhold amounts, and threshholdBps
-    /// @dev Each amount in _tokenAmounts must have a corresponding bps value in _threshholdBps. Bps values should 
+    /// @notice Function to set new values for NFT contracts, threshold amounts, and thresholdBps
+    /// @dev Each amount in _tokenAmounts must have a corresponding bps value in _thresholdBps. Bps values should 
     /// decrease at each index, and token amounts should increase at each index. This maintains that the more NFTs
     /// a user holds, the lower the fee bps.
-    function setFees(address[] memory _nftContracts, uint8[] memory _tokenAmounts, uint16[] memory _threshholdBps) public onlyOwner {
+    function setFees(address[] memory _nftContracts, uint8[] memory _tokenAmounts, uint16[] memory _thresholdBps) public onlyOwner {
         uint256 _length = _nftContracts.length;
         require (_length > 0, "FortiFi: Invalid NFT array");
 
@@ -50,12 +50,12 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
             require(_nftContracts[i] != address(0), "FortiFi: Invalid NFT address");
         }
 
-        require(_tokenAmounts.length == _threshholdBps.length &&
-                _validateAmountsAndBps(_tokenAmounts, _threshholdBps), "FortiFi: Invalid amounts or bps");
+        require(_tokenAmounts.length == _thresholdBps.length &&
+                _validateAmountsAndBps(_tokenAmounts, _thresholdBps), "FortiFi: Invalid amounts or bps");
         
         nftContracts = _nftContracts;
         tokenAmounts = _tokenAmounts;
-        threshholdBps = _threshholdBps;
+        thresholdBps = _thresholdBps;
     }
 
     /// @notice Function to set combineNFTHoldings state variable. 
@@ -83,7 +83,7 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
     function _getFees(address _user, uint256 _amount) internal view returns (uint256) {
         uint256 _length = nftContracts.length;
         uint256 _amountLength = tokenAmounts.length;
-        uint16 _feeBps = threshholdBps[0];
+        uint16 _feeBps = thresholdBps[0];
 
         for (uint256 i = 0; i < _length; i++) {
             IERC721 _nft = IERC721(nftContracts[i]);
@@ -92,13 +92,13 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
             if (_balance > 0) {
                 for (uint256 j = 1; j < _amountLength; j++) {
                     if (_balance < tokenAmounts[j]) {
-                        uint16 _bps = threshholdBps[j - 1];
+                        uint16 _bps = thresholdBps[j - 1];
                         if (_bps < _feeBps) {
                             _feeBps = _bps;
                         }
                         break;
                     } else if (_balance == tokenAmounts[j] || j == (_amountLength - 1)) {
-                        uint16 _bps = threshholdBps[j];
+                        uint16 _bps = thresholdBps[j];
                         if (_bps < _feeBps) {
                             _feeBps = _bps;
                         }
@@ -120,7 +120,7 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         uint256 _length = nftContracts.length;
         uint256 _amountLength = tokenAmounts.length;
         uint256 _balance = 0;
-        uint16 _feeBps = threshholdBps[0];
+        uint16 _feeBps = thresholdBps[0];
 
         for (uint256 i = 0; i < _length; i++) {
             IERC721 _nft = IERC721(nftContracts[i]);
@@ -130,13 +130,13 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         if (_balance > 0) {
             for (uint256 j = 1; j < _amountLength; j++) {
                 if (_balance < tokenAmounts[j]) {
-                    uint16 _bps = threshholdBps[j - 1];
+                    uint16 _bps = thresholdBps[j - 1];
                     if (_bps < _feeBps) {
                         _feeBps = _bps;
                     }
                     break;
                 } else if (_balance == tokenAmounts[j] || j == (_amountLength - 1)) {
-                    uint16 _bps = threshholdBps[j];
+                    uint16 _bps = thresholdBps[j];
                     if (_bps < _feeBps) {
                         _feeBps = _bps;
                     }
