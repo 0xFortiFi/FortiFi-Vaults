@@ -174,11 +174,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @notice Function to set max approvals for router and strategies. 
     /// @dev Since contract never holds deposit tokens max approvals should not matter. 
     function refreshApprovals() public {
-        uint8 _length = uint8(strategies.length);
+        uint256 _length = strategies.length;
         IERC20 _depositToken = IERC20(depositToken);
 
         IERC20(depositToken).approve(address(feeMgr), type(uint256).max);
-        for(uint8 i = 0; i < _length; i++) {
+        for(uint256 i = 0; i < _length; i++) {
             IERC20(strategies[i].depositToken).approve(strategies[i].strategy, type(uint256).max);
             IERC20(strategies[i].depositToken).approve(strategies[i].router, type(uint256).max);
             _depositToken.approve(strategies[i].router, type(uint256).max);
@@ -187,18 +187,18 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
     /// @notice This function sets up the underlying strategies used by the vault.
     function setStrategies(Strategy[] memory _strategies) public onlyOwner {
-        uint8 _length = uint8(_strategies.length);
+        uint256 _length = _strategies.length;
         require(_length > 0, "FortiFi: No strategies");
 
         uint16 _bps = 0;
-        for (uint8 i = 0; i < _length; i++) {
+        for (uint256 i = 0; i < _length; i++) {
             _bps += _strategies[i].bps;
         }
         require(_bps == BPS, "FortiFi: Invalid total bps");
 
         delete strategies; // remove old array, if any
 
-        for (uint8 i = 0; i < _length; i++) {
+        for (uint256 i = 0; i < _length; i++) {
             require(_strategies[i].strategy != address(0), "FortiFi: Invalid strat address");
             require(_strategies[i].depositToken != address(0), "FortiFi: Invalid ERC20 address");
             require(_strategies[i].router != address(0), "FortiFi: Invalid router address");
@@ -310,8 +310,8 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         TokenInfo storage _info = tokenInfo[_tokenId];
         uint256 _remainder = _amount;
 
-        uint8 _length = uint8(strategies.length);
-        for (uint8 i = 0; i < _length; i++) {
+        uint256 _length = strategies.length;
+        for (uint256 i = 0; i < _length; i++) {
             Strategy memory _strategy = strategies[i];
 
             // cannot add to deposit if strategies have changed. must rebalance first
@@ -391,10 +391,10 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @notice Internal withdraw function that withdraws from strategies and calculates profits.
     function _withdraw(uint256 _tokenId) internal returns(uint256 _proceeds, uint256 _profit) {
         TokenInfo memory _info = tokenInfo[_tokenId];
-        uint8 _length = uint8(_info.positions.length);
+        uint256 _length = _info.positions.length;
         _proceeds = 0;
 
-        for (uint8 i = 0 ; i < _length; i++) {
+        for (uint256 i = 0 ; i < _length; i++) {
             // withdraw based on the type of underlying strategy, if not SAMS check if FortiFi strategy
             if (_info.positions[i].strategy.isSAMS) {
                 ISAMS _strat = ISAMS(_info.positions[i].strategy.strategy);

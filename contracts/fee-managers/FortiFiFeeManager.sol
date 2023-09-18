@@ -30,8 +30,8 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
 
         uint256 _feeBalance = _t.balanceOf(address(this));
         if (_feeBalance >= 1000) {
-            uint8 _length = uint8(receivers.length);
-            for (uint8 i = 0; i < _length; i++) {
+            uint256 _length = receivers.length;
+            for (uint256 i = 0; i < _length; i++) {
                 if (i == (_length - 1)) {
                     require(_t.transfer(receivers[i], _t.balanceOf(address(this))), "FortiFi: Failed to transfer last share");
                 } else {
@@ -45,10 +45,10 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
     /// @notice Function to set new receivers
     /// @dev This function replaces the current receivers and splitBps. Total bps must equal 10_000
     function setSplit(address[] memory _receivers, uint16[] memory _splitBps) public onlyOwner {
-        uint8 _length = uint8(_receivers.length);
+        uint256 _length = _receivers.length;
         require (_length > 0, "FortiFi: Invalid receiver array");
 
-        for (uint8 i = 0; i < _length; i++) {
+        for (uint256 i = 0; i < _length; i++) {
             require(_receivers[i] != address(0), "FortiFi: Invalid receiver address");
         }
 
@@ -61,7 +61,7 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
 
     /// @notice Validate that total bps in aray equals 10_000
     function _validateBps(uint16[] memory _bps) internal pure returns(bool) {
-        uint8 _length = uint8(_bps.length);
+        uint256 _length = _bps.length;
         uint16 _totalBps = 0;
         
         for (uint256 i = 0; i < _length; i++) {

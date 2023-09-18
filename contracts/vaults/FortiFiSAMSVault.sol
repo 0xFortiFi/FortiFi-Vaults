@@ -171,9 +171,9 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// transaction. This means there should be no risk exposure. 
     function refreshApprovals() public {
         IERC20 _depositToken = IERC20(depositToken);
-        uint8 _length = uint8(strategies.length);
+        uint256 _length = strategies.length;
 
-        for(uint8 i = 0; i < _length; i++) {
+        for(uint256 i = 0; i < _length; i++) {
             _depositToken.approve(strategies[i].strategy, type(uint256).max);
         }
 
@@ -182,18 +182,18 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
     /// @notice This function sets up the underlying strategies used by the vault.
     function setStrategies(Strategy[] memory _strategies) public onlyOwner {
-        uint8 _length = uint8(_strategies.length);
+        uint256 _length = _strategies.length;
         require(_length > 0, "FortiFi: No strategies");
 
         uint16 _bps = 0;
-        for (uint8 i = 0; i < _length; i++) {
+        for (uint256 i = 0; i < _length; i++) {
             _bps += _strategies[i].bps;
         }
         require(_bps == BPS, "FortiFi: Invalid total bps");
 
         delete strategies; // remove old array, if any
 
-        for (uint8 i = 0; i < _length; i++) {
+        for (uint256 i = 0; i < _length; i++) {
             require(_strategies[i].strategy != address(0), "FortiFi: Invalid strat address");
             strategies.push(_strategies[i]);
         }
@@ -256,8 +256,8 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         TokenInfo storage _info = tokenInfo[_tokenId];
         uint256 _remainder = _amount;
 
-        uint8 _length = uint8(strategies.length);
-        for (uint8 i = 0; i < _length; i++) {
+        uint256 _length = strategies.length;
+        for (uint256 i = 0; i < _length; i++) {
             Strategy memory _strategy = strategies[i];
 
             // cannot add to position if strategies have changed. must rebalance first
@@ -297,9 +297,9 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice Internal withdraw function that withdraws from strategies and calculates profits.
     function _withdraw(uint256 _tokenId) internal returns(uint256 _proceeds, uint256 _profit) {
         TokenInfo memory _info = tokenInfo[_tokenId];
-        uint8 _length = uint8(_info.positions.length);
+        uint256 _length = _info.positions.length;
 
-        for (uint8 i = 0 ; i < _length; i++) {
+        for (uint256 i = 0 ; i < _length; i++) {
             IStrategy _strat = IStrategy(_info.positions[i].strategy.strategy);
             if (_info.positions[i].strategy.isFortiFi) {
                 _strat.withdrawFromFortress(_info.positions[i].receipt, msg.sender, _tokenId);
