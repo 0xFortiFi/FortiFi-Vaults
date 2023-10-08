@@ -94,8 +94,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// tokens received for later withdrawal.
     function deposit(uint256 _amount) external override nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
-        IERC20 _depositToken = IERC20(depositToken);
-        _depositToken.safeTransferFrom(msg.sender, address(this), _amount);
+        IERC20(depositToken).safeTransferFrom(msg.sender, address(this), _amount);
         _tokenId = _mintReceipt();
         _deposit(_amount, _tokenId, false);
         _info = tokenInfo[_tokenId];
@@ -110,8 +109,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// deposit without needing to burn/withdraw first. 
     function add(uint256 _amount, uint256 _tokenId) external override nonReentrant whileNotPaused returns(TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
-        IERC20 _depositToken = IERC20(depositToken);
-        _depositToken.safeTransferFrom(msg.sender, address(this), _amount);
+        IERC20(depositToken).safeTransferFrom(msg.sender, address(this), _amount);
         require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
         _deposit(_amount, _tokenId, true);
         _info = tokenInfo[_tokenId];
