@@ -24,6 +24,9 @@ pragma solidity 0.8.21;
 /// @notice Error caused by trying to set a strategy more than once
 error DuplicateStrategy();
 
+/// @notice Error caused by trying to set a slippage too high
+error InvalidSlippage();
+
 /// @title Contract for FortiFi MASS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
@@ -143,8 +146,9 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         minDeposit = _amount;
     }
 
-    /// @notice Function to set slippage used in swap functions
+    /// @notice Function to set slippage used in swap functions. Must be 1-5% (100-500)
     function setSlippage(uint16 _amount) external onlyOwner {
+        if (_amount < 100 || _amount > 500) revert InvalidSlippage();
         slippageBps = _amount;
     }
 
