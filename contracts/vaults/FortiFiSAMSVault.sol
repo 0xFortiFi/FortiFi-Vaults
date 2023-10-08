@@ -16,6 +16,9 @@ pragma solidity ^0.8.18;
 /// @notice Error caused by trying to set a strategy more than once
 error DuplicateStrategy();
 
+/// @notice Error caused by trying to set minDeposit below BPS
+error InvalidMinDeposit();
+
 /// @title Contract for FortiFi SAMS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then split and deposited in to 
 /// multiple yield-bearing strategies. 
@@ -62,7 +65,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         require(_depositToken != address(0), "FortiFi: Invalid deposit token");
         require(_feeManager != address(0), "FortiFi: Invalid feeManager");
         require(_feeCalculator != address(0), "FortiFi: Invalid feeCalculator");
-        require(_minDeposit >= BPS, "FortiFi: Invalid min deposit");
+        if (_minDeposit >= BPS) revert InvalidMinDeposit();
         name = _name; 
         symbol = _symbol;
         minDeposit = _minDeposit;
@@ -139,6 +142,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
     /// @notice Setter for minDeposit state variable
     function setMinDeposit(uint256 _amount) external onlyOwner {
+        if (_amount >= BPS) revert InvalidMinDeposit();
         minDeposit = _amount;
     }
 
