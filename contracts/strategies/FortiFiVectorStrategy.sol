@@ -4,12 +4,14 @@
 import "./FortiFiStrategy.sol";
 import "./FortiFiVectorFortress.sol";
 import "./interfaces/IVectorFortress.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 pragma solidity ^0.8.18;
 
 /// @title Delta Prime FortiFi Strategy contract
 /// @notice This contract allows for FortiFi vaults to utilize Vector Finance strategies. 
 contract FortiFiVectorStrategy is FortiFiStrategy {
+    using SafeERC20 for IERC20;
     uint256 public slippageBps = 100;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative) 
@@ -24,7 +26,7 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
     function depositToFortress(uint256 _amount, address _user, uint256 _tokenId) external override {
         require(_amount > 0, "FortiFi: 0 deposit");
         require(isFortiFiVault[msg.sender], "FortiFi: Invalid vault");
-        require(_dToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to transfer dep.");
+        _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         IVectorFortress _fortress;
 
         // If user has not deposited previously, deploy Fortress
@@ -47,7 +49,7 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
         // Refund left over deposit tokens, if any
         uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
         if (_depositTokenBalance > 0) {
-            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+            _dToken.safeTransfer(msg.sender, _depositTokenBalance);
         }
 
         emit DepositToFortress(msg.sender, _user, address(_strat), _amount);
@@ -66,7 +68,7 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
         uint256 _depositTokenReceived = _dToken.balanceOf(address(this));
 
         // transfer received deposit tokens
-        require(_dToken.transfer(msg.sender, _dToken.balanceOf(address(this))), "FortiFi: Failed to transfer dep.");
+        _dToken.safeTransfer(msg.sender, _dToken.balanceOf(address(this)));
 
         emit WithdrawFromFortress(msg.sender, _user, address(_strat), _depositTokenReceived);
     }

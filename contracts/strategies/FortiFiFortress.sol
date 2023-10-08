@@ -3,6 +3,7 @@
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IStrategy.sol";
 
 pragma solidity ^0.8.18;
@@ -14,6 +15,7 @@ error CannotWithdrawStrategyReceipts();
 /// @notice Fortresses are vault contracts that are specific to an individual vault receipt. By isolating deposits,
 /// Fortresses allow for balance-specific logic from underlying strategies.
 contract FortiFiFortress is Ownable {
+    using SafeERC20 for IERC20;
     IStrategy internal immutable _strat;
     IERC20 internal immutable _dToken;
     IERC20 internal immutable _wNative;
@@ -40,7 +42,7 @@ contract FortiFiFortress is Ownable {
     /// @notice Function to deposit
     function deposit(uint256 _amount, address _user) external virtual onlyOwner returns(uint256 _newStratReceipts){
         require(_amount > 0, "FortiFi: 0 deposit");
-        require(_dToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to transfer dep.");
+        _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         uint256 _beforeBalance = _strat.balanceOf(address(this));
 
         // deposit to underlying strategy
@@ -63,11 +65,11 @@ contract FortiFiFortress is Ownable {
         // ensure no strategy receipt tokens remain
         _balance = _strat.balanceOf(address(this));
         if (_balance > 0) {
-            require(_strat.transfer(_user, _balance));
+            IERC20(address(_strat)).safeTransfer(_user, _balance);
         }
 
         // transfer received deposit tokens and refund left over tokens, if any
-        require(_dToken.transfer(msg.sender, _dToken.balanceOf(address(this))), "FortiFi: Failed to transfer dep.");
+        _dToken.safeTransfer(msg.sender, _dToken.balanceOf(address(this)));
         _refund(_user);
     }
 
@@ -96,7 +98,7 @@ contract FortiFiFortress is Ownable {
     /// @notice Emergency function to recover stuck tokens. 
     function recoverERC20(address _to, address _token, uint256 _amount) external onlyOwner {
         if (_token == address(_strat)) revert CannotWithdrawStrategyReceipts();
-        IERC20(_token).transfer(_to, _amount);
+        IERC20(_token).safeTransfer(_to, _amount);
     }
 
     /// @notice Internal function to refund left over tokens from transactions to user who initiated vault transaction
@@ -104,13 +106,13 @@ contract FortiFiFortress is Ownable {
         // Refund left over deposit tokens to strategy, if any
         uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
         if (_depositTokenBalance > 0) {
-            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+            _dToken.safeTransfer(msg.sender, _depositTokenBalance);
         }
 
         // Refund left over wrapped native tokens to user, if any
         uint256 _wrappedNativeTokenBalance = _wNative.balanceOf(address(this));
         if (_wrappedNativeTokenBalance > 0) {
-            require(_wNative.transfer(_user, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
+            _wNative.safeTransfer(_user, _wrappedNativeTokenBalance);
         }
 
         // Refund left over native tokens to user, if any

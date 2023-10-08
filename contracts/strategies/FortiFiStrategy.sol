@@ -3,6 +3,7 @@
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IFortress.sol";
 import "./interfaces/IVault.sol";
 import "./FortiFiFortress.sol";
@@ -17,11 +18,11 @@ error InvalidVaultImplementation();
 /// simple deposit(amount deposit token) and withdraw(receipt tokens to burn). These strategies
 /// are designed to only be called by FortiFi SAMS and MASS Vaults.
 contract FortiFiStrategy is Ownable, ERC20 {
+    using SafeERC20 for IERC20;
     address internal immutable _strat;
     address internal immutable _wNative;
     IERC20 internal immutable _dToken;
     
-
     mapping(address => bool) public isFortiFiVault;
     mapping(address => mapping(uint256 => address)) public vaultToTokenToFortress;
 
@@ -45,7 +46,7 @@ contract FortiFiStrategy is Ownable, ERC20 {
     function depositToFortress(uint256 _amount, address _user, uint256 _tokenId) external virtual {
         require(_amount > 0, "FortiFi: 0 deposit");
         require(isFortiFiVault[msg.sender], "FortiFi: Invalid vault");
-        require(_dToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to transfer dep.");
+        _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         IFortress _fortress;
 
         // If user has not deposited previously, deploy Fortress
@@ -68,7 +69,7 @@ contract FortiFiStrategy is Ownable, ERC20 {
         // Refund left over deposit tokens, if any
         uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
         if (_depositTokenBalance > 0) {
-            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+            _dToken.safeTransfer(msg.sender, _depositTokenBalance);
         }
 
         emit DepositToFortress(msg.sender, _user, address(_strat), _amount);
@@ -86,7 +87,7 @@ contract FortiFiStrategy is Ownable, ERC20 {
         uint256 _depositTokenReceived = _dToken.balanceOf(address(this));
 
         // transfer received deposit tokens
-        require(_dToken.transfer(msg.sender, _depositTokenReceived), "FortiFi: Failed to transfer dep.");
+        _dToken.safeTransfer(msg.sender, _depositTokenReceived);
 
         emit WithdrawFromFortress(msg.sender, _user, address(_strat), _depositTokenReceived);
     }
@@ -99,7 +100,7 @@ contract FortiFiStrategy is Ownable, ERC20 {
 
     /// @notice Emergency function to recover stuck tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
-        IERC20(_token).transfer(msg.sender, _amount);
+        IERC20(_token).safeTransfer(msg.sender, _amount);
     }
 
     /// @notice Emergency function to recover stuck tokens from Fortress

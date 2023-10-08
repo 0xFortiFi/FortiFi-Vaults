@@ -3,12 +3,14 @@
 
 import "./FortiFiFortress.sol";
 import "./interfaces/IStrategy.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 pragma solidity ^0.8.18;
 
 /// @title FortiFi Fortress contract for Delta Prime strategies
 /// @notice This Fortress contract is specifically made to interact with Delta Prime strategies
 contract FortiFiDPFortress is FortiFiFortress {
+    using SafeERC20 for IERC20;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) 
         FortiFiFortress(_strategy, _depositToken, _wrappedNative, _fortiFiStrat) {
@@ -28,11 +30,11 @@ contract FortiFiDPFortress is FortiFiFortress {
         // ensure no strategy receipt tokens remain
         _balance = _strat.balanceOf(address(this));
         if (_balance > 0) {
-            require(_strat.transfer(_user, _balance));
+            IERC20(address(_strat)).safeTransfer(_user, _balance);
         }
 
         // transfer received deposit tokens and refund left over tokens, if any
-        require(_dToken.transfer(msg.sender, _dToken.balanceOf(address(this))), "FortiFi: Failed to transfer dep.");
+        _dToken.safeTransfer(msg.sender, _dToken.balanceOf(address(this)));
         _refund(_user);
     }
 

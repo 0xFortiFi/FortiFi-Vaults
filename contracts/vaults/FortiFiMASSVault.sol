@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../strategies/interfaces/IStrategy.sol";
 import "../strategies/interfaces/IVectorStrategy.sol";
 import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
@@ -24,6 +25,7 @@ pragma solidity ^0.8.18;
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
 contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
     string public name;
     string public symbol;
     address public immutable depositToken;
@@ -84,7 +86,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     function deposit(uint256 _amount) external override nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
         IERC20 _depositToken = IERC20(depositToken);
-        require(_depositToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
+        _depositToken.safeTransferFrom(msg.sender, address(this), _amount);
         _tokenId = _mintReceipt();
         _deposit(_amount, _tokenId, false);
         _info = tokenInfo[_tokenId];
@@ -100,7 +102,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     function add(uint256 _amount, uint256 _tokenId) external override nonReentrant whileNotPaused returns(TokenInfo memory _info) {
         require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
         IERC20 _depositToken = IERC20(depositToken);
-        require(_depositToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
+        _depositToken.safeTransferFrom(msg.sender, address(this), _amount);
         require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
         _deposit(_amount, _tokenId, true);
         _info = tokenInfo[_tokenId];
@@ -122,7 +124,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         uint256 _fee = feeCalc.getFees(msg.sender, _profit);
         feeMgr.collectFees(depositToken, _fee);
         
-        require(IERC20(depositToken).transfer(msg.sender, _amount - _fee), "FortiFi: Failed to send proceeds");
+        IERC20(depositToken).safeTransfer(msg.sender, _amount - _fee);
 
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
@@ -162,7 +164,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
     /// @notice Emergency function to recover stuck ERC20 tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
-        IERC20(_token).transfer(msg.sender, _amount);
+        IERC20(_token).safeTransfer(msg.sender, _amount);
     }
 
     /// @notice Emergency function to recover stuck ERC1155 tokens
@@ -445,13 +447,13 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         uint256 _depositTokenBalance = IERC20(depositToken).balanceOf(address(this));
         if (_depositTokenBalance > 0) {
             _info.deposit -= _depositTokenBalance;
-            require(IERC20(depositToken).transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+            IERC20(depositToken).safeTransfer(msg.sender, _depositTokenBalance);
         }
 
         // Refund left over wrapped native tokens, if any
         uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
         if (_wrappedNativeTokenBalance > 0) {
-            require(IERC20(wrappedNative).transfer(msg.sender, _wrappedNativeTokenBalance), "FortiFi: Failed to refund native");
+            IERC20(wrappedNative).safeTransfer(msg.sender, _wrappedNativeTokenBalance);
         }
 
         // Refund left over native tokens, if any

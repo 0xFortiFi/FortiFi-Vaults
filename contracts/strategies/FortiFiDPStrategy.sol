@@ -3,12 +3,14 @@
 
 import "./FortiFiStrategy.sol";
 import "./FortiFiDPFortress.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 pragma solidity ^0.8.18;
 
 /// @title Delta Prime FortiFi Strategy contract
 /// @notice This contract allows for FortiFi vaults to utilize Delta Prime strategies. 
 contract FortiFiDPStrategy is FortiFiStrategy {
+    using SafeERC20 for IERC20;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative) 
         FortiFiStrategy(_strategy, _depositToken, _wrappedNative) {
@@ -20,7 +22,7 @@ contract FortiFiDPStrategy is FortiFiStrategy {
     function depositToFortress(uint256 _amount, address _user, uint256 _tokenId) external override {
         require(_amount > 0, "FortiFi: 0 deposit");
         require(isFortiFiVault[msg.sender], "FortiFi: Invalid vault");
-        require(_dToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to transfer dep.");
+        _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         IFortress _fortress;
 
         // If user has not deposited previously, deploy Fortress
@@ -43,7 +45,7 @@ contract FortiFiDPStrategy is FortiFiStrategy {
         // Refund left over deposit tokens, if any
         uint256 _depositTokenBalance = _dToken.balanceOf(address(this));
         if (_depositTokenBalance > 0) {
-            require(_dToken.transfer(msg.sender, _depositTokenBalance), "FortiFi: Failed to refund ERC20");
+            _dToken.safeTransfer(msg.sender, _depositTokenBalance);
         }
 
         emit DepositToFortress(msg.sender, _user, address(_strat), _amount);
