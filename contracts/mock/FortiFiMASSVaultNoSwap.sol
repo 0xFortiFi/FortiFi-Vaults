@@ -299,13 +299,13 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
     }
 
     /// @notice Internal swap function for deposits.
-    function _swap(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
+    function _swapFromDepositToken(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
         return _amount; 
     }
 
     /// @notice Internal swap function for withdrawals.
 
-    function _swapOut(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
+    function _swapToDepositToken(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
         return _amount; 
     }
 
@@ -333,14 +333,14 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
             // split deposit and swap if necessary
             if (i == (_length - 1)) {
                 if (depositToken != _strategy.depositToken) {
-                    _depositAmount = _swap(_remainder, _strategy);
+                    _depositAmount = _swapFromDepositToken(_remainder, _strategy);
                 } else {
                     _depositAmount = _remainder;
                 }    
             } else {
                 uint256 _split = _amount * _strategy.bps / BPS;
                 if (depositToken != _strategy.depositToken) {
-                    _depositAmount = _swap(_split, _strategy);
+                    _depositAmount = _swapFromDepositToken(_split, _strategy);
                 } else {
                     _depositAmount = _split;
                 }    
@@ -415,7 +415,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
 
             // swap out for deposit tokens 
             uint256 _depositTokenProceeds = IERC20(_info.positions[i].strategy.depositToken).balanceOf(address(this));
-            _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
+            _swapToDepositToken(_depositTokenProceeds, _info.positions[i].strategy);
         }
 
         _proceeds = IERC20(depositToken).balanceOf(address(this));

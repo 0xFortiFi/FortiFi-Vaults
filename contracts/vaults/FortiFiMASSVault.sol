@@ -249,7 +249,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         uint256 _length = strategies.length;
         IERC20 _depositToken = IERC20(depositToken);
 
-        IERC20(depositToken).approve(address(feeMgr), type(uint256).max);
+        _depositToken.approve(address(feeMgr), type(uint256).max);
         for(uint256 i = 0; i < _length; i++) {
             IERC20(strategies[i].depositToken).approve(strategies[i].strategy, type(uint256).max);
             IERC20(strategies[i].depositToken).approve(strategies[i].router, type(uint256).max);
@@ -356,15 +356,15 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @notice Internal swap function for deposits.
     /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
     /// since this contract does not hold strategy deposit tokens, return contract balance after swap.
-    function _swap(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
-        address _depositToken = _strat.depositToken;
+    function _swapFromDepositToken(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
+        address _strategyDepositToken = _strat.depositToken;
         address[] memory _route = new address[](3);
         IRouter _router = IRouter(_strat.router);
         IOracle _oracle = IOracle(_strat.oracle);
         
         _route[0] = depositToken;
         _route[1] = wrappedNative;
-        _route[2] = _depositToken;
+        _route[2] = _strategyDepositToken;
 
         uint256 _latestPrice = uint256(_oracle.latestAnswer());
         uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_strat.decimals - DECIMALS);
@@ -375,21 +375,21 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             address(this), 
             block.timestamp + SWAP_DEADLINE_BUFFER);
 
-        uint256 _depositTokenBalance = IERC20(_depositToken).balanceOf(address(this));
-        if (_depositTokenBalance == 0) revert SwapFailed();
+        uint256 _strategyDepositTokenBalance = IERC20(_strategyDepositToken).balanceOf(address(this));
+        if (_strategyDepositTokenBalance == 0) revert SwapFailed();
 
-        return _depositTokenBalance;
+        return _strategyDepositTokenBalance;
     }
 
     /// @notice Internal swap function for withdrawals.
     /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
-    function _swapOut(uint256 _amount, Strategy memory _strat) internal {
-        address _depositToken = _strat.depositToken;
+    function _swapToDepositToken(uint256 _amount, Strategy memory _strat) internal {
+        address _strategyDepositToken = _strat.depositToken;
         address[] memory _route = new address[](3);
         IRouter _router = IRouter(_strat.router);
         IOracle _oracle = IOracle(_strat.oracle);
 
-        _route[0] = _depositToken;
+        _route[0] = _strategyDepositToken;
         _route[1] = wrappedNative;
         _route[2] = depositToken;
         
@@ -430,14 +430,14 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             // split deposit and swap if necessary
             if (i == (_length - 1)) {
                 if (depositToken != _strategy.depositToken) {
-                    _depositAmount = _swap(_remainder, _strategy);
+                    _depositAmount = _swapFromDepositToken(_remainder, _strategy);
                 } else {
                     _depositAmount = _remainder;
                 }    
             } else {
                 uint256 _split = _amount * _strategy.bps / BPS;
                 if (depositToken != _strategy.depositToken) {
-                    _depositAmount = _swap(_split, _strategy);
+                    _depositAmount = _swapFromDepositToken(_split, _strategy);
                 } else {
                     _depositAmount = _split;
                 }    
@@ -514,8 +514,8 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
             // swap out for deposit tokens if needed
             if (_info.positions[i].strategy.depositToken != depositToken) {
-                uint256 _depositTokenProceeds = IERC20(_info.positions[i].strategy.depositToken).balanceOf(address(this));
-                _swapOut(_depositTokenProceeds, _info.positions[i].strategy);
+                uint256 _strategyDepositTokenProceeds = IERC20(_info.positions[i].strategy.depositToken).balanceOf(address(this));
+                _swapToDepositToken(_strategyDepositTokenProceeds, _info.positions[i].strategy);
             }  
         }
 
