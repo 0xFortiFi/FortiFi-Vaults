@@ -63,6 +63,13 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     event Add(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Rebalance(uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Withdrawal(address indexed depositor, uint256 indexed tokenId, uint256 amountWithdrawn, uint256 profit, uint256 fee);
+    event ApprovalsRefreshed();
+    event StrategiesSet(Strategy[]);
+    event MinDepositSet(uint256 minAmount);
+    event SlippageSet(uint16 slippage);
+    event FeeManagerSet(address feeManager);
+    event FeeCalculatorSet(address feeCalculator);
+    event PauseStateUpdated(bool paused);
 
     /// @notice Used to restrict function access while paused.
     modifier whileNotPaused() {
@@ -151,29 +158,34 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     function setMinDeposit(uint256 _amount) external onlyOwner {
         require(_amount > 30_000, "FortiFi: Invalid amount");
         minDeposit = _amount;
+        emit MinDepositSet(_amount);
     }
 
     /// @notice Function to set slippage used in swap functions. Must be 1-5% (100-500)
     function setSlippage(uint16 _amount) external onlyOwner {
         if (_amount < 100 || _amount > 500) revert InvalidSlippage();
         slippageBps = _amount;
+        emit SlippageSet(_amount);
     }
 
     /// @notice Function to set new FortiFiFeeManager contract
     function setFeeManager(address _contract) external onlyOwner {
         require(_contract != address(0), "FortiFi: Invalid contract");
         feeMgr = IFortiFiFeeManager(_contract);
+        emit FeeManagerSet(_contract);
     }
 
     /// @notice Function to set new FortiFiFeeCalculator contract
     function setFeeCalculator(address _contract) external onlyOwner {
         require(_contract != address(0), "FortiFi: Invalid contract");
         feeCalc = IFortiFiFeeCalculator(_contract);
+        emit FeeCalculatorSet(_contract);
     }
 
     /// @notice Function to flip paused state
     function flipPaused() external onlyOwner {
         paused = !paused;
+        emit PauseStateUpdated(paused);
     }
 
     /// @notice Emergency function to recover stuck ERC20 tokens
@@ -204,6 +216,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             IERC20(strategies[i].depositToken).approve(strategies[i].router, type(uint256).max);
             _depositToken.approve(strategies[i].router, type(uint256).max);
         }
+        emit ApprovalsRefreshed();
     }
 
     /// @notice This function sets up the underlying strategies used by the vault.
@@ -239,6 +252,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         }
 
         refreshApprovals();
+        emit StrategiesSet(_strategies);
     }
 
     /// @notice This function allows for changing the allocations of current strategies
@@ -251,6 +265,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             _totalBps += _bps[i];
         }
         if (_totalBps != BPS) revert InvalidBps();
+        emit StrategiesSet(strategies);
     }
 
     /// @notice This function allows a user to rebalance a receipt (ERC1155) token's underlying assets. 

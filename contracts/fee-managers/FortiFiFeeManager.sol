@@ -25,6 +25,7 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
 
     event FeesCollected(uint256 amount, address[] receivers, uint16[] split);
     event FeesChanged(address[] receivers, uint16[] split);
+    event ERC20Recovered(address token, uint amount);
 
     /// @notice Function to collect fees from payer
     function collectFees(address _token, uint256 _amount) external override {
@@ -85,6 +86,7 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
     /// @notice Emergency function to recover stuck ERC20 tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).transfer(msg.sender, _amount);
+        emit ERC20Recovered(_token, _amount);
     }
 
 }

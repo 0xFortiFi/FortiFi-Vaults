@@ -29,6 +29,9 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         combineNftHoldings = _combineHoldings;
     }
 
+    event FeesSet(address[] nftContracts, uint8[] tokenAmounts, uint16[] thresholdBps);
+    event CombineNftsSet(bool combine);
+
     /// @notice Function to determine fees due based on a user's NFT holdings and amount of profit
     function getFees(address _user, uint256 _amount) external view override returns(uint256) {
         if (combineNftHoldings) {
@@ -56,6 +59,8 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
         nftContracts = _nftContracts;
         tokenAmounts = _tokenAmounts;
         thresholdBps = _thresholdBps;
+
+        emit FeesSet(_nftContracts, _tokenAmounts, _thresholdBps);
     }
 
     /// @notice Function to set combineNFTHoldings state variable. 
@@ -63,6 +68,7 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
     /// NFT count that is used when determining the _feeBps in _getFees.
     function setCombine(bool _bool) external onlyOwner {
         combineNftHoldings = _bool;
+        emit CombineNftsSet(_bool);
     }
 
     /// @notice Validate that arrays meet specifications

@@ -36,6 +36,8 @@ contract FortiFiDPFortress is FortiFiFortress {
         // transfer received deposit tokens and refund left over tokens, if any
         _dToken.safeTransfer(msg.sender, _dToken.balanceOf(address(this)));
         _refund(_user);
+
+        emit WithdrawalMade(_user);
     }
 
 }

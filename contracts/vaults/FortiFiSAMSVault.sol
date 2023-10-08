@@ -54,6 +54,13 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     event Add(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Rebalance(uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Withdrawal(address indexed depositor, uint256 indexed tokenId, uint256 amountWithdrawn, uint256 profit, uint256 fee);
+    event ApprovalsRefreshed();
+    event StrategiesSet(Strategy[]);
+    event MinDepositSet(uint256 minAmount);
+    event FeeManagerSet(address feeManager);
+    event FeeCalculatorSet(address feeCalculator);
+    event FeesSetForAddress(address vault, bool fees);
+    event PauseStateUpdated(bool paused);
 
     /// @notice Used to restrict function access while paused.
     modifier whileNotPaused() {
@@ -151,18 +158,21 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     function setMinDeposit(uint256 _amount) external onlyOwner {
         if (_amount < BPS) revert InvalidMinDeposit();
         minDeposit = _amount;
+        emit MinDepositSet(_amount);
     }
 
     /// @notice Setter for contract fee manager
     /// @dev Contract address specified should implement IFortiFiFeeManager
     function setFeeManager(address _contract) external onlyOwner {
         feeMgr = IFortiFiFeeManager(_contract);
+        emit FeeManagerSet(_contract);
     }
 
     /// @notice Setter for contract fee calculator
     /// @dev Contract address specified should implement IFortiFiFeeCalculator
     function setFeeCalculator(address _contract) external onlyOwner {
         feeCalc = IFortiFiFeeCalculator(_contract);
+        emit FeeCalculatorSet(_contract);
     }
 
     /// @notice Function to set noFeesFor a contract. 
@@ -170,11 +180,13 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// do not pay fees twice.
     function setNoFeesFor(address _contract, bool _fees) external onlyOwner {
         noFeesFor[_contract] = _fees;
+        emit FeesSetForAddress(_contract, _fees);
     }
 
     /// @notice Function to pause/unpause the contract.
     function flipPaused() external onlyOwner {
         paused = !paused;
+        emit PauseStateUpdated(paused);
     }
 
     /// @notice Emergency function to recover stuck ERC20 tokens.
@@ -194,6 +206,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         }
 
         _depositToken.approve(address(feeMgr), type(uint256).max);
+        emit ApprovalsRefreshed();
     }
 
     /// @notice This function sets up the underlying strategies used by the vault.
@@ -223,6 +236,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         }
 
         refreshApprovals();
+        emit StrategiesSet(_strategies);
     }
 
     /// @notice This function allows for changing the allocations of current strategies
@@ -235,6 +249,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
             _totalBps += _bps[i];
         }
         if (_totalBps != BPS) revert InvalidBps();
+        emit StrategiesSet(strategies);
     }
 
     /// @notice This function allows a user to rebalance a receipt (ERC1155) token's underlying assets. 

@@ -36,6 +36,11 @@ contract FortiFiFortress is Ownable {
         _transferOwnership(_fortiFiStrat);
     }
 
+    event DepositMade(uint256 amount, address indexed user);
+    event WithdrawalMade(address user);
+    event ApprovalsRefreshed();
+    event ERC20Recovered(address indexed to, address indexed token, uint256 amount);
+
     receive() external payable { 
     }
 
@@ -53,6 +58,8 @@ contract FortiFiFortress is Ownable {
 
         // refund left over tokens, if any
         _refund(_user);
+
+        emit DepositMade(_amount, _user);
     }
 
     /// @notice Function to withdraw everything from vault
@@ -71,6 +78,8 @@ contract FortiFiFortress is Ownable {
         // transfer received deposit tokens and refund left over tokens, if any
         _dToken.safeTransfer(msg.sender, _dToken.balanceOf(address(this)));
         _refund(_user);
+
+        emit WithdrawalMade(_user);
     }
 
     /// @notice Grant max approval to underlying strategy for deposit token
@@ -78,12 +87,14 @@ contract FortiFiFortress is Ownable {
     /// transaction there should be no risk in granting max approval
     function refreshApproval() external {
         _dToken.approve(address(_strat), type(uint256).max);
+        emit ApprovalsRefreshed();
     }
 
     /// @notice Emergency function to recover stuck tokens. 
     function recoverERC20(address _to, address _token, uint256 _amount) external onlyOwner {
         if (_token == address(_strat)) revert CannotWithdrawStrategyReceipts();
         IERC20(_token).safeTransfer(_to, _amount);
+        emit ERC20Recovered(_to, _token, _amount);
     }
 
     /// @notice Internal function to refund left over tokens from transactions to user who initiated vault transaction

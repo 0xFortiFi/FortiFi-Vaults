@@ -29,6 +29,9 @@ contract FortiFiStrategy is Ownable, ERC20 {
     event FortressCreated(address indexed vault, uint256 tokenId, address indexed strategy);
     event DepositToFortress(address indexed vault, address indexed user, address indexed strategy, uint256 amountDeposited);
     event WithdrawFromFortress(address indexed vault, address indexed user, address indexed strategy, uint256 amountReceived);
+    event VaultSet(address vault, bool approved);
+    event ERC20Recovered(address indexed token, uint256 amount);
+    event ERC20RecoveredFromFortress(address indexed fortress, address indexed token, uint256 amount);
 
     constructor(address _strategy, address _depositToken, address _wrappedNative) ERC20("FortiFi Strategy Receipt", "FFSR") {
         require(_strategy != address(0), "FortiFi: Invalid strategy");
@@ -96,16 +99,19 @@ contract FortiFiStrategy is Ownable, ERC20 {
     function setVault(address _vault, bool _approved) external onlyOwner {
         if (!IVault(_vault).supportsInterface(0x23c01392)) revert InvalidVaultImplementation();
         isFortiFiVault[_vault] = _approved;
+        emit VaultSet(_vault, _approved);
     }
 
     /// @notice Emergency function to recover stuck tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).safeTransfer(msg.sender, _amount);
+        emit ERC20Recovered(_token, _amount);
     }
 
     /// @notice Emergency function to recover stuck tokens from Fortress
     function recoverFromFortress(address _fortress, address _token, uint256 _amount) external onlyOwner {
         IFortress(_fortress).recoverERC20(msg.sender, _token, _amount);
+        emit ERC20RecoveredFromFortress(_fortress, _token, _amount);
     }
 
 }
