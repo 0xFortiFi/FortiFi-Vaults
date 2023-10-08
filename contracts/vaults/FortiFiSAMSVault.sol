@@ -93,7 +93,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// The receipt token will be mapped to a TokenInfo containing the amount deposited as well as the strategy receipt 
     /// tokens received for later withdrawal.
     function deposit(uint256 _amount) external override nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
-        require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
+        require(_amount >= minDeposit, "FortiFi: Invalid deposit amount");
         IERC20(depositToken).safeTransferFrom(msg.sender, address(this), _amount);
         _tokenId = _mintReceipt();
         _deposit(_amount, _tokenId, false);
@@ -108,7 +108,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice This function is used to add to a user's deposit when they already has a receipt (ERC1155). The user can add to their 
     /// deposit without needing to burn/withdraw first. 
     function add(uint256 _amount, uint256 _tokenId) external override nonReentrant whileNotPaused returns(TokenInfo memory _info) {
-        require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
+        require(_amount >= minDeposit, "FortiFi: Invalid deposit amount");
         IERC20(depositToken).safeTransferFrom(msg.sender, address(this), _amount);
         require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
         _deposit(_amount, _tokenId, true);
