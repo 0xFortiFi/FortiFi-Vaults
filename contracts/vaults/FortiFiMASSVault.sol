@@ -30,6 +30,12 @@ error TooManyStrategies();
 /// @notice Error caused by trying to set a slippage too high
 error InvalidSlippage();
 
+/// @notice Error caused by mismatching array lengths
+error InvalidArrayLength();
+
+/// @notice Error caused when bps does not equal 10_000
+error InvalidBps();
+
 /// @title Contract for FortiFi MASS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
@@ -235,6 +241,18 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         }
 
         refreshApprovals();
+    }
+
+    /// @notice This function allows for changing the allocations of current strategies
+    function setBpsForStrategies(uint16[] calldata _bps) external onlyOwner {
+        uint256 _length = strategies.length;
+        if (_bps.length != _length) revert InvalidArrayLength();
+        uint256 _totalBps = 0;
+        for (uint256 i = 0; i < _length; i++) {
+            strategies[i].bps = _bps[i];
+            _totalBps += _bps[i];
+        }
+        if (_totalBps != BPS) revert InvalidBps();
     }
 
     /// @notice This function allows a user to rebalance a receipt (ERC1155) token's underlying assets. 
