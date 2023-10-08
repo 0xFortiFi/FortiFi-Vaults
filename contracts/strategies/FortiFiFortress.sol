@@ -16,9 +16,9 @@ error CannotWithdrawStrategyReceipts();
 /// Fortresses allow for balance-specific logic from underlying strategies.
 contract FortiFiFortress is Ownable {
     using SafeERC20 for IERC20;
-    IStrategy internal immutable _strat;
-    IERC20 internal immutable _dToken;
-    IERC20 internal immutable _wNative;
+    IStrategy public immutable _strat;
+    IERC20 public immutable _dToken;
+    IERC20 public immutable _wNative;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) {
         require(_strategy != address(0), "FortiFi: Invalid strategy");
@@ -78,21 +78,6 @@ contract FortiFiFortress is Ownable {
     /// transaction there should be no risk in granting max approval
     function refreshApproval() external {
         _dToken.approve(address(_strat), type(uint256).max);
-    }
-
-    /// @notice View function returns specified wrapped native token address
-    function wrappedNativeToken() external view returns(address) {
-        return address(_wNative);
-    }
-
-    /// @notice View function returns specified deposit token address
-    function depositToken() external view returns(address) {
-        return address(_dToken);
-    }
-
-    /// @notice View function returns specified underlying strategy address
-    function strategy() external view returns(address) {
-        return address(_strat);
     }
 
     /// @notice Emergency function to recover stuck tokens. 

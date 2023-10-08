@@ -12,7 +12,7 @@ pragma solidity 0.8.21;
 contract FortiFiVectorFortress is FortiFiFortress {
     using SafeERC20 for IERC20;
     uint16 private constant BPS = 10_000;
-    IVectorStrategy private immutable _vectorStrat;
+    IVectorStrategy public immutable _vectorStrat;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) 
         FortiFiFortress(_strategy, _depositToken, _wrappedNative, _fortiFiStrat) {

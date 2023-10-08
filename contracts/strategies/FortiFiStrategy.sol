@@ -19,9 +19,9 @@ error InvalidVaultImplementation();
 /// are designed to only be called by FortiFi SAMS and MASS Vaults.
 contract FortiFiStrategy is Ownable, ERC20 {
     using SafeERC20 for IERC20;
-    address internal immutable _strat;
-    address internal immutable _wNative;
-    IERC20 internal immutable _dToken;
+    address public immutable _strat;
+    address public immutable _wNative;
+    IERC20 public immutable _dToken;
     
     mapping(address => bool) public isFortiFiVault;
     mapping(address => mapping(uint256 => address)) public vaultToTokenToFortress;
@@ -106,21 +106,6 @@ contract FortiFiStrategy is Ownable, ERC20 {
     /// @notice Emergency function to recover stuck tokens from Fortress
     function recoverFromFortress(address _fortress, address _token, uint256 _amount) external onlyOwner {
         IFortress(_fortress).recoverERC20(msg.sender, _token, _amount);
-    }
-
-    /// @notice View function to return specified wrapped native token address
-    function wrappedNativeToken() external view returns(address) {
-        return _wNative;
-    }
-
-    /// @notice View function to return specified deposit token address
-    function depositToken() external view returns(address) {
-        return address(_dToken);
-    }
-
-    /// @notice View function to return specified underlying strategy address
-    function strategy() external view returns(address) {
-        return _strat;
     }
 
 }
