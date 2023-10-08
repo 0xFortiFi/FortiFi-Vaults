@@ -24,6 +24,9 @@ pragma solidity 0.8.21;
 /// @notice Error caused by trying to set a strategy more than once
 error DuplicateStrategy();
 
+/// @notice Error caused by trying to set too many strategies
+error TooManyStrategies();
+
 /// @notice Error caused by trying to set a slippage too high
 error InvalidSlippage();
 
@@ -203,6 +206,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     function setStrategies(Strategy[] memory _strategies) public onlyOwner {
         uint256 _length = _strategies.length;
         require(_length > 0, "FortiFi: No strategies");
+        if (_length > 4) revert TooManyStrategies();
 
         address[] memory _holdStrategies = new address[](_length);
 

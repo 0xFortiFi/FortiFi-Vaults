@@ -16,6 +16,9 @@ pragma solidity 0.8.21;
 /// @notice Error caused by trying to set a strategy more than once
 error DuplicateStrategy();
 
+/// @notice Error caused by trying to set too many strategies
+error TooManyStrategies();
+
 /// @notice Error caused by trying to set minDeposit below BPS
 error InvalidMinDeposit();
 
@@ -193,6 +196,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     function setStrategies(Strategy[] memory _strategies) public onlyOwner {
         uint256 _length = _strategies.length;
         require(_length > 0, "FortiFi: No strategies");
+        if (_length > 4) revert TooManyStrategies();
 
         address[] memory _holdStrategies = new address[](_length);
 
