@@ -7,6 +7,9 @@ import "./interfaces/IStrategy.sol";
 
 pragma solidity ^0.8.18;
 
+/// @notice Error caused by trying to use recoverERC20 to withdraw strategy receipt tokens
+error CannotWithdrawStrategyReceipts();
+
 /// @title Base FortiFi Fortress contract
 /// @notice Fortresses are vault contracts that are specific to an individual vault receipt. By isolating deposits,
 /// Fortresses allow for balance-specific logic from underlying strategies.
@@ -92,6 +95,7 @@ contract FortiFiFortress is Ownable {
 
     /// @notice Emergency function to recover stuck tokens. 
     function recoverERC20(address _to, address _token, uint256 _amount) external onlyOwner {
+        if (_token == address(_strat)) revert CannotWithdrawStrategyReceipts();
         IERC20(_token).transfer(_to, _amount);
     }
 
