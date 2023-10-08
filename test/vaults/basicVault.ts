@@ -606,7 +606,7 @@ describe("Basic SAMS Vault Tests", function () {
                         {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
                         {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid min deposit");
+    ).to.be.revertedWith(`InvalidMinDeposit`);
 
   });
 

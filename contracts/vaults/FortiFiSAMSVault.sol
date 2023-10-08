@@ -65,7 +65,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         require(_depositToken != address(0), "FortiFi: Invalid deposit token");
         require(_feeManager != address(0), "FortiFi: Invalid feeManager");
         require(_feeCalculator != address(0), "FortiFi: Invalid feeCalculator");
-        if (_minDeposit >= BPS) revert InvalidMinDeposit();
+        if (_minDeposit < BPS) revert InvalidMinDeposit();
         name = _name; 
         symbol = _symbol;
         minDeposit = _minDeposit;
@@ -142,7 +142,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
     /// @notice Setter for minDeposit state variable
     function setMinDeposit(uint256 _amount) external onlyOwner {
-        if (_amount >= BPS) revert InvalidMinDeposit();
+        if (_amount < BPS) revert InvalidMinDeposit();
         minDeposit = _amount;
     }
 
