@@ -82,6 +82,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     address public immutable depositToken;
     address public immutable wrappedNative;
     uint8 public constant DECIMALS = 6; // USDC ONLY
+    uint16 public constant SWAP_DEADLINE_BUFFER = 1800;
     uint16 public constant BPS = 10_000;
     uint16 public slippageBps = 100;
     uint256 public minDeposit = 30_000;
@@ -372,7 +373,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             (_swapAmount * (BPS - slippageBps) / BPS), 
             _route, 
             address(this), 
-            block.timestamp + 1800);
+            block.timestamp + SWAP_DEADLINE_BUFFER);
 
         uint256 _depositTokenBalance = IERC20(_depositToken).balanceOf(address(this));
         if (_depositTokenBalance == 0) revert SwapFailed();
@@ -399,7 +400,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             (_swapAmount * (BPS - slippageBps) / BPS), 
             _route, 
             address(this), 
-            block.timestamp + 1800);
+            block.timestamp + SWAP_DEADLINE_BUFFER);
 
         uint256 _depositTokenBalance = IERC20(depositToken).balanceOf(address(this));
         if (_depositTokenBalance == 0) revert SwapFailed();
