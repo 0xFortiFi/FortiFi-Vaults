@@ -9,9 +9,11 @@ interface IMASS {
         address strategy;
         address depositToken;
         address router;
+        address oracle;
         bool isFortiFi;
         bool isSAMS;
         uint16 bps;
+        uint8 decimals;
     }
 
     struct Position {

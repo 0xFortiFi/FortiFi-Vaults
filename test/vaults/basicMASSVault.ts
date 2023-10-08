@@ -130,26 +130,32 @@ describe("Basic MASS Vault Tests", function () {
                                     {
                                       strategy: SAMS.getAddress(), 
                                       depositToken: MockERC20.getAddress(),
-                                      router: owner.getAddress(), 
+                                      router: owner.getAddress(),
+                                      oracle: owner.getAddress(), 
                                       isFortiFi: false, 
                                       isSAMS: true,
-                                      bps: 4000
+                                      bps: 4000,
+                                      decimals: 8
                                     }, 
                                     {
                                       strategy: SAMS2.getAddress(), 
                                       depositToken: MockERC20.getAddress(),
                                       router: owner.getAddress(), 
+                                      oracle: owner.getAddress(), 
                                       isFortiFi: false, 
                                       isSAMS: true,
-                                      bps: 1000
+                                      bps: 1000,
+                                      decimals: 8
                                     }, 
                                     {
                                       strategy: SAMS3.getAddress(), 
                                       depositToken: MockERC20.getAddress(),
                                       router: owner.getAddress(), 
+                                      oracle: owner.getAddress(), 
                                       isFortiFi: false, 
                                       isSAMS: true,
-                                      bps: 5000
+                                      bps: 5000,
+                                      decimals: 8
                                     }
                                   ]);
     await MASS.waitForDeployment();
@@ -602,25 +608,31 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 4000
+                          bps: 4000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 1000
+                          bps: 1000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 1000
+                          bps: 1000,
+                          decimals: 8
                         }
                       ])
     ).to.be.revertedWith("FortiFi: Invalid total bps");
@@ -638,25 +650,31 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 4000
+                          bps: 4000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 1000
+                          bps: 1000,
+                          decimals: 8
                         }, 
                         {
                           strategy: NULL_ADDRESS, 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 5000
+                          bps: 5000,
+                          decimals: 8
                         }
                       ])
     ).to.be.revertedWith("FortiFi: Invalid strat address");
@@ -674,25 +692,31 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 4000
+                          bps: 4000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS2.getAddress(), 
                           depositToken: NULL_ADDRESS,
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 1000
+                          bps: 1000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 5000
+                          bps: 5000,
+                          decimals: 8
                         }
                       ])
     ).to.be.revertedWith("FortiFi: Invalid ERC20 address");
@@ -710,25 +734,31 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 4000
+                          bps: 4000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 1000
+                          bps: 1000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 5000
+                          bps: 5000,
+                          decimals: 8
                         }
                       ])
     ).to.be.revertedWith("FortiFi: Invalid native token");
@@ -746,25 +776,31 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 4000
+                          bps: 4000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 1000
+                          bps: 1000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 5000
+                          bps: 5000,
+                          decimals: 8
                         }
                       ])
     ).to.be.revertedWith("FortiFi: Invalid deposit token");
@@ -782,25 +818,31 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 4000
+                          bps: 4000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 1000
+                          bps: 1000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 5000
+                          bps: 5000,
+                          decimals: 8
                         }
                       ])
     ).to.be.revertedWith("FortiFi: Invalid feeManager");
@@ -818,25 +860,31 @@ describe("Basic MASS Vault Tests", function () {
                           strategy: SAMS.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 4000
+                          bps: 4000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS2.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 1000
+                          bps: 1000,
+                          decimals: 8
                         }, 
                         {
                           strategy: SAMS3.getAddress(), 
                           depositToken: MockERC20.getAddress(),
                           router: owner.getAddress(), 
+                          oracle: owner.getAddress(), 
                           isFortiFi: false, 
                           isSAMS: true,
-                          bps: 5000
+                          bps: 5000,
+                          decimals: 8
                         }
                       ])
     ).to.be.revertedWith("FortiFi: Invalid feeCalculator");
@@ -877,17 +925,21 @@ describe("Basic MASS Vault Tests", function () {
               strategy: SAMS2.getAddress(), 
               depositToken: MockERC20.getAddress(),
               router: owner.getAddress(), 
+              oracle: owner.getAddress(), 
               isFortiFi: false, 
               isSAMS: true,
-              bps: 5000
+              bps: 5000,
+              decimals: 8
             }, 
             {
               strategy: SAMS3.getAddress(), 
               depositToken: MockERC20.getAddress(),
               router: owner.getAddress(), 
+              oracle: owner.getAddress(), 
               isFortiFi: false, 
               isSAMS: true,
-              bps: 5000
+              bps: 5000,
+              decimals: 8
             }
           ]
         );

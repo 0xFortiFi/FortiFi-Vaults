@@ -14,6 +14,10 @@ import "./interfaces/IMASS.sol";
 import "./interfaces/ISAMS.sol";
 import "./interfaces/IRouter.sol";
 
+interface IOracle {
+  function latestAnswer() external view returns (int256);
+}
+
 pragma solidity ^0.8.18;
 
 /// @title Contract for FortiFi MASS Vaults
@@ -24,6 +28,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     string public symbol;
     address public immutable depositToken;
     address public immutable wrappedNative;
+    uint8 public constant DECIMALS = 6; // USDC ONLY
     uint16 public constant BPS = 10_000;
     uint16 public slippageBps = 100;
     uint256 public minDeposit = 30_000;
@@ -202,6 +207,10 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             require(_strategies[i].strategy != address(0), "FortiFi: Invalid strat address");
             require(_strategies[i].depositToken != address(0), "FortiFi: Invalid ERC20 address");
             require(_strategies[i].router != address(0), "FortiFi: Invalid router address");
+            require(_strategies[i].oracle != address(0) ||
+                    _strategies[i].depositToken == depositToken, "FortiFi: Invalid oracle address");
+            require(_strategies[i].decimals > DECIMALS ||
+                    _strategies[i].depositToken == depositToken, "FortiFi: Invalid strat decimals");
             strategies.push(_strategies[i]);
         }
 
@@ -262,14 +271,17 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         address _depositToken = _strat.depositToken;
         address[] memory _route = new address[](3);
         IRouter _router = IRouter(_strat.router);
+        IOracle _oracle = IOracle(_strat.oracle);
         
         _route[0] = depositToken;
         _route[1] = wrappedNative;
         _route[2] = _depositToken;
-        uint256[] memory _amounts = _router.getAmountsOut(_amount, _route);
+
+        uint256 _latestPrice = uint256(_oracle.latestAnswer());
+        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_strat.decimals - DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
-            (_amounts[_amounts.length - 1] * (BPS - slippageBps) / BPS), 
+            (_swapAmount * (BPS - slippageBps) / BPS), 
             _route, 
             address(this), 
             block.timestamp + 1800);
@@ -286,14 +298,17 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         address _depositToken = _strat.depositToken;
         address[] memory _route = new address[](3);
         IRouter _router = IRouter(_strat.router);
+        IOracle _oracle = IOracle(_strat.oracle);
 
         _route[0] = _depositToken;
         _route[1] = wrappedNative;
         _route[2] = depositToken;
-        uint256[] memory _amounts = _router.getAmountsOut(_amount, _route);
+        
+        uint256 _latestPrice = uint256(_oracle.latestAnswer());
+        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_strat.decimals - DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
-            (_amounts[_amounts.length - 1] * (BPS - slippageBps) / BPS), 
+            (_swapAmount * (BPS - slippageBps) / BPS), 
             _route, 
             address(this), 
             block.timestamp + 1800);
