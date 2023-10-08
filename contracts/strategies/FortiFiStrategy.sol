@@ -13,6 +13,12 @@ pragma solidity 0.8.21;
 /// @notice Error when vault does not implement ISAMS or IMASS interface (0x23c01392)
 error InvalidVaultImplementation();
 
+/// @notice Error caused when calling address is not a valid vault 
+error InvalidCaller();
+
+/// @notice Error caused when trying to withdraw from non-existent fortress
+error NoFortress();
+
 /// @title Base FortiFi Strategy contract
 /// @notice This contract should be used when a yield strategy requires special logic beyond
 /// simple deposit(amount deposit token) and withdraw(receipt tokens to burn). These strategies
@@ -34,9 +40,9 @@ contract FortiFiStrategy is Ownable, ERC20 {
     event ERC20RecoveredFromFortress(address indexed fortress, address indexed token, uint256 amount);
 
     constructor(address _strategy, address _depositToken, address _wrappedNative) ERC20("FortiFi Strategy Receipt", "FFSR") {
-        require(_strategy != address(0), "FortiFi: Invalid strategy");
-        require(_depositToken != address(0), "FortiFi: Invalid deposit token");
-        require(_wrappedNative != address(0), "FortiFi: Invalid native token");
+        if (_strategy == address(0)) revert ZeroAddress();
+        if (_depositToken == address(0)) revert ZeroAddress();
+        if (_wrappedNative == address(0)) revert ZeroAddress();
         _strat = _strategy;
         _wNative = _wrappedNative;
         _dToken = IERC20(_depositToken);
@@ -47,8 +53,8 @@ contract FortiFiStrategy is Ownable, ERC20 {
     /// to interact with the underlying strategy for a specific vault receipt token. This allows user deposits to be isolated
     /// as many strategies utilize special logic that is dependent on the balance of the address interacting with them.
     function depositToFortress(uint256 _amount, address _user, uint256 _tokenId) external virtual {
-        require(_amount > 0, "FortiFi: 0 deposit");
-        require(isFortiFiVault[msg.sender], "FortiFi: Invalid vault");
+        if (_amount == 0) revert InvalidDeposit();
+        if (!isFortiFiVault[msg.sender]) revert InvalidCaller();
         _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         IFortress _fortress;
 
@@ -80,8 +86,8 @@ contract FortiFiStrategy is Ownable, ERC20 {
 
     /// @notice Function to withdraw
     function withdrawFromFortress(uint256 _amount, address _user, uint256 _tokenId) external virtual {
-        require(_amount > 0, "FortiFi: 0 withdraw");
-        require(vaultToTokenToFortress[msg.sender][_tokenId] != address(0), "FortiFi: No fortress");
+        if (_amount == 0) revert InvalidWithdrawal();
+        if (vaultToTokenToFortress[msg.sender][_tokenId] == address(0)) revert NoFortress();
 
         // burn receipt tokens and withdraw from Fortress
         _burn(msg.sender, _amount);

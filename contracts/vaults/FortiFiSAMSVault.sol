@@ -19,6 +19,27 @@ error DuplicateStrategy();
 /// @notice Error caused by trying to set too many strategies
 error TooManyStrategies();
 
+/// @notice Error caused by using 0 address as a parameter
+error ZeroAddress();
+
+/// @notice Error caused by trying to deposit 0
+error InvalidDeposit();
+
+/// @notice Error caused by trying to withdraw 0
+error InvalidWithdrawal();
+
+/// @notice Error caused by trying to use a token not owned by user
+error NotTokenOwner();
+
+/// @notice Error thrown when refunding native token fails
+error FailedToRefund();
+
+/// @notice Error caused when strategies array is empty
+error NoStrategies();
+
+/// @notice Error caused when strategies change and a receipt cannot be added to without rebalancing
+error CantAddToReceipt();
+
 /// @notice Error caused by trying to set minDeposit below BPS
 error InvalidMinDeposit();
 
@@ -27,6 +48,9 @@ error InvalidArrayLength();
 
 /// @notice Error caused when bps does not equal 10_000
 error InvalidBps();
+
+/// @notice Error caused when trying to transact with contract while paused
+error ContractPaused();
 
 /// @title Contract for FortiFi SAMS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then split and deposited in to 
@@ -61,10 +85,11 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     event FeeCalculatorSet(address feeCalculator);
     event FeesSetForAddress(address vault, bool fees);
     event PauseStateUpdated(bool paused);
+    event ERC20Recovered(address indexed token, uint256 amount);
 
     /// @notice Used to restrict function access while paused.
     modifier whileNotPaused() {
-        require(!paused, "FortiFi: Contract paused");
+        if (paused) revert ContractPaused();
         _;
     }
 
@@ -77,10 +102,10 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         address _feeCalculator,
         uint256 _minDeposit,
         Strategy[] memory _strategies) ERC1155(_metadata) {
-        require(_wrappedNative != address(0), "FortiFi: Invalid native token");
-        require(_depositToken != address(0), "FortiFi: Invalid deposit token");
-        require(_feeManager != address(0), "FortiFi: Invalid feeManager");
-        require(_feeCalculator != address(0), "FortiFi: Invalid feeCalculator");
+        if (_wrappedNative == address(0)) revert ZeroAddress();
+        if (_depositToken == address(0)) revert ZeroAddress();
+        if (_feeManager == address(0)) revert ZeroAddress();
+        if (_feeCalculator == address(0)) revert ZeroAddress();
         if (_minDeposit < BPS) revert InvalidMinDeposit();
         name = _name; 
         symbol = _symbol;
@@ -100,7 +125,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// The receipt token will be mapped to a TokenInfo containing the amount deposited as well as the strategy receipt 
     /// tokens received for later withdrawal.
     function deposit(uint256 _amount) external override nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
-        require(_amount >= minDeposit, "FortiFi: Invalid deposit amount");
+        if (_amount < minDeposit) revert InvalidDeposit();
         IERC20(depositToken).safeTransferFrom(msg.sender, address(this), _amount);
         _tokenId = _mintReceipt();
         _deposit(_amount, _tokenId, false);
@@ -115,9 +140,9 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice This function is used to add to a user's deposit when they already has a receipt (ERC1155). The user can add to their 
     /// deposit without needing to burn/withdraw first. 
     function add(uint256 _amount, uint256 _tokenId) external override nonReentrant whileNotPaused returns(TokenInfo memory _info) {
-        require(_amount >= minDeposit, "FortiFi: Invalid deposit amount");
+        if (_amount < minDeposit) revert InvalidDeposit();
         IERC20(depositToken).safeTransferFrom(msg.sender, address(this), _amount);
-        require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
+        if (balanceOf(msg.sender, _tokenId) == 0) revert NotTokenOwner();
         _deposit(_amount, _tokenId, true);
         _info = tokenInfo[_tokenId];
 
@@ -131,7 +156,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @dev Once all receipts are burned and deposit tokens received, the fee manager will calculate the fees due, 
     /// and the fee manager will distribute those fees before transfering the user their proceeds.
     function withdraw(uint256 _tokenId) external override nonReentrant whileNotPaused {
-        require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
+        if (balanceOf(msg.sender, _tokenId) == 0) revert NotTokenOwner();
         _burn(msg.sender, _tokenId, 1);
 
         (uint256 _amount, uint256 _profit) = _withdraw(_tokenId);
@@ -148,7 +173,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         // Refund excess native token, if any
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
+		    if (!success) revert FailedToRefund();
         }
 
         emit Withdrawal(msg.sender, _tokenId, _amount, _profit, _fee);
@@ -164,6 +189,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice Setter for contract fee manager
     /// @dev Contract address specified should implement IFortiFiFeeManager
     function setFeeManager(address _contract) external onlyOwner {
+        if (_contract == address(0)) revert ZeroAddress();
         feeMgr = IFortiFiFeeManager(_contract);
         emit FeeManagerSet(_contract);
     }
@@ -171,6 +197,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice Setter for contract fee calculator
     /// @dev Contract address specified should implement IFortiFiFeeCalculator
     function setFeeCalculator(address _contract) external onlyOwner {
+        if (_contract == address(0)) revert ZeroAddress();
         feeCalc = IFortiFiFeeCalculator(_contract);
         emit FeeCalculatorSet(_contract);
     }
@@ -192,6 +219,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice Emergency function to recover stuck ERC20 tokens.
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).safeTransfer(msg.sender, _amount);
+        emit ERC20Recovered(_token, _amount);
     }
 
     /// @notice Function that approves ERC20 transfers for all strategy contracts
@@ -212,7 +240,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice This function sets up the underlying strategies used by the vault.
     function setStrategies(Strategy[] memory _strategies) public onlyOwner {
         uint256 _length = _strategies.length;
-        require(_length > 0, "FortiFi: No strategies");
+        if (_length == 0) revert NoStrategies();
         if (_length > 4) revert TooManyStrategies();
 
         address[] memory _holdStrategies = new address[](_length);
@@ -221,12 +249,12 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         for (uint256 i = 0; i < _length; i++) {
             _bps += _strategies[i].bps;
         }
-        require(_bps == BPS, "FortiFi: Invalid total bps");
+        if (_bps != BPS) revert InvalidBps();
 
         delete strategies; // remove old array, if any
 
         for (uint256 i = 0; i < _length; i++) {
-            require(_strategies[i].strategy != address(0), "FortiFi: Invalid strat address");
+            if (_strategies[i].strategy == address(0)) revert ZeroAddress();
             uint256 _holdLength = _holdStrategies.length;
             for (uint256 j = 0; j < _holdLength; j++) {
                 if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
@@ -257,9 +285,8 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// the strategies set in the contract. Since _deposit will set the TokenInfo.deposit to the total 
     /// deposited after the rebalance, we must store the original deposit and overwrite the TokenInfo
     /// before completing the transaction.
-    function rebalance(uint256 _tokenId) public override nonReentrant  returns(TokenInfo memory) {
-        require((balanceOf(msg.sender, _tokenId) > 0 && !paused) ||
-                          msg.sender == owner(), "FortiFi: Invalid message sender");
+    function rebalance(uint256 _tokenId) public override nonReentrant whileNotPaused returns(TokenInfo memory) {
+        if (balanceOf(msg.sender, _tokenId) == 0) revert NotTokenOwner();
         uint256 _originalDeposit = tokenInfo[_tokenId].deposit;
 
         // withdraw from strategies first
@@ -313,7 +340,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
             // cannot add to position if strategies have changed. must rebalance first
             if (_isAdd) {
-                require(_strategy.strategy == _info.positions[i].strategy.strategy, "FortiFi: Can't add to receipt");
+                if (_strategy.strategy != _info.positions[i].strategy.strategy) revert CantAddToReceipt();
             }
             
             IStrategy _strat = IStrategy(_strategy.strategy);
@@ -386,7 +413,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         // Refund left over native tokens, if any
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
+		    if (!success) revert FailedToRefund();
         }
     }
 

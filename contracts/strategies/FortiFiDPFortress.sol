@@ -22,7 +22,7 @@ contract FortiFiDPFortress is FortiFiFortress {
     /// This means that total balance will be withdrawn every time withdraw is called.
     function withdraw(address _user) external override onlyOwner {
         uint256 _balance = _strat.balanceOf(address(this));
-        require(_balance > 0, "FortiFi: 0 withdraw");
+        if (_balance == 0) revert InvalidWithdrawal();
         
         // withdraw from strategy
         _strat.withdraw(_balance);

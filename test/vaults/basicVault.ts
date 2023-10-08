@@ -121,7 +121,7 @@ describe("Basic SAMS Vault Tests", function () {
     // Can't deposit while paused
     await expect(
       Vault.connect(addr2).deposit(ethers.parseEther("1000"))
-    ).to.be.revertedWith("FortiFi: Contract paused");
+    ).to.be.revertedWith(`ContractPaused`);
 
     // Unpause and deposit
     await Vault.connect(owner).flipPaused();
@@ -155,11 +155,11 @@ describe("Basic SAMS Vault Tests", function () {
     // Don't allow 0 deposit or withdraw without token
     await expect(
       Vault.connect(addr2).deposit(0)
-    ).to.be.revertedWith("FortiFi: Invalid deposit amount");
+    ).to.be.revertedWith(`InvalidDeposit`);
 
     await expect(
       Vault.connect(addr2).withdraw(2)
-    ).to.be.revertedWith("FortiFi: Not the owner of token");
+    ).to.be.revertedWith(`NotTokenOwner`);
 
     // withdraw
     await Vault.connect(addr2).withdraw(1);
@@ -510,7 +510,7 @@ describe("Basic SAMS Vault Tests", function () {
                         {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
                         {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 1000}
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid total bps");
+    ).to.be.revertedWith(`InvalidBps`);
 
     await expect(
       facVault.deploy("Basic Vault", 
@@ -526,7 +526,7 @@ describe("Basic SAMS Vault Tests", function () {
                         {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
                         {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid strat address");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facVault.deploy("Basic Vault", 
@@ -542,7 +542,7 @@ describe("Basic SAMS Vault Tests", function () {
                         {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
                         {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid native token");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facVault.deploy("Basic Vault", 
@@ -558,7 +558,7 @@ describe("Basic SAMS Vault Tests", function () {
                         {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
                         {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid deposit token");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facVault.deploy("Basic Vault", 
@@ -574,7 +574,7 @@ describe("Basic SAMS Vault Tests", function () {
                         {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
                         {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid feeManager");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facVault.deploy("Basic Vault", 
@@ -590,7 +590,7 @@ describe("Basic SAMS Vault Tests", function () {
                         {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
                         {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 3000}
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid feeCalculator");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facVault.deploy("Basic Vault", 
@@ -621,22 +621,22 @@ describe("Basic SAMS Vault Tests", function () {
         
         await expect(
           Vault.connect(addr2).deposit(0)
-        ).to.be.revertedWith("FortiFi: Invalid deposit amount");
+        ).to.be.revertedWith(`InvalidDeposit`);
 
         await Vault.connect(addr2).deposit(ethers.parseEther("500"));
         await Vault.connect(addr3).deposit(ethers.parseEther("500"));
 
         await expect(
           Vault.connect(addr2).add(ethers.parseEther("500"), 2)
-        ).to.be.revertedWith("FortiFi: Not the owner of token");
+        ).to.be.revertedWith(`NotTokenOwner`);
 
         await expect(
           Vault.connect(addr2).withdraw(2)
-        ).to.be.revertedWith("FortiFi: Not the owner of token");
+        ).to.be.revertedWith(`NotTokenOwner`);
 
         await expect(
           Vault.connect(addr2).rebalance(2)
-        ).to.be.revertedWith("FortiFi: Invalid message sender");
+        ).to.be.revertedWith(`NotTokenOwner`);
 
         await expect( Vault.connect(owner).setStrategies([
           {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
@@ -650,7 +650,7 @@ describe("Basic SAMS Vault Tests", function () {
 
         await expect(
           Vault.connect(addr2).add(ethers.parseEther("500"), 1)
-        ).to.be.revertedWith("FortiFi: Can't add to receipt");
+        ).to.be.revertedWith(`CantAddToReceipt`);
 
   });
 

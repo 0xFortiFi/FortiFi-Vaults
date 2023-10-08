@@ -19,6 +19,54 @@ pragma solidity 0.8.21;
 /// @notice Error caused by trying to set a strategy more than once
 error DuplicateStrategy();
 
+/// @notice Error caused by trying to set too many strategies
+error TooManyStrategies();
+
+/// @notice Error caused by using 0 address as a parameter
+error ZeroAddress();
+
+/// @notice Error caused by trying to deposit 0
+error InvalidDeposit();
+
+/// @notice Error caused by trying to withdraw 0
+error InvalidWithdrawal();
+
+/// @notice Error caused by trying to use a token not owned by user
+error NotTokenOwner();
+
+/// @notice Error thrown when refunding native token fails
+error FailedToRefund();
+
+/// @notice Error caused when strategies array is empty
+error NoStrategies();
+
+/// @notice Error caused when strategies change and a receipt cannot be added to without rebalancing
+error CantAddToReceipt();
+
+/// @notice Error caused when swap fails
+error SwapFailed();
+
+/// @notice Error caused when trying to use a token with less decimals than USDC
+error InvalidDecimals();
+
+/// @notice Error caused when trying to set oracle to an invalid address
+error InvalidOracle();
+
+/// @notice Error caused by trying to set minDeposit below BPS
+error InvalidMinDeposit();
+
+/// @notice Error caused by trying to set a slippage too high
+error InvalidSlippage();
+
+/// @notice Error caused by mismatching array lengths
+error InvalidArrayLength();
+
+/// @notice Error caused when bps does not equal 10_000
+error InvalidBps();
+
+/// @notice Error caused when trying to transact with contract while paused
+error ContractPaused();
+
 /// @title Contract for FortiFi MASS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
@@ -49,7 +97,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
 
     /// @notice Used to restrict function access while paused.
     modifier whileNotPaused() {
-        require(!paused, "FortiFi: Contract paused");
+        if (paused) revert ContractPaused();
         _;
     }
 
@@ -61,10 +109,10 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         address _feeManager,
         address _feeCalculator,
         Strategy[] memory _strategies) ERC1155(_metadata) {
-        require(_wrappedNative != address(0), "FortiFi: Invalid native token");
-        require(_depositToken != address(0), "FortiFi: Invalid deposit token");
-        require(_feeManager != address(0), "FortiFi: Invalid feeManager");
-        require(_feeCalculator != address(0), "FortiFi: Invalid feeCalculator");
+        if (_wrappedNative == address(0)) revert ZeroAddress();
+        if (_depositToken == address(0)) revert ZeroAddress();
+        if (_feeManager == address(0)) revert ZeroAddress();
+        if (_feeCalculator == address(0)) revert ZeroAddress();
         name = _name; 
         symbol = _symbol;
         wrappedNative = _wrappedNative;
@@ -82,7 +130,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
     /// The receipt token will be mapped to a TokenInfo containing the amount deposited as well as the strategy receipt 
     /// tokens received for later withdrawal.
     function deposit(uint256 _amount) external override nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
-        require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
+        if (_amount < minDeposit) revert InvalidDeposit();
         IERC20 _depositToken = IERC20(depositToken);
         require(_depositToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
         _tokenId = _mintReceipt();
@@ -98,10 +146,10 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
     /// @notice This function is used to add to a user's deposit when they already has a receipt (ERC1155). The user can add to their 
     /// deposit without needing to burn/withdraw first. 
     function add(uint256 _amount, uint256 _tokenId) external override nonReentrant whileNotPaused returns(TokenInfo memory _info) {
-        require(_amount > minDeposit, "FortiFi: Invalid deposit amount");
+        if (_amount < minDeposit) revert InvalidDeposit();
         IERC20 _depositToken = IERC20(depositToken);
         require(_depositToken.transferFrom(msg.sender, address(this), _amount), "FortiFi: Failed to xfer deposit");
-        require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
+        if (balanceOf(msg.sender, _tokenId) == 0) revert NotTokenOwner();
         _deposit(_amount, _tokenId, true);
         _info = tokenInfo[_tokenId];
 
@@ -115,7 +163,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
     /// @dev Once all receipts are burned and deposit tokens received, the fee manager will calculate the fees due, 
     /// and the fee manager will distribute those fees before transfering the user their proceeds.
     function withdraw(uint256 _tokenId) external override nonReentrant whileNotPaused {
-        require(balanceOf(msg.sender, _tokenId) > 0, "FortiFi: Not the owner of token");
+        if (balanceOf(msg.sender, _tokenId) == 0) revert NotTokenOwner();
         _burn(msg.sender, _tokenId, 1);
 
         (uint256 _amount, uint256 _profit) = _withdraw(_tokenId);
@@ -126,7 +174,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
 
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
+		    if (!success) revert FailedToRefund();
         }
 
         emit Withdrawal(msg.sender, _tokenId, _amount, _profit, _fee);
@@ -183,7 +231,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
     /// @notice This function sets up the underlying strategies used by the vault.
     function setStrategies(Strategy[] memory _strategies) public onlyOwner {
         uint256 _length = _strategies.length;
-        require(_length > 0, "FortiFi: No strategies");
+        if (_length == 0) revert NoStrategies();
 
         address[] memory _holdStrategies = new address[](_length);
 
@@ -191,18 +239,18 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         for (uint256 i = 0; i < _length; i++) {
             _bps += _strategies[i].bps;
         }
-        require(_bps == BPS, "FortiFi: Invalid total bps");
+        if (_bps != BPS) revert InvalidBps();
 
         delete strategies; // remove old array, if any
 
         for (uint256 i = 0; i < _length; i++) {
-            require(_strategies[i].strategy != address(0), "FortiFi: Invalid strat address");
-            require(_strategies[i].depositToken != address(0), "FortiFi: Invalid ERC20 address");
-            require(_strategies[i].router != address(0), "FortiFi: Invalid router address");
-            require(_strategies[i].oracle != address(0) ||
-                    _strategies[i].depositToken == depositToken, "FortiFi: Invalid oracle address");
-            require(_strategies[i].decimals > DECIMALS ||
-                    _strategies[i].depositToken == depositToken, "FortiFi: Invalid strat decimals");
+            if (_strategies[i].strategy == address(0)) revert ZeroAddress();
+            if (_strategies[i].depositToken == address(0)) revert ZeroAddress();
+            if (_strategies[i].router == address(0)) revert ZeroAddress();
+            if (_strategies[i].oracle == address(0) &&
+                    _strategies[i].depositToken != depositToken) revert InvalidOracle();
+            if (_strategies[i].decimals <= DECIMALS &&
+                    _strategies[i].depositToken != depositToken) revert InvalidDecimals();
             uint256 _holdLength = _holdStrategies.length;
             for (uint256 j = 0; j < _holdLength; j++) {
                 if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
@@ -219,9 +267,8 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
     /// the strategies set in the contract. Since _deposit will set the TokenInfo.deposit to the total 
     /// deposited after the rebalance, we must store the original deposit and overwrite the TokenInfo
     /// before completing the transaction.
-    function rebalance(uint256 _tokenId) public override nonReentrant returns(TokenInfo memory) {
-        require((balanceOf(msg.sender, _tokenId) > 0 && !paused) ||
-                          msg.sender == owner(), "FortiFi: Invalid message sender");
+    function rebalance(uint256 _tokenId) public override nonReentrant whileNotPaused returns(TokenInfo memory) {
+        if (balanceOf(msg.sender, _tokenId) == 0) revert NotTokenOwner();
         uint256 _originalDeposit = tokenInfo[_tokenId].deposit;
         (uint256 _amount, ) = _withdraw(_tokenId);
         delete tokenInfo[_tokenId];
@@ -276,7 +323,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
 
             // cannot add to deposit if strategies have changed. must rebalance first
             if (_isAdd) {
-                require(_strategy.strategy == _info.positions[i].strategy.strategy, "FortiFi: Can't add to receipt");
+                if (_strategy.strategy != _info.positions[i].strategy.strategy) revert CantAddToReceipt();
             }
             
             bool _isSAMS = _strategy.isSAMS;
@@ -398,7 +445,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
         // Refund left over native tokens, if any
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
+		    if (!success) revert FailedToRefund();
         }
     }
 

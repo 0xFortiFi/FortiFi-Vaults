@@ -3,15 +3,26 @@
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
 
 pragma solidity 0.8.21;
+
+/// @notice Error caused by using 0 address as a parameter
+error ZeroAddress();
+
+/// @notice Error caused by mismatching array lengths
+error InvalidArrayLength();
+
+/// @notice Error caused when bps does not equal 10_000
+error InvalidBps();
 
 /// @title Contract to distribute fees for FortiFi Vaults
 /// @notice This contract is used by FortiFi Vaults to distribute fees earned upon withdrawal.
 /// @dev Fees will only be disbursed when the contract holds at least 1000 wei of the token being 
 /// disbursed. This way the contract does not fail when splitting the amount amongst multiple receivers.
 contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
+    using SafeERC20 for IERC20;
 
     uint16 public constant BPS = 10_000;
     uint16[] public splitBps;
@@ -30,17 +41,17 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
     /// @notice Function to collect fees from payer
     function collectFees(address _token, uint256 _amount) external override {
         IERC20 _t = IERC20(_token);
-        require(_t.transferFrom(msg.sender, address(this), _amount), "FortiFi: Unable to collect fees");
+        _t.safeTransferFrom(msg.sender, address(this), _amount);
 
         uint256 _feeBalance = _t.balanceOf(address(this));
         if (_feeBalance >= 1000) {
             uint256 _length = receivers.length;
             for (uint256 i = 0; i < _length; i++) {
                 if (i == (_length - 1)) {
-                    require(_t.transfer(receivers[i], _t.balanceOf(address(this))), "FortiFi: Failed to transfer last share");
+                    _t.safeTransfer(receivers[i], _t.balanceOf(address(this)));
                 } else {
                     uint256 _share = _feeBalance * splitBps[i] / BPS;
-                    require(_t.transfer(receivers[i], _share), "FortiFi: Failed to transfer share");
+                    _t.safeTransfer(receivers[i], _share);
                 }
             }
         }
@@ -52,14 +63,13 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
     /// @dev This function replaces the current receivers and splitBps. Total bps must equal 10_000
     function setSplit(address[] memory _receivers, uint16[] memory _splitBps) public onlyOwner {
         uint256 _length = _receivers.length;
-        require (_length > 0, "FortiFi: Invalid receiver array");
+        if (_length == 0) revert InvalidArrayLength();
 
         for (uint256 i = 0; i < _length; i++) {
-            require(_receivers[i] != address(0), "FortiFi: Invalid receiver address");
+            if (_receivers[i] == address(0)) revert ZeroAddress();
         }
 
-        require(_length == _splitBps.length &&
-                _validateBps(_splitBps), "FortiFi: Invalid array lengths");
+        if (_length != _splitBps.length || !_validateBps(_splitBps)) revert InvalidArrayLength();
         
         receivers = _receivers;
         splitBps = _splitBps;
@@ -74,11 +84,11 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
         
         for (uint256 i = 0; i < _length; i++) {
             uint16 _b = _bps[i];
-            require(_b > 9, "FortiFi: Invalid bps amount");
+            if (_b <= 9) revert InvalidBps();
             _totalBps += _b;
         }
 
-        require(_totalBps == BPS, "FortiFi: Invalid total bps");
+        if (_totalBps != BPS) revert InvalidBps();
 
         return true;
     }

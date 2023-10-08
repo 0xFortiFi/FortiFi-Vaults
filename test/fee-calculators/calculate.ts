@@ -197,27 +197,27 @@ describe("Fee Calculator Tests", function () {
 
     await expect(
       facCalc.deploy([], [0,1,3,5,10], [700,600,500,400,300], true)
-    ).to.be.revertedWith("FortiFi: Invalid NFT array");
+    ).to.be.revertedWith(`InvalidArrayLength`);
 
     await expect(
       facCalc.deploy([NULL_ADDRESS], [0,1,3,5,10], [700,600,500,400,300], true)
-    ).to.be.revertedWith("FortiFi: Invalid NFT address");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facCalc.deploy([NFT1.getAddress()], [], [700,600,500,400,300], true)
-    ).to.be.revertedWith("FortiFi: Invalid amounts or bps");
+    ).to.be.revertedWith(`InvalidArrayLength`);
 
     await expect(
       facCalc.deploy([NFT1.getAddress()], [], [], true)
-    ).to.be.revertedWith("FortiFi: Invalid amounts array");
+    ).to.be.revertedWith(`InvalidAmounts`);
 
     await expect(
       facCalc.deploy([NFT1.getAddress()], [1,3,5,10], [600,500,400,300], true)
-    ).to.be.revertedWith("FortiFi: Invalid amounts array");
+    ).to.be.revertedWith(`InvalidAmounts`);
 
     await expect(
       facCalc.deploy([NFT1.getAddress()], [0,1,3,5,10], [700,800,500,400,300], true)
-    ).to.be.revertedWith("FortiFi: Invalid bps array");
+    ).to.be.revertedWith(`InvalidBps`);
   });
 
 });

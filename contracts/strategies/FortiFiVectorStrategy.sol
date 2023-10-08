@@ -24,8 +24,8 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
     /// @dev If a user has not deposited previously, this function will deploy a FortiFiVectorFortress contract
     /// instead of the base FortiFiFortress contract
     function depositToFortress(uint256 _amount, address _user, uint256 _tokenId) external override {
-        require(_amount > 0, "FortiFi: 0 deposit");
-        require(isFortiFiVault[msg.sender], "FortiFi: Invalid vault");
+        if (_amount == 0) revert InvalidDeposit();
+        if (!isFortiFiVault[msg.sender]) revert InvalidCaller();
         _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         IVectorFortress _fortress;
 
@@ -58,8 +58,8 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
     /// @notice Function to withdraw
     /// @dev Override is required because Vector Fortresses need slippage passed in to withdrawal function
     function withdrawFromFortress(uint256 _amount, address _user, uint256 _tokenId) external override {
-        require(_amount > 0, "FortiFi: 0 withdraw");
-        require(vaultToTokenToFortress[msg.sender][_tokenId] != address(0), "FortiFi: No fortress");
+        if (_amount == 0) revert InvalidWithdrawal();
+        if (vaultToTokenToFortress[msg.sender][_tokenId] == address(0)) revert NoFortress();
 
         // burn receipt tokens and withdraw from Fortress
         _burn(msg.sender, _amount);

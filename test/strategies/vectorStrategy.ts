@@ -78,11 +78,11 @@ describe("Basic Vector Strategy Tests", function () {
     // Don't allow 0 deposit or withdraw
     await expect(
       Strategy.connect(addr1).depositToFortress(0, addr1.getAddress(), 1)
-    ).to.be.revertedWith("FortiFi: 0 deposit");
+    ).to.be.revertedWith(`InvalidDeposit`);
 
     await expect(
       Strategy.connect(addr1).withdrawFromFortress(0, addr1.getAddress(), 1)
-    ).to.be.revertedWith("FortiFi: 0 withdraw");
+    ).to.be.revertedWith(`InvalidWithdrawal`);
 
     // Approve receipt token and withdraw
     await MockStrat.connect(addr1).approve(Strategy.getAddress(), ethers.parseEther("1000"));

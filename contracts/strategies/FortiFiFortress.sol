@@ -11,6 +11,18 @@ pragma solidity 0.8.21;
 /// @notice Error caused by trying to use recoverERC20 to withdraw strategy receipt tokens
 error CannotWithdrawStrategyReceipts();
 
+/// @notice Error caused by using 0 address as a parameter
+error ZeroAddress();
+
+/// @notice Error caused by trying to deposit 0
+error InvalidDeposit();
+
+/// @notice Error caused by trying to withdraw 0
+error InvalidWithdrawal();
+
+/// @notice Error thrown when refunding native token fails
+error FailedToRefund();
+
 /// @title Base FortiFi Fortress contract
 /// @notice Fortresses are vault contracts that are specific to an individual vault receipt. By isolating deposits,
 /// Fortresses allow for balance-specific logic from underlying strategies.
@@ -21,10 +33,10 @@ contract FortiFiFortress is Ownable {
     IERC20 public immutable _wNative;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) {
-        require(_strategy != address(0), "FortiFi: Invalid strategy");
-        require(_depositToken != address(0), "FortiFi: Invalid deposit token");
-        require(_wrappedNative != address(0), "FortiFi: Invalid native token");
-        require(_fortiFiStrat != address(0), "FortiFi: Invalid owner");
+        if (_strategy == address(0)) revert ZeroAddress();
+        if (_depositToken == address(0)) revert ZeroAddress();
+        if (_wrappedNative == address(0)) revert ZeroAddress();
+        if (_fortiFiStrat == address(0)) revert ZeroAddress();
         _strat = IStrategy(_strategy);
         _dToken = IERC20(_depositToken);
         _wNative = IERC20(_wrappedNative);
@@ -46,7 +58,7 @@ contract FortiFiFortress is Ownable {
 
     /// @notice Function to deposit
     function deposit(uint256 _amount, address _user) external virtual onlyOwner returns(uint256 _newStratReceipts){
-        require(_amount > 0, "FortiFi: 0 deposit");
+        if (_amount == 0) revert InvalidDeposit();
         _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         uint256 _beforeBalance = _strat.balanceOf(address(this));
 
@@ -65,7 +77,7 @@ contract FortiFiFortress is Ownable {
     /// @notice Function to withdraw everything from vault
     function withdraw(address _user) external virtual onlyOwner {
         uint256 _balance = _strat.balanceOf(address(this));
-        require(_balance > 0, "FortiFi: 0 withdraw");
+        if (_balance == 0) revert InvalidWithdrawal();
 
         _strat.withdraw(_balance);
 
@@ -114,7 +126,7 @@ contract FortiFiFortress is Ownable {
         // Refund left over native tokens to user, if any
         if (address(this).balance > 0) {
             (bool success, ) = payable(_user).call{ value: address(this).balance }("");
-		    require(success, "FortiFi: Failed to refund native");
+		    if (!success) revert FailedToRefund();
         }
     }
 }

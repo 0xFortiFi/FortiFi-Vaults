@@ -20,8 +20,8 @@ contract FortiFiDPStrategy is FortiFiStrategy {
     /// @dev If a user has not deposited previously, this function will deploy a FortiFiDPFortress contract
     /// instead of the base FortiFiFortress contract
     function depositToFortress(uint256 _amount, address _user, uint256 _tokenId) external override {
-        require(_amount > 0, "FortiFi: 0 deposit");
-        require(isFortiFiVault[msg.sender], "FortiFi: Invalid vault");
+        if (_amount == 0) revert InvalidDeposit();
+        if (!isFortiFiVault[msg.sender]) revert InvalidCaller();
         _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         IFortress _fortress;
 

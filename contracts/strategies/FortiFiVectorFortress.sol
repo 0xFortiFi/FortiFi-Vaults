@@ -32,7 +32,7 @@ contract FortiFiVectorFortress is FortiFiFortress {
     /// getDepositTokensForShares view function and applying a slippage amount (typically 1%).
     function withdrawVector(address _user, uint16 _slippageBps) external onlyOwner {
         uint256 _balance = _vectorStrat.balanceOf(address(this));
-        require(_balance > 0, "FortiFi: 0 withdraw");
+        if (_balance == 0) revert InvalidWithdrawal();
 
         // calculate _tokensForShares and apply slippage
         uint256 _tokensForShares = _vectorStrat.getDepositTokensForShares(_balance);

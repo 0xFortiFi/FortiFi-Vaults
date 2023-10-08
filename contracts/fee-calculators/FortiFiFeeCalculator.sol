@@ -7,6 +7,18 @@ import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 
 pragma solidity 0.8.21;
 
+/// @notice Error caused by using 0 address as a parameter
+error ZeroAddress();
+
+/// @notice Error caused by mismatching array lengths
+error InvalidArrayLength();
+
+/// @notice Error caused when bps does not equal 10_000
+error InvalidBps();
+
+/// @notice Error caused NFT amounts array is invalid
+error InvalidAmounts();
+
 /// @title Contract to calculate fees for FortiFi Vaults
 /// @notice This contract is used by FortiFi Vaults to calculate fees based on a user's NFT holdings. 
 /// @dev When combineNftHoldings is true the contract will combine the user's balance across all NFT
@@ -47,14 +59,14 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
     /// a user holds, the lower the fee bps.
     function setFees(address[] memory _nftContracts, uint8[] memory _tokenAmounts, uint16[] memory _thresholdBps) public onlyOwner {
         uint256 _length = _nftContracts.length;
-        require (_length > 0, "FortiFi: Invalid NFT array");
+        if (_length == 0) revert InvalidArrayLength();
 
         for (uint256 i = 0; i < _length; i++) {
-            require(_nftContracts[i] != address(0), "FortiFi: Invalid NFT address");
+            if (_nftContracts[i] == address(0)) revert ZeroAddress();
         }
 
-        require(_tokenAmounts.length == _thresholdBps.length &&
-                _validateAmountsAndBps(_tokenAmounts, _thresholdBps), "FortiFi: Invalid amounts or bps");
+        if (_tokenAmounts.length != _thresholdBps.length ||
+                !_validateAmountsAndBps(_tokenAmounts, _thresholdBps)) revert InvalidArrayLength();
         
         nftContracts = _nftContracts;
         tokenAmounts = _tokenAmounts;
@@ -73,13 +85,13 @@ contract FortiFiFeeCalculator is IFortiFiFeeCalculator, Ownable {
 
     /// @notice Validate that arrays meet specifications
     function _validateAmountsAndBps(uint8[] memory _amounts, uint16[] memory _bps) internal pure returns(bool) {
-        require(_amounts.length > 0 &&
-                _amounts[0] == 0, "FortiFi: Invalid amounts array");
+        if (_amounts.length == 0 ||
+                _amounts[0] != 0) revert InvalidAmounts();
         uint256 _length = _bps.length;
         for (uint256 i = 0; i < _length; i++) {
             if (i > 0) {
-                require(_bps[i] < _bps[i-1], "FortiFi: Invalid bps array");
-                require(_amounts[i] > _amounts[i-1], "FortiFi: Invalid amount values");
+                if (_bps[i] >= _bps[i-1]) revert InvalidBps();
+                if (_amounts[i] <= _amounts[i-1]) revert InvalidAmounts();
             }
         }
         return true;

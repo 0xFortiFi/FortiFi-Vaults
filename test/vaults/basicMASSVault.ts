@@ -220,7 +220,7 @@ describe("Basic MASS Vault Tests", function () {
     // Can't deposit while paused
     await expect(
       MASS.connect(addr2).deposit(ethers.parseEther("1000"))
-    ).to.be.revertedWith("FortiFi: Contract paused");
+    ).to.be.revertedWith(`ContractPaused`);
 
     // Unpause and deposit
     await MASS.connect(owner).flipPaused();
@@ -254,11 +254,11 @@ describe("Basic MASS Vault Tests", function () {
     // Don't allow 0 deposit or withdraw without token
     await expect(
       MASS.connect(addr2).deposit(0)
-    ).to.be.revertedWith("FortiFi: Invalid deposit amount");
+    ).to.be.revertedWith(`InvalidDeposit`);
 
     await expect(
       MASS.connect(addr2).withdraw(2)
-    ).to.be.revertedWith("FortiFi: Not the owner of token");
+    ).to.be.revertedWith(`NotTokenOwner`);
 
     // withdraw
     await MASS.connect(addr2).withdraw(1);
@@ -635,7 +635,7 @@ describe("Basic MASS Vault Tests", function () {
                           decimals: 8
                         }
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid total bps");
+    ).to.be.revertedWith(`InvalidBps`);
 
     await expect(
       facMASS.deploy("Basic Vault", 
@@ -677,7 +677,7 @@ describe("Basic MASS Vault Tests", function () {
                           decimals: 8
                         }
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid strat address");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facMASS.deploy("Basic Vault", 
@@ -719,7 +719,7 @@ describe("Basic MASS Vault Tests", function () {
                           decimals: 8
                         }
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid ERC20 address");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facMASS.deploy("Basic Vault", 
@@ -761,7 +761,7 @@ describe("Basic MASS Vault Tests", function () {
                           decimals: 8
                         }
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid native token");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facMASS.deploy("Basic Vault", 
@@ -803,7 +803,7 @@ describe("Basic MASS Vault Tests", function () {
                           decimals: 8
                         }
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid deposit token");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facMASS.deploy("Basic Vault", 
@@ -845,7 +845,7 @@ describe("Basic MASS Vault Tests", function () {
                           decimals: 8
                         }
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid feeManager");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facMASS.deploy("Basic Vault", 
@@ -887,7 +887,7 @@ describe("Basic MASS Vault Tests", function () {
                           decimals: 8
                         }
                       ])
-    ).to.be.revertedWith("FortiFi: Invalid feeCalculator");
+    ).to.be.revertedWith(`ZeroAddress`);
 
   });
 
@@ -902,22 +902,22 @@ describe("Basic MASS Vault Tests", function () {
         
         await expect(
           MASS.connect(addr2).deposit(0)
-        ).to.be.revertedWith("FortiFi: Invalid deposit amount");
+        ).to.be.revertedWith(`InvalidDeposit`);
 
         await MASS.connect(addr2).deposit(ethers.parseEther("500"));
         await MASS.connect(addr3).deposit(ethers.parseEther("500"));
 
         await expect(
           MASS.connect(addr2).add(ethers.parseEther("500"), 2)
-        ).to.be.revertedWith("FortiFi: Not the owner of token");
+        ).to.be.revertedWith(`NotTokenOwner`);
 
         await expect(
           MASS.connect(addr2).withdraw(2)
-        ).to.be.revertedWith("FortiFi: Not the owner of token");
+        ).to.be.revertedWith(`NotTokenOwner`);
 
         await expect(
           MASS.connect(addr2).rebalance(2)
-        ).to.be.revertedWith("FortiFi: Invalid message sender");
+        ).to.be.revertedWith(`NotTokenOwner`);
 
         await expect(MASS.connect(owner).setStrategies(
           [
@@ -971,7 +971,7 @@ describe("Basic MASS Vault Tests", function () {
 
         await expect(
           MASS.connect(addr2).add(ethers.parseEther("500"), 1)
-        ).to.be.revertedWith("FortiFi: Can't add to receipt");
+        ).to.be.revertedWith(`CantAddToReceipt`);
 
   });
 

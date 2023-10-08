@@ -143,23 +143,23 @@ describe("Fee Manager Tests", function () {
 
     await expect(
       facMgr.deploy([], [2500, 2500, 5000])
-    ).to.be.revertedWith("FortiFi: Invalid receiver array");
+    ).to.be.revertedWith(`InvalidArrayLength`);
 
     await expect(
       facMgr.deploy([NULL_ADDRESS], [2500, 2500, 5000])
-    ).to.be.revertedWith("FortiFi: Invalid receiver address");
+    ).to.be.revertedWith(`ZeroAddress`);
 
     await expect(
       facMgr.deploy([addr1.getAddress()], [2500, 2500, 5000])
-    ).to.be.revertedWith("FortiFi: Invalid array lengths");
+    ).to.be.revertedWith(`InvalidArrayLength`);
 
     await expect(
       facMgr.deploy([addr1.getAddress()], [0])
-    ).to.be.revertedWith("FortiFi: Invalid bps amount");
+    ).to.be.revertedWith(`InvalidBps`);
 
     await expect(
       facMgr.deploy([addr1.getAddress()], [5000])
-    ).to.be.revertedWith("FortiFi: Invalid total bps");
+    ).to.be.revertedWith(`InvalidBps`);
 
   });
 
