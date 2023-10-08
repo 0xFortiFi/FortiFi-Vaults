@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.21;
 
 /// @title Contract to distribute fees for FortiFi Vaults
 /// @notice This contract is used by FortiFi Vaults to distribute fees earned upon withdrawal.

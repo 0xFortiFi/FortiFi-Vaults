@@ -8,7 +8,7 @@ import "./interfaces/IFortress.sol";
 import "./interfaces/IVault.sol";
 import "./FortiFiFortress.sol";
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.21;
 
 /// @notice Error when vault does not implement ISAMS or IMASS interface (0x23c01392)
 error InvalidVaultImplementation();

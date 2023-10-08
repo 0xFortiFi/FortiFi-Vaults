@@ -5,7 +5,7 @@ import "./FortiFiFortress.sol";
 import "./interfaces/IStrategy.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.21;
 
 /// @title FortiFi Fortress contract for Delta Prime strategies
 /// @notice This Fortress contract is specifically made to interact with Delta Prime strategies

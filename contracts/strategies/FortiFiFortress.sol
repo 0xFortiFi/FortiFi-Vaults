@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IStrategy.sol";
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.21;
 
 /// @notice Error caused by trying to use recoverERC20 to withdraw strategy receipt tokens
 error CannotWithdrawStrategyReceipts();

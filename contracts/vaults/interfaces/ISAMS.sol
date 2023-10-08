@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // ISAMS Interface by FortiFi
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.21;
 
 /// @title Interface for FortiFi SAMS Vaults
 interface ISAMS {

@@ -11,7 +11,7 @@ import "../fee-calculators/interfaces/IFortiFiFeeCalculator.sol";
 import "../fee-managers/interfaces/IFortiFiFeeManager.sol";
 import "./interfaces/ISAMS.sol";
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.21;
 
 /// @notice Error caused by trying to set a strategy more than once
 error DuplicateStrategy();

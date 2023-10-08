@@ -14,7 +14,7 @@ import "../vaults/interfaces/IMASS.sol";
 import "../vaults/interfaces/ISAMS.sol";
 import "../vaults/interfaces/IRouter.sol";
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.21;
 
 /// @notice Error caused by trying to set a strategy more than once
 error DuplicateStrategy();

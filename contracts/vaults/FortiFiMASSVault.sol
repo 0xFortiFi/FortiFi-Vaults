@@ -19,7 +19,7 @@ interface IOracle {
   function latestAnswer() external view returns (int256);
 }
 
-pragma solidity ^0.8.18;
+pragma solidity 0.8.21;
 
 /// @notice Error caused by trying to set a strategy more than once
 error DuplicateStrategy();
