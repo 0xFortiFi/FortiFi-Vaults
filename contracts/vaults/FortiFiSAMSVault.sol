@@ -339,4 +339,13 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         }
     }
 
+    /// @notice Override to allow FortiFiStrategy contracts to verify that specified vaults implement ISAMS interface
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155) returns (bool) {
+        return
+            interfaceId == type(IERC1155).interfaceId ||
+            interfaceId == type(IERC1155MetadataURI).interfaceId ||
+            interfaceId == type(ISAMS).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
 }

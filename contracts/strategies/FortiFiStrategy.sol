@@ -4,9 +4,13 @@
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interfaces/IFortress.sol";
+import "./interfaces/IVault.sol";
 import "./FortiFiFortress.sol";
 
 pragma solidity ^0.8.18;
+
+/// @notice Error when vault does not implement ISAMS or IMASS interface (0x23c01392)
+error InvalidVaultImplementation();
 
 /// @title Base FortiFi Strategy contract
 /// @notice This contract should be used when a yield strategy requires special logic beyond
@@ -88,8 +92,9 @@ contract FortiFiStrategy is Ownable, ERC20 {
     }
 
     /// @notice Set valid vaults
-    function setVault(address _strategy, bool _approved) external onlyOwner {
-        isFortiFiVault[_strategy] = _approved;
+    function setVault(address _vault, bool _approved) external onlyOwner {
+        if (!IVault(_vault).supportsInterface(0x23c01392)) revert InvalidVaultImplementation();
+        isFortiFiVault[_vault] = _approved;
     }
 
     /// @notice Emergency function to recover stuck tokens

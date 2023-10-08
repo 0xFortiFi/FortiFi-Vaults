@@ -481,4 +481,13 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         return this.onERC1155BatchReceived.selector;
     }
 
+    /// @notice Override to allow FortiFiStrategy contracts to verify that specified vaults implement IMASS interface
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155,IERC165) returns (bool) {
+        return
+            interfaceId == type(IERC1155).interfaceId ||
+            interfaceId == type(IERC1155MetadataURI).interfaceId ||
+            interfaceId == type(IMASS).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
 }
