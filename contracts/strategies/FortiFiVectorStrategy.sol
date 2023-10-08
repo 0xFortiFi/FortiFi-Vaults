@@ -31,7 +31,7 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
 
         // If user has not deposited previously, deploy Fortress
         if (vaultToTokenToFortress[msg.sender][_tokenId] == address(0)) {
-            FortiFiVectorFortress _fort = new FortiFiVectorFortress(_strat, address(_dToken), address(_wNative), address(this));
+            FortiFiVectorFortress _fort = new FortiFiVectorFortress(_strat, address(_dToken), address(_wNative));
             _fortress = IVectorFortress(address(_fort));
             vaultToTokenToFortress[msg.sender][_tokenId] = address(_fortress);
             emit FortressCreated(msg.sender, _tokenId, address(_strat));

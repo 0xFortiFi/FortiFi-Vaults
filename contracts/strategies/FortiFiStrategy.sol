@@ -60,7 +60,7 @@ contract FortiFiStrategy is Ownable, ERC20 {
 
         // If user has not deposited previously, deploy Fortress
         if (vaultToTokenToFortress[msg.sender][_tokenId] == address(0)) {
-            FortiFiFortress _fort = new FortiFiFortress(_strat, address(_dToken), address(_wNative), address(this));
+            FortiFiFortress _fort = new FortiFiFortress(_strat, address(_dToken), address(_wNative));
             _fortress = IFortress(address(_fort));
             vaultToTokenToFortress[msg.sender][_tokenId] = address(_fortress);
             emit FortressCreated(msg.sender, _tokenId, address(_strat));

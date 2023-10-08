@@ -12,8 +12,8 @@ pragma solidity 0.8.21;
 contract FortiFiDPFortress is FortiFiFortress {
     using SafeERC20 for IERC20;
 
-    constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) 
-        FortiFiFortress(_strategy, _depositToken, _wrappedNative, _fortiFiStrat) {
+    constructor(address _strategy, address _depositToken, address _wrappedNative) 
+        FortiFiFortress(_strategy, _depositToken, _wrappedNative) {
     }
 
     /// @notice Function to withdraw

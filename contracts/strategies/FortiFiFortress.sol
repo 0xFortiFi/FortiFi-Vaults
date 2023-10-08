@@ -32,20 +32,16 @@ contract FortiFiFortress is Ownable {
     IERC20 public immutable _dToken;
     IERC20 public immutable _wNative;
 
-    constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) {
+    constructor(address _strategy, address _depositToken, address _wrappedNative) {
         if (_strategy == address(0)) revert ZeroAddress();
         if (_depositToken == address(0)) revert ZeroAddress();
         if (_wrappedNative == address(0)) revert ZeroAddress();
-        if (_fortiFiStrat == address(0)) revert ZeroAddress();
         _strat = IStrategy(_strategy);
         _dToken = IERC20(_depositToken);
         _wNative = IERC20(_wrappedNative);
 
         // grant approvals
         _dToken.approve(_strategy, type(uint256).max);
-
-        // owner is the FortiFiStrategy contract that creates this Fortress
-        _transferOwnership(_fortiFiStrat);
     }
 
     event DepositMade(uint256 amount, address indexed user);

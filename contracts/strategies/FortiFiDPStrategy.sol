@@ -27,7 +27,7 @@ contract FortiFiDPStrategy is FortiFiStrategy {
 
         // If user has not deposited previously, deploy Fortress
         if (vaultToTokenToFortress[msg.sender][_tokenId] == address(0)) {
-            FortiFiDPFortress _fort = new FortiFiDPFortress(_strat, address(_dToken), address(_wNative), address(this));
+            FortiFiDPFortress _fort = new FortiFiDPFortress(_strat, address(_dToken), address(_wNative));
             _fortress = IFortress(address(_fort));
             vaultToTokenToFortress[msg.sender][_tokenId] = address(_fortress);
             emit FortressCreated(msg.sender, _tokenId, address(_strat));

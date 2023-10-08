@@ -14,8 +14,8 @@ contract FortiFiVectorFortress is FortiFiFortress {
     uint16 private constant BPS = 10_000;
     IVectorStrategy public immutable _vectorStrat;
 
-    constructor(address _strategy, address _depositToken, address _wrappedNative, address _fortiFiStrat) 
-        FortiFiFortress(_strategy, _depositToken, _wrappedNative, _fortiFiStrat) {
+    constructor(address _strategy, address _depositToken, address _wrappedNative) 
+        FortiFiFortress(_strategy, _depositToken, _wrappedNative) {
         _vectorStrat = IVectorStrategy(_strategy);
     }
 
