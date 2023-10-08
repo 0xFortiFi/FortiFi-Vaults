@@ -30,7 +30,7 @@ contract FortiFiVectorFortress is FortiFiFortress {
     /// @dev Vector Finance strategies require that you pass in the amount of deposit tokens you expect to receive
     /// rather than the amount of receipt tokens you want to burn as well as a minAmount. This is calculated by utilizing the
     /// getDepositTokensForShares view function and applying a slippage amount (typically 1%).
-    function withdrawVector(address _user, uint256 _slippageBps) external onlyOwner {
+    function withdrawVector(address _user, uint16 _slippageBps) external onlyOwner {
         uint256 _balance = _vectorStrat.balanceOf(address(this));
         require(_balance > 0, "FortiFi: 0 withdraw");
 

@@ -12,13 +12,13 @@ pragma solidity 0.8.21;
 /// @notice This contract allows for FortiFi vaults to utilize Vector Finance strategies. 
 contract FortiFiVectorStrategy is FortiFiStrategy {
     using SafeERC20 for IERC20;
-    uint256 public slippageBps = 100;
+    uint16 public slippageBps = 100;
 
     constructor(address _strategy, address _depositToken, address _wrappedNative) 
         FortiFiStrategy(_strategy, _depositToken, _wrappedNative) {
     }
 
-    event SlippageSet(uint256 newSlippage);
+    event SlippageSet(uint16 newSlippage);
 
     /// @notice Function to deposit
     /// @dev If a user has not deposited previously, this function will deploy a FortiFiVectorFortress contract
