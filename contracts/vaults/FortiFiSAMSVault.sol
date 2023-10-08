@@ -155,7 +155,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
     /// @notice This function is used to burn a receipt (ERC1155) and withdraw all underlying strategy receipt tokens. 
     /// @dev Once all receipts are burned and deposit tokens received, the fee manager will calculate the fees due, 
     /// and the fee manager will distribute those fees before transfering the user their proceeds.
-    function withdraw(uint256 _tokenId) external override nonReentrant whileNotPaused {
+    function withdraw(uint256 _tokenId) external override nonReentrant {
         if (balanceOf(msg.sender, _tokenId) == 0) revert NotTokenOwner();
         _burn(msg.sender, _tokenId, 1);
 
