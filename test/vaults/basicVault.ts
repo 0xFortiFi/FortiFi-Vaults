@@ -638,6 +638,11 @@ describe("Basic SAMS Vault Tests", function () {
           Vault.connect(addr2).rebalance(2)
         ).to.be.revertedWith("FortiFi: Invalid message sender");
 
+        await expect( Vault.connect(owner).setStrategies([
+          {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
+          {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000}
+        ],)).to.be.revertedWith(`DuplicateStrategy`);
+
         await Vault.connect(owner).setStrategies([
           {strategy: MockStrat2.getAddress(), isFortiFi: false, bps: 5000},
           {strategy: MockStrat3.getAddress(), isFortiFi: false, bps: 5000}

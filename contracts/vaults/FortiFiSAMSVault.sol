@@ -13,6 +13,9 @@ import "./interfaces/ISAMS.sol";
 
 pragma solidity ^0.8.18;
 
+/// @notice Error caused by trying to set a strategy more than once
+error DuplicateStrategy();
+
 /// @title Contract for FortiFi SAMS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then split and deposited in to 
 /// multiple yield-bearing strategies. 
@@ -187,6 +190,8 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
         uint256 _length = _strategies.length;
         require(_length > 0, "FortiFi: No strategies");
 
+        address[] memory _holdStrategies = new address[](_length);
+
         uint16 _bps = 0;
         for (uint256 i = 0; i < _length; i++) {
             _bps += _strategies[i].bps;
@@ -197,6 +202,11 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
         for (uint256 i = 0; i < _length; i++) {
             require(_strategies[i].strategy != address(0), "FortiFi: Invalid strat address");
+            uint256 _holdLength = _holdStrategies.length;
+            for (uint256 j = 0; j < _holdLength; j++) {
+                if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
+            }
+            _holdStrategies[i] = _strategies[i].strategy;
             strategies.push(_strategies[i]);
         }
 

@@ -919,6 +919,31 @@ describe("Basic MASS Vault Tests", function () {
           MASS.connect(addr2).rebalance(2)
         ).to.be.revertedWith("FortiFi: Invalid message sender");
 
+        await expect(MASS.connect(owner).setStrategies(
+          [
+            {
+              strategy: SAMS2.getAddress(), 
+              depositToken: MockERC20.getAddress(),
+              router: owner.getAddress(), 
+              oracle: owner.getAddress(), 
+              isFortiFi: false, 
+              isSAMS: true,
+              bps: 5000,
+              decimals: 8
+            }, 
+            {
+              strategy: SAMS2.getAddress(), 
+              depositToken: MockERC20.getAddress(),
+              router: owner.getAddress(), 
+              oracle: owner.getAddress(), 
+              isFortiFi: false, 
+              isSAMS: true,
+              bps: 5000,
+              decimals: 8
+            }
+          ]
+        )).to.be.revertedWith(`DuplicateStrategy`);
+
         await MASS.connect(owner).setStrategies(
           [
             {
