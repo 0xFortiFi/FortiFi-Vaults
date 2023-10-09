@@ -108,8 +108,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     event FeeManagerSet(address feeManager);
     event FeeCalculatorSet(address feeCalculator);
     event PauseStateUpdated(bool paused);
-    event ERC20Recovered(address indexed token, uint256 amount);
-    event SetDirectSwap(address token, bool direct);
 
     /// @notice Used to restrict function access while paused.
     modifier whileNotPaused() {
@@ -226,7 +224,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @dev This can be used when there is sufficient USDC/strategyDepositToken liquidity
     function setDirectSwapFor(address _token, bool _bool) external onlyOwner {
         useDirectSwap[_token] = _bool;
-        emit SetDirectSwap(_token, _bool);
     }
 
     /// @notice Function to flip paused state
@@ -238,7 +235,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @notice Emergency function to recover stuck ERC20 tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).safeTransfer(msg.sender, _amount);
-        emit ERC20Recovered(_token, _amount);
     }
 
     /// @notice Emergency function to recover stuck ERC1155 tokens
