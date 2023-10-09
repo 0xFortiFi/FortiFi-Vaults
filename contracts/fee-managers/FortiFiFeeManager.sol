@@ -95,7 +95,7 @@ contract FortiFiFeeManager is IFortiFiFeeManager, Ownable {
 
     /// @notice Emergency function to recover stuck ERC20 tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
-        IERC20(_token).transfer(msg.sender, _amount);
+        IERC20(_token).safeTransfer(msg.sender, _amount);
         emit ERC20Recovered(_token, _amount);
     }
 
