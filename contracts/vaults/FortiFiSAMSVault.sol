@@ -255,8 +255,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
         for (uint256 i = 0; i < _length; i++) {
             if (_strategies[i].strategy == address(0)) revert ZeroAddress();
-            uint256 _holdLength = _holdStrategies.length;
-            for (uint256 j = 0; j < _holdLength; j++) {
+            for (uint256 j = 0; j < i; j++) {
                 if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
             }
             _holdStrategies[i] = _strategies[i].strategy;

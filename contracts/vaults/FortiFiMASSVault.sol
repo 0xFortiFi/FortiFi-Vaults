@@ -282,8 +282,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
                     _strategies[i].depositToken != depositToken) revert InvalidOracle();
             if (_strategies[i].decimals <= DECIMALS &&
                     _strategies[i].depositToken != depositToken) revert InvalidDecimals();
-            uint256 _holdLength = _holdStrategies.length;
-            for (uint256 j = 0; j < _holdLength; j++) {
+            for (uint256 j = 0; j < i; j++) {
                 if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
             }
             _holdStrategies[i] = _strategies[i].strategy;
