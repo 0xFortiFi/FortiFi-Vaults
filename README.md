@@ -49,6 +49,8 @@ SAMS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calc
 ### FortiFiMASSVault
 MASS Vaults allow for the deposit of a single token, which is then split, swapped into other assets if necessary, and then deposited into sub-strategies, including FortiFiStrategy strategies and SAMS Vaults. MASS Vaults are designed to function similarly to ETF tokens, but the underlying assets are yield-bearing.
 
+When setting strategies you must specify the router and oracle you would like to use to get prices and swap for the strategy deposit token. Routers must be Uniswap V2 style routers with a swapTokensForExactTokens function, and the oracle should be a Chainlink price feed or similar oracle with a latestAnswer view function that returns the price.
+
 MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees.
 
 ### FortiFiStrategy
@@ -58,9 +60,9 @@ FortiFiStrategy contracts are meant to be used as a sort of wrapper for yield st
 
 ```withdraw(amount of receipt token to burn)```
 
-Initial strategies inheriting from this contract are:
+This contract must be used for Delta Prime strategies, and can be used as is. Other strategies can inherit this contract and add necessary modifications.
 
-**FortiFiDPStrategy** (Delta Prime)
+Initial strategies inheriting from this contract are:
 
 **FortiFiVectorStrategy** (Vector Finance)
 
@@ -70,8 +72,6 @@ FortiFiStrategies isolate user deposits into FortiFiFortress contracts.
 FortiFiFortress contracts are used to isolate users' receipt tokens, which is necessary for strategies that have unique deposit or withdraw functions. Fortress contracts are deployed by FortiFiStrategy contracts, and can only be accessed by the contract that deploys them. A fortress is created for each vault receipt token (1155) used to deposit to the FortiFiStrategy.
 
 Initial fortresses inheriting from this contract are:
-
-**FortiFiDPFortress** (Delta Prime)
 
 **FortiFiVectorFortress** (Vector Finance)
 
