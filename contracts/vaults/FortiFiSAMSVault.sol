@@ -220,7 +220,8 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
     /// @notice Emergency function to recover stuck ERC20 tokens.
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
-        for (uint256 i = 0; i < strategies.length; i++) {
+        uint256 _length = strategies.length;
+        for (uint256 i = 0; i < _length; i++) {
             if (_token == strategies[i].strategy) {
                 revert CantWithdrawStrategyReceipts();
             }
