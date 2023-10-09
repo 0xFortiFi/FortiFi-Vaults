@@ -71,7 +71,7 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
     Strategy[] public strategies;
 
-    mapping(uint256 => TokenInfo) private tokenInfo;
+    mapping(uint256 => TokenInfo) public tokenInfo;
     mapping(address => bool) public noFeesFor;
 
     event Deposit(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
@@ -306,11 +306,6 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
         emit Rebalance(_tokenId, _amount, _info);
         return _info;
-    }
-
-    /// @notice View function that returns all TokenInfo for a specific receipt
-    function getTokenInfo(uint256 _tokenId) public view override returns(TokenInfo memory) {
-        return tokenInfo[_tokenId];
     }
 
     /// @notice View function that returns all strategies

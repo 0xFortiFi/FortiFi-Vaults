@@ -94,7 +94,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
     Strategy[] public strategies;
 
-    mapping(uint256 => TokenInfo) private tokenInfo;
+    mapping(uint256 => TokenInfo) public tokenInfo;
     mapping(address => bool) public useDirectSwap;
 
     event Deposit(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
@@ -342,11 +342,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
         emit Rebalance(_tokenId, _amount, _info);
         return _info;
-    }
-
-    /// @notice View function to get token information
-    function getTokenInfo(uint256 _tokenId) public view override returns(TokenInfo memory) {
-        return tokenInfo[_tokenId];
     }
 
     /// @notice View function that returns all strategies

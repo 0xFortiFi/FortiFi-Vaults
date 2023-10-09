@@ -30,6 +30,5 @@ interface IMASS {
     function add(uint amount, uint tokenId) external returns(TokenInfo memory info);
     function withdraw(uint amount) external;
     function rebalance(uint tokenId) external returns(TokenInfo memory info);
-    function getTokenInfo(uint tokenId) external view returns(TokenInfo memory info);
     function getStrategies() external view returns(Strategy[] memory strategies);
 }

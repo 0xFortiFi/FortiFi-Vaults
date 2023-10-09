@@ -88,7 +88,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
 
     Strategy[] public strategies;
 
-    mapping(uint256 => TokenInfo) private tokenInfo;
+    mapping(uint256 => TokenInfo) public tokenInfo;
 
     event Deposit(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Add(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
@@ -251,8 +251,7 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
                     _strategies[i].depositToken != depositToken) revert InvalidOracle();
             if (_strategies[i].decimals <= DECIMALS &&
                     _strategies[i].depositToken != depositToken) revert InvalidDecimals();
-            uint256 _holdLength = _holdStrategies.length;
-            for (uint256 j = 0; j < _holdLength; j++) {
+            for (uint256 j = 0; j < i; j++) {
                 if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
             }
             _holdStrategies[i] = _strategies[i].strategy;
@@ -281,10 +280,6 @@ contract FortiFiMASSVaultNoSwap is IMASS, ERC1155Supply, IERC1155Receiver, Ownab
 
         emit Rebalance(_tokenId, _amount, _info);
         return _info;
-    }
-
-    function getTokenInfo(uint256 _tokenId) public view override returns(TokenInfo memory) {
-        return tokenInfo[_tokenId];
     }
 
     /// @notice View function that returns all strategies

@@ -10,7 +10,7 @@ import "./FortiFiFortress.sol";
 
 pragma solidity 0.8.21;
 
-/// @notice Error when vault does not implement ISAMS or IMASS interface (0x23c01392)
+/// @notice Error when vault does not implement ISAMS or IMASS interface (0xafba703c)
 error InvalidVaultImplementation();
 
 /// @notice Error caused when calling address is not a valid vault 
@@ -103,7 +103,7 @@ contract FortiFiStrategy is Ownable, ERC20 {
 
     /// @notice Set valid vaults
     function setVault(address _vault, bool _approved) external onlyOwner {
-        if (!IVault(_vault).supportsInterface(0x23c01392)) revert InvalidVaultImplementation();
+        if (!IVault(_vault).supportsInterface(0xafba703c)) revert InvalidVaultImplementation();
         isFortiFiVault[_vault] = _approved;
         emit VaultSet(_vault, _approved);
     }
