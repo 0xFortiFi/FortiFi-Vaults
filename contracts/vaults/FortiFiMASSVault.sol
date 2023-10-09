@@ -72,6 +72,9 @@ error InvalidBps();
 /// @notice Error caused when trying to transact with contract while paused
 error ContractPaused();
 
+/// @notice Error caused by trying to use recoverERC20 to withdraw strategy receipt tokens
+error CantWithdrawStrategyReceipts();
+
 /// @title Contract for FortiFi MASS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
@@ -234,18 +237,12 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
     /// @notice Emergency function to recover stuck ERC20 tokens
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
+        for (uint256 i = 0; i < strategies.length; i++) {
+            if (_token == strategies[i].strategy) {
+                revert CantWithdrawStrategyReceipts();
+            }
+        }
         IERC20(_token).safeTransfer(msg.sender, _amount);
-    }
-
-    /// @notice Emergency function to recover stuck ERC1155 tokens
-    function recoverERC1155(address _token, uint256[] calldata _tokenIds, uint256[] calldata _amounts) external onlyOwner {
-        IERC1155(_token).safeBatchTransferFrom(
-            address(this),
-            msg.sender,
-            _tokenIds,
-            _amounts,
-            ""
-        );
     }
 
     /// @notice Function to set max approvals for router and strategies. 

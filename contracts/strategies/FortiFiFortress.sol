@@ -9,7 +9,7 @@ import "./interfaces/IStrategy.sol";
 pragma solidity 0.8.21;
 
 /// @notice Error caused by trying to use recoverERC20 to withdraw strategy receipt tokens
-error CannotWithdrawStrategyReceipts();
+error CantWithdrawStrategyReceipts();
 
 /// @notice Error caused by using 0 address as a parameter
 error ZeroAddress();
@@ -100,7 +100,7 @@ contract FortiFiFortress is Ownable {
 
     /// @notice Emergency function to recover stuck tokens. 
     function recoverERC20(address _to, address _token, uint256 _amount) external onlyOwner {
-        if (_token == address(_strat)) revert CannotWithdrawStrategyReceipts();
+        if (_token == address(_strat)) revert CantWithdrawStrategyReceipts();
         IERC20(_token).safeTransfer(_to, _amount);
         emit ERC20Recovered(_to, _token, _amount);
     }

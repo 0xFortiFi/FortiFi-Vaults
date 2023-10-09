@@ -51,6 +51,8 @@ error InvalidBps();
 
 /// @notice Error caused when trying to transact with contract while paused
 error ContractPaused();
+/// @notice Error caused by trying to use recoverERC20 to withdraw strategy receipt tokens
+error CantWithdrawStrategyReceipts();
 
 /// @title Contract for FortiFi SAMS Vaults
 /// @notice This contract allows for the deposit of a single asset, which is then split and deposited in to 
@@ -218,6 +220,11 @@ contract FortiFiSAMSVault is ISAMS, ERC1155Supply, Ownable, ReentrancyGuard {
 
     /// @notice Emergency function to recover stuck ERC20 tokens.
     function recoverERC20(address _token, uint256 _amount) external onlyOwner {
+        for (uint256 i = 0; i < strategies.length; i++) {
+            if (_token == strategies[i].strategy) {
+                revert CantWithdrawStrategyReceipts();
+            }
+        }
         IERC20(_token).safeTransfer(msg.sender, _amount);
         emit ERC20Recovered(_token, _amount);
     }
