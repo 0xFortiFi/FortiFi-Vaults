@@ -53,6 +53,8 @@ When setting strategies you must specify the router and oracle you would like to
 
 MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees.
 
+MASS Vaults utilize FortiFiPriceOracle contracts to get on-chain price feeds to calculate swap values.
+
 ### FortiFiStrategy
 FortiFiStrategy contracts are meant to be used as a sort of wrapper for yield strategies that do not adhere to the simple structure of:
 
@@ -80,6 +82,9 @@ FortiFiFeeCalculator contracts are utilized by SAMS and MASS Vaults to calculate
 
 ### FortiFiFeeManager
 FortiFiFeeManager contracts are utilized by SAMS and MASS Vaults to split performance fees among one or more addresses.
+
+### FortiFiPriceOracle
+FortiFiPriceOracle contracts are utilized by MASS Vaults to calculate swap prices. The base contract uses Chainlink's AggregatorV3Interface and can be extended for other price feeds.
 
 ## Notes for Auditors
 
