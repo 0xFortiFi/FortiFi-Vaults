@@ -6,6 +6,13 @@ import "./interfaces/AggregatorV3Interface.sol";
 
 pragma solidity 0.8.21;
 
+/// @notice Error caused by negative price returned from oracle
+error InvalidPrice();
+
+/// @notice Error caused by stale price returned from oracle
+error StalePrice();
+
+
 /// @title FortiFiPriceOracle
 /// @notice This contract is used as a flexible interface to provide prices to FortiFiMASSVault implementations.
 /// This base version is meant to use Chainlink on-chain price feeds, and can be inherited and modified to 
@@ -24,9 +31,13 @@ contract FortiFiPriceOracle is IFortiFiPriceOracle {
             /* uint80 roundID */,
             int answer,
             /*uint startedAt*/,
-            /*uint timeStamp*/,
+            uint timeStamp,
             /*uint80 answeredInRound*/
         ) = feed.latestRoundData();
+
+        if (answer <= 0) revert InvalidPrice();
+        if (timeStamp < block.timestamp - (75*60) /*75 minutes*/ ) revert StalePrice();
+        
         return uint(answer);
     }
 }
