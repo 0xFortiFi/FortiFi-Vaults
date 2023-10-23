@@ -81,7 +81,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     string public symbol;
     address public immutable depositToken;
     address public immutable wrappedNative;
-    uint8 public constant DECIMALS = 6; // USDC ONLY
+    uint8 public constant USDC_DECIMALS = 6;
     uint16 public constant SWAP_DEADLINE_BUFFER = 1800;
     uint16 public constant BPS = 10_000;
     uint16 public slippageBps = 100;
@@ -282,7 +282,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
                 _strategies[i].depositToken != depositToken) ||
                 _strategies[i].depositToken != IFortiFiPriceOracle(_strategies[i].oracle).token() ||
                 _strategies[i].decimals != IFortiFiPriceOracle(_strategies[i].oracle).decimals()) revert InvalidOracle();
-            if (_strategies[i].decimals <= DECIMALS &&
+            if (_strategies[i].decimals <= USDC_DECIMALS &&
                 _strategies[i].depositToken != depositToken) revert InvalidDecimals();
             for (uint256 j = 0; j < i; j++) {
                 if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
@@ -363,7 +363,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _route[2] = _strategyDepositToken;
 
         uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_strat.decimals - DECIMALS);
+        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_strat.decimals - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -390,7 +390,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _route[1] = _strategyDepositToken;
 
         uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_strat.decimals - DECIMALS);
+        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_strat.decimals - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -417,7 +417,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _route[2] = depositToken;
         
         uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_strat.decimals - DECIMALS);
+        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_strat.decimals - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -441,7 +441,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _route[1] = depositToken;
         
         uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_strat.decimals - DECIMALS);
+        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_strat.decimals - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
