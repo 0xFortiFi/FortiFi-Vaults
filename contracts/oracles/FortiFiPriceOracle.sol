@@ -40,4 +40,8 @@ contract FortiFiPriceOracle is IFortiFiPriceOracle {
         
         return uint(answer);
     }
+
+    function decimals() external view returns (uint8) {
+        return feed.decimals();
+    }
 }

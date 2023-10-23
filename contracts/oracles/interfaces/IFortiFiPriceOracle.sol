@@ -7,4 +7,5 @@ pragma solidity 0.8.21;
 interface IFortiFiPriceOracle {
     function getPrice() external view returns(uint256);
     function token() external view returns(address);
+    function decimals() external view returns (uint8);
 }
