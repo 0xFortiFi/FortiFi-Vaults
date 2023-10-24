@@ -278,10 +278,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             if (_strategies[i].strategy == address(0)) revert ZeroAddress();
             if (_strategies[i].depositToken == address(0)) revert ZeroAddress();
             if (_strategies[i].router == address(0)) revert ZeroAddress();
-            if ((_strategies[i].oracle == address(0) &&
-                _strategies[i].depositToken != depositToken) ||
-                _strategies[i].depositToken != IFortiFiPriceOracle(_strategies[i].oracle).token() ||
-                _strategies[i].decimals != IFortiFiPriceOracle(_strategies[i].oracle).decimals()) revert InvalidOracle();
+            if (_strategies[i].depositToken != depositToken &&
+                (_strategies[i].oracle == address(0) ||
+                 _strategies[i].depositToken != IFortiFiPriceOracle(_strategies[i].oracle).token() ||
+                 _strategies[i].decimals != IFortiFiPriceOracle(_strategies[i].oracle).decimals()) 
+               ) revert InvalidOracle();
             if (_strategies[i].decimals <= USDC_DECIMALS &&
                 _strategies[i].depositToken != depositToken) revert InvalidDecimals();
             for (uint256 j = 0; j < i; j++) {
