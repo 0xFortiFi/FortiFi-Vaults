@@ -8,14 +8,18 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 pragma solidity 0.8.21;
 
-/// @title Delta Prime FortiFi Strategy contract
+/// @title Vector Finance FortiFi Strategy contract
 /// @notice This contract allows for FortiFi vaults to utilize Vector Finance strategies. 
 contract FortiFiVectorStrategy is FortiFiStrategy {
     using SafeERC20 for IERC20;
     uint16 public slippageBps = 100;
 
-    constructor(address _strategy, address _depositToken, address _wrappedNative) 
-        FortiFiStrategy(_strategy, _depositToken, _wrappedNative) {
+    constructor(address _strategy, 
+        address _depositToken, 
+        address _wrappedNative,
+        address _feeManager,
+        address _feeCalculator) 
+        FortiFiStrategy(_strategy, _depositToken, _wrappedNative, _feeManager, _feeCalculator) {
     }
 
     event SlippageSet(uint16 newSlippage);
@@ -26,6 +30,7 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
     function depositToFortress(uint256 _amount, address _user, uint256 _tokenId) external override {
         if (_amount == 0) revert InvalidDeposit();
         if (!isFortiFiVault[msg.sender]) revert InvalidCaller();
+        if (strategyIsBricked) revert StrategyBricked();
         _dToken.safeTransferFrom(msg.sender, address(this), _amount);
         IVectorFortress _fortress;
 
@@ -63,14 +68,35 @@ contract FortiFiVectorStrategy is FortiFiStrategy {
 
         // burn receipt tokens and withdraw from Fortress
         _burn(msg.sender, _amount);
-        IVectorFortress(vaultToTokenToFortress[msg.sender][_tokenId]).withdrawVector(_user, slippageBps);
 
-        uint256 _depositTokenReceived = _dToken.balanceOf(address(this));
+        if (strategyIsBricked) {
+            IVectorFortress(vaultToTokenToFortress[msg.sender][_tokenId]).withdrawBricked(_user);
 
-        // transfer received deposit tokens
-        _dToken.safeTransfer(msg.sender, _dToken.balanceOf(address(this)));
+            emit WithdrawBrickedFromFortress(msg.sender, _user, address(_strat), _tokenId);
+        } else {
+            IVectorFortress(vaultToTokenToFortress[msg.sender][_tokenId]).withdrawVector(_user, extraTokens, slippageBps);
 
-        emit WithdrawFromFortress(msg.sender, _user, address(_strat), _depositTokenReceived);
+            uint256 _depositTokenReceived = _dToken.balanceOf(address(this));
+
+            // transfer received deposit tokens
+            _dToken.safeTransfer(msg.sender, _depositTokenReceived);
+
+            // handle fees on extra reward tokens
+            uint256 _length = extraTokens.length;
+            if (_length > 0) {
+                for(uint256 i = 0; i < _length; i++) {
+                    IERC20 _token = IERC20(extraTokens[i]);
+                    uint256 _tokenBalance = _token.balanceOf(address(this));
+                    if (_tokenBalance > 0) {
+                        uint256 _fee = feeCalc.getFees(_user, _tokenBalance);
+                        feeMgr.collectFees(extraTokens[i], _fee);
+                        _token.safeTransfer(_user, _tokenBalance - _fee);
+                    }
+                }
+            }
+
+            emit WithdrawFromFortress(msg.sender, _user, address(_strat), _tokenId, _depositTokenReceived);
+        }
     }
 
     /// @notice Function to set the slippage if 1% is not sufficient
