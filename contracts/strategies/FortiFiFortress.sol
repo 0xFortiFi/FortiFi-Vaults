@@ -71,7 +71,7 @@ contract FortiFiFortress is Ownable {
     }
 
     /// @notice Function to withdraw everything from vault
-    function withdraw(address _user) external virtual onlyOwner {
+    function withdraw(address _user, address[] memory _extraTokens) external virtual onlyOwner {
         uint256 _balance = _strat.balanceOf(address(this));
         if (_balance == 0) revert InvalidWithdrawal();
 
@@ -85,7 +85,34 @@ contract FortiFiFortress is Ownable {
 
         // transfer received deposit tokens and refund left over tokens, if any
         _dToken.safeTransfer(msg.sender, _dToken.balanceOf(address(this)));
+
+        // transfer extra reward tokens
+        uint256 _length = _extraTokens.length;
+        if (_length > 0) {
+            for(uint256 i = 0; i < _length; i++) {
+                IERC20 _token = IERC20(_extraTokens[i]);
+                uint256 _tokenBalance = _token.balanceOf(address(this));
+                if (_tokenBalance > 0) {
+                    _token.safeTransfer(msg.sender, _tokenBalance);
+                }
+            }
+        }
+
         _refund(_user);
+
+        emit WithdrawalMade(_user);
+    }
+
+    /// @notice Function to return strategy receipts to user when strategy is bricked
+    function withdrawBricked(address _user) external virtual onlyOwner {
+        uint256 _balance = _strat.balanceOf(address(this));
+        if (_balance == 0) revert InvalidWithdrawal();
+
+        // ensure no strategy receipt tokens remain
+        _balance = _strat.balanceOf(address(this));
+        if (_balance > 0) {
+            IERC20(address(_strat)).safeTransfer(_user, _balance);
+        }
 
         emit WithdrawalMade(_user);
     }

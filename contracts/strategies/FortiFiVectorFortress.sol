@@ -22,7 +22,7 @@ contract FortiFiVectorFortress is FortiFiFortress {
     /// @notice Nullified withdraw function
     /// @dev this override is to ensure an incorrect withdraw call is not made from the strategy contract.
     /// Vector strategies require calling withdrawVector(_amount, _slippageBps)
-    function withdraw(address) external override onlyOwner {
+    function withdraw(address, address[] memory extraTokens) external override onlyOwner {
         revert("FortiFi: Invalid withdraw");
     }
 
@@ -30,7 +30,7 @@ contract FortiFiVectorFortress is FortiFiFortress {
     /// @dev Vector Finance strategies require that you pass in the amount of deposit tokens you expect to receive
     /// rather than the amount of receipt tokens you want to burn as well as a minAmount. This is calculated by utilizing the
     /// getDepositTokensForShares view function and applying a slippage amount (typically 1%).
-    function withdrawVector(address _user, uint16 _slippageBps) external onlyOwner {
+    function withdrawVector(address _user, address[] memory _extraTokens, uint16 _slippageBps) external onlyOwner {
         uint256 _balance = _vectorStrat.balanceOf(address(this));
         if (_balance == 0) revert InvalidWithdrawal();
 
@@ -49,6 +49,19 @@ contract FortiFiVectorFortress is FortiFiFortress {
 
         // transfer received deposit tokens and refund left over tokens, if any
         _dToken.safeTransfer(msg.sender, _dToken.balanceOf(address(this)));
+
+        // transfer extra reward tokens
+        uint256 _length = _extraTokens.length;
+        if (_length > 0) {
+            for(uint256 i = 0; i < _length; i++) {
+                IERC20 _token = IERC20(_extraTokens[i]);
+                uint256 _tokenBalance = _token.balanceOf(address(this));
+                if (_tokenBalance > 0) {
+                    _token.safeTransfer(msg.sender, _tokenBalance);
+                }
+            }
+        }
+
         _refund(_user);
 
         emit WithdrawalMade(_user);

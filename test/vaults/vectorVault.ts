@@ -57,24 +57,24 @@ describe("Vector SAMS Vault Tests", function () {
     await NFT1.mint(addr2.getAddress(), 3);
     await NFT1.mint(addr3.getAddress(), 10);
 
+    FeeMgr = await facMgr.deploy([addr1.getAddress()], [10000]);
+
+    FeeCalc = await facCalc.deploy([NFT1.getAddress()], [0,1,3,5,10], [700,600,500,400,300], false);
+
     MockStrat = await facVectorStrat.deploy(MockERC20.getAddress());
     await MockStrat.waitForDeployment();
 
-    VectorStrat = await facFortiFiStrat.deploy(MockStrat.getAddress(), MockERC20.getAddress(), MockERC20.getAddress());
+    VectorStrat = await facFortiFiStrat.deploy(MockStrat.getAddress(), MockERC20.getAddress(), MockERC20.getAddress(), FeeMgr.getAddress(), FeeCalc.getAddress());
     await VectorStrat.waitForDeployment();
 
     MockStrat2 = await facVectorStrat.deploy(MockERC20.getAddress());
     await MockStrat2.waitForDeployment();
 
-    VectorStrat2 = await facFortiFiStrat.deploy(MockStrat2.getAddress(), MockERC20.getAddress(), MockERC20.getAddress());
+    VectorStrat2 = await facFortiFiStrat.deploy(MockStrat2.getAddress(), MockERC20.getAddress(), MockERC20.getAddress(), FeeMgr.getAddress(), FeeCalc.getAddress());
     await VectorStrat2.waitForDeployment().then(() => {})
 
     MockStrat3 = await facMockStrat.deploy(MockERC20.getAddress());
     await MockStrat3.waitForDeployment();
-
-    FeeMgr = await facMgr.deploy([addr1.getAddress()], [10000]);
-
-    FeeCalc = await facCalc.deploy([NFT1.getAddress()], [0,1,3,5,10], [700,600,500,400,300], false);
 
     Vault = await facVault.deploy("Basic Vault", 
                                   "ffBasic", 
