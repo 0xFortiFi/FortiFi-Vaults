@@ -19,21 +19,22 @@ error StalePrice();
 /// support other oracles.
 contract FortiFiPriceOracle is IFortiFiPriceOracle {
     address public immutable token;
-    AggregatorV3Interface public immutable feed;
+    address public immutable feed;
 
     constructor(address _token, address _feed) {
         token = _token;
-        feed = AggregatorV3Interface(_feed);
+        feed = _feed;
     }
 
-    function getPrice() external view returns(uint256) {
+    function getPrice() external view virtual returns(uint256) {
+        AggregatorV3Interface _feed = AggregatorV3Interface(feed);
         (
             /* uint80 roundID */,
             int answer,
             /*uint startedAt*/,
             uint timeStamp,
             /*uint80 answeredInRound*/
-        ) = feed.latestRoundData();
+        ) = _feed.latestRoundData();
 
         if (answer <= 0) revert InvalidPrice();
         if (timeStamp < block.timestamp - (75*60) /*75 minutes*/ ) revert StalePrice();
@@ -41,7 +42,8 @@ contract FortiFiPriceOracle is IFortiFiPriceOracle {
         return uint(answer);
     }
 
-    function decimals() external view returns (uint8) {
-        return feed.decimals();
+    function decimals() external view virtual returns (uint8) {
+        AggregatorV3Interface _feed = AggregatorV3Interface(feed);
+        return _feed.decimals();
     }
 }
