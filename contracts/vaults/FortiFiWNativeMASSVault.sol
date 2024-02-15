@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// FortiFiMASSVault by FortiFi
+// FortiFiWNativeMASSVault by FortiFi
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -71,16 +71,15 @@ error ContractPaused();
 /// @notice Error caused by trying to use recoverERC20 to withdraw strategy receipt tokens
 error CantWithdrawStrategyReceipts();
 
-/// @title Contract for FortiFi MASS Vaults
-/// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
+/// @title Contract for FortiFi Wrapped Native MASS Vaults
+/// @notice This contract allows for the deposit of wrapped native tokens, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
-contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, ReentrancyGuard {
+contract FortiFiWNativeMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     string public name;
     string public symbol;
-    address public immutable depositToken;
     address public immutable wrappedNative;
-    uint8 public constant USDC_DECIMALS = 6;
+    uint8 public constant WNATIVE_DECIMALS = 18;
     uint16 public constant SWAP_DEADLINE_BUFFER = 1800;
     uint16 public constant BPS = 10_000;
     uint16 public slippageBps = 100;
@@ -90,6 +89,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
     IFortiFiFeeCalculator public feeCalc;
     IFortiFiFeeManager public feeMgr;
+    IFortiFiPriceOracle public nativeOracle;
 
     Strategy[] public strategies;
 
@@ -106,6 +106,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     event SlippageSet(uint16 slippage);
     event FeeManagerSet(address feeManager);
     event FeeCalculatorSet(address feeCalculator);
+    event NativeOracleSet(address oracle);
     event PauseStateUpdated(bool paused);
 
     /// @notice Used to restrict function access while paused.
@@ -118,20 +119,20 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         string memory _symbol, 
         string memory _metadata,
         address _wrappedNative,
-        address _depositToken,
         address _feeManager,
         address _feeCalculator,
+        address _nativeOracle,
         Strategy[] memory _strategies) ERC1155(_metadata) {
         if (_wrappedNative == address(0)) revert ZeroAddress();
-        if (_depositToken == address(0)) revert ZeroAddress();
         if (_feeManager == address(0)) revert ZeroAddress();
         if (_feeCalculator == address(0)) revert ZeroAddress();
+        if (_nativeOracle == address(0)) revert ZeroAddress();
         name = _name; 
         symbol = _symbol;
         wrappedNative = _wrappedNative;
-        depositToken = _depositToken;
         feeCalc = IFortiFiFeeCalculator(_feeCalculator);
         feeMgr = IFortiFiFeeManager(_feeManager);
+        nativeOracle = IFortiFiPriceOracle(_nativeOracle);
         setStrategies(_strategies);
     }
 
@@ -144,7 +145,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// tokens received for later withdrawal.
     function deposit(uint256 _amount) external override nonReentrant whileNotPaused returns(uint256 _tokenId, TokenInfo memory _info) {
         if (_amount < minDeposit) revert InvalidDeposit();
-        IERC20(depositToken).safeTransferFrom(msg.sender, address(this), _amount);
+        IERC20(wrappedNative).safeTransferFrom(msg.sender, address(this), _amount);
         _tokenId = _mintReceipt();
         _deposit(_amount, _tokenId, false);
         _info = tokenInfo[_tokenId];
@@ -159,7 +160,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// deposit without needing to burn/withdraw first. 
     function add(uint256 _amount, uint256 _tokenId) external override nonReentrant whileNotPaused returns(TokenInfo memory _info) {
         if (_amount < minDeposit) revert InvalidDeposit();
-        IERC20(depositToken).safeTransferFrom(msg.sender, address(this), _amount);
+        IERC20(wrappedNative).safeTransferFrom(msg.sender, address(this), _amount);
         if (balanceOf(msg.sender, _tokenId) == 0) revert NotTokenOwner();
         _deposit(_amount, _tokenId, true);
         _info = tokenInfo[_tokenId];
@@ -179,9 +180,9 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
         (uint256 _amount, uint256 _profit) = _withdraw(_tokenId);
         uint256 _fee = feeCalc.getFees(msg.sender, _profit);
-        feeMgr.collectFees(depositToken, _fee);
+        feeMgr.collectFees(wrappedNative, _fee);
         
-        IERC20(depositToken).safeTransfer(msg.sender, _amount - _fee);
+        IERC20(wrappedNative).safeTransfer(msg.sender, _amount - _fee);
 
         if (address(this).balance > 0) {
             (bool success, ) = payable(msg.sender).call{ value: address(this).balance }("");
@@ -219,10 +220,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         emit FeeCalculatorSet(_contract);
     }
 
-    /// @notice Function to set a direct swap path for a specific token
-    /// @dev This can be used when there is sufficient USDC/strategyDepositToken liquidity
-    function setDirectSwapFor(address _token, bool _bool) external onlyOwner {
-        useDirectSwap[_token] = _bool;
+    /// @notice Function to set new native oracle contract
+    function setNativeOracle(address _contract) external onlyOwner {
+        if (_contract == address(0)) revert ZeroAddress();
+        nativeOracle = IFortiFiPriceOracle(_contract);
+        emit NativeOracleSet(_contract);
     }
 
     /// @notice Function to flip paused state
@@ -246,7 +248,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @dev Since contract never holds deposit tokens max approvals should not matter. 
     function refreshApprovals() public {
         uint256 _length = strategies.length;
-        IERC20 _depositToken = IERC20(depositToken);
+        IERC20 _depositToken = IERC20(wrappedNative);
 
         _depositToken.approve(address(feeMgr), type(uint256).max);
         for(uint256 i = 0; i < _length; i++) {
@@ -277,10 +279,10 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             if (_strategies[i].strategy == address(0)) revert ZeroAddress();
             if (_strategies[i].depositToken == address(0)) revert ZeroAddress();
             if (_strategies[i].router == address(0)) revert ZeroAddress();
-            if (_strategies[i].depositToken != depositToken &&
+            if (_strategies[i].depositToken != wrappedNative &&
                 (_strategies[i].oracle == address(0) ||
                  _strategies[i].depositToken != IFortiFiPriceOracle(_strategies[i].oracle).token() ||
-                 IFortiFiPriceOracle(_strategies[i].oracle).decimals() <= USDC_DECIMALS) 
+                 IFortiFiPriceOracle(_strategies[i].oracle).decimals() != nativeOracle.decimals()) 
                ) revert InvalidOracle();
             for (uint256 j = 0; j < i; j++) {
                 if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
@@ -350,45 +352,18 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @notice Internal swap function for deposits.
     /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
     /// since this contract does not hold strategy deposit tokens, return contract balance after swap.
-    function _swapFromDepositToken(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
-        address _strategyDepositToken = _strat.depositToken;
-        address[] memory _route = new address[](3);
-        IRouter _router = IRouter(_strat.router);
-        IFortiFiPriceOracle _oracle = IFortiFiPriceOracle(_strat.oracle);
-        
-        _route[0] = depositToken;
-        _route[1] = wrappedNative;
-        _route[2] = _strategyDepositToken;
-
-        uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_oracle.decimals() - USDC_DECIMALS);
-
-        _router.swapExactTokensForTokens(_amount, 
-            (_swapAmount * (BPS - slippageBps) / BPS), 
-            _route, 
-            address(this), 
-            block.timestamp + SWAP_DEADLINE_BUFFER);
-
-        uint256 _strategyDepositTokenBalance = IERC20(_strategyDepositToken).balanceOf(address(this));
-        if (_strategyDepositTokenBalance == 0) revert SwapFailed();
-
-        return _strategyDepositTokenBalance;
-    }
-
-    /// @notice Internal swap function for deposits where USDC/strategyDepositToken exists with sufficient liquidity.
-    /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
-    /// since this contract does not hold strategy deposit tokens, return contract balance after swap.
     function _swapFromDepositTokenDirect(uint256 _amount, Strategy memory _strat) internal returns(uint256) {
         address _strategyDepositToken = _strat.depositToken;
         address[] memory _route = new address[](2);
         IRouter _router = IRouter(_strat.router);
         IFortiFiPriceOracle _oracle = IFortiFiPriceOracle(_strat.oracle);
         
-        _route[0] = depositToken;
+        _route[0] = wrappedNative;
         _route[1] = _strategyDepositToken;
 
-        uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_oracle.decimals() - USDC_DECIMALS);
+        uint256 _latestPriceNative = nativeOracle.getPrice();
+        uint256 _latestPriceTokenB = _oracle.getPrice();
+        uint256 _swapAmount = _amount * _latestPriceNative * 10**WNATIVE_DECIMALS / _latestPriceTokenB / 10**(_oracle.decimals());
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -400,31 +375,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         if (_strategyDepositTokenBalance == 0) revert SwapFailed();
 
         return _strategyDepositTokenBalance;
-    }
-
-    /// @notice Internal swap function for withdrawals.
-    /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
-    function _swapToDepositToken(uint256 _amount, Strategy memory _strat) internal {
-        address _strategyDepositToken = _strat.depositToken;
-        address[] memory _route = new address[](3);
-        IRouter _router = IRouter(_strat.router);
-        IFortiFiPriceOracle _oracle = IFortiFiPriceOracle(_strat.oracle);
-
-        _route[0] = _strategyDepositToken;
-        _route[1] = wrappedNative;
-        _route[2] = depositToken;
-        
-        uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_oracle.decimals() - USDC_DECIMALS);
-
-        _router.swapExactTokensForTokens(_amount, 
-            (_swapAmount * (BPS - slippageBps) / BPS), 
-            _route, 
-            address(this), 
-            block.timestamp + SWAP_DEADLINE_BUFFER);
-
-        uint256 _depositTokenBalance = IERC20(depositToken).balanceOf(address(this));
-        if (_depositTokenBalance == 0) revert SwapFailed();
     }
 
     /// @notice Internal swap function for withdrawals where USDC/strategyDepositToken exists with sufficient liquidity.
@@ -436,10 +386,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         IFortiFiPriceOracle _oracle = IFortiFiPriceOracle(_strat.oracle);
 
         _route[0] = _strategyDepositToken;
-        _route[1] = depositToken;
+        _route[1] = wrappedNative;
         
-        uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_oracle.decimals() - USDC_DECIMALS);
+        uint256 _latestPriceNative = nativeOracle.getPrice();
+        uint256 _latestPriceTokenB = _oracle.getPrice();
+        uint256 _swapAmount = _amount * _latestPriceTokenB / 10**(_oracle.decimals()) / _latestPriceNative * 10**WNATIVE_DECIMALS;
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -447,7 +398,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             address(this), 
             block.timestamp + SWAP_DEADLINE_BUFFER);
 
-        uint256 _depositTokenBalance = IERC20(depositToken).balanceOf(address(this));
+        uint256 _depositTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
         if (_depositTokenBalance == 0) revert SwapFailed();
     }
 
@@ -474,23 +425,15 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
             // split deposit and swap if necessary
             if (i == (_length - 1)) {
-                if (depositToken != _strategy.depositToken) {
-                    if (useDirectSwap[_strategy.depositToken]) {
-                        _depositAmount = _swapFromDepositTokenDirect(_remainder, _strategy);
-                    } else {
-                        _depositAmount = _swapFromDepositToken(_remainder, _strategy);
-                    }
+                if (wrappedNative != _strategy.depositToken) {
+                    _depositAmount = _swapFromDepositTokenDirect(_remainder, _strategy);
                 } else {
                     _depositAmount = _remainder;
                 }    
             } else {
                 uint256 _split = _amount * _strategy.bps / BPS;
-                if (depositToken != _strategy.depositToken) {
-                    if (useDirectSwap[_strategy.depositToken]) {
-                        _depositAmount = _swapFromDepositTokenDirect(_split, _strategy);
-                    } else {
-                        _depositAmount = _swapFromDepositToken(_split, _strategy);
-                    }
+                if (wrappedNative != _strategy.depositToken) {
+                    _depositAmount = _swapFromDepositTokenDirect(_split, _strategy);
                 } else {
                     _depositAmount = _split;
                 }    
@@ -566,17 +509,13 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             }
 
             // swap out for deposit tokens if needed
-            if (_info.positions[i].strategy.depositToken != depositToken) {
+            if (_info.positions[i].strategy.depositToken != wrappedNative) {
                 uint256 _strategyDepositTokenProceeds = IERC20(_info.positions[i].strategy.depositToken).balanceOf(address(this));
-                if (useDirectSwap[_info.positions[i].strategy.depositToken]) {
-                    _swapToDepositTokenDirect(_strategyDepositTokenProceeds, _info.positions[i].strategy);
-                } else {
-                    _swapToDepositToken(_strategyDepositTokenProceeds, _info.positions[i].strategy);
-                }
+                _swapToDepositTokenDirect(_strategyDepositTokenProceeds, _info.positions[i].strategy);
             }  
         }
 
-        _proceeds = IERC20(depositToken).balanceOf(address(this));
+        _proceeds = IERC20(wrappedNative).balanceOf(address(this));
         
         if (_proceeds > _info.deposit) {
             _profit = _proceeds - _info.deposit;
@@ -588,16 +527,10 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @notice Internal function to refund left over tokens from deposit/add/rebalance transactions
     function _refund(TokenInfo memory _info) internal {
         // Refund left over deposit tokens, if any
-        uint256 _depositTokenBalance = IERC20(depositToken).balanceOf(address(this));
+        uint256 _depositTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
         if (_depositTokenBalance > 0) {
             _info.deposit -= _depositTokenBalance;
-            IERC20(depositToken).safeTransfer(msg.sender, _depositTokenBalance);
-        }
-
-        // Refund left over wrapped native tokens, if any
-        uint256 _wrappedNativeTokenBalance = IERC20(wrappedNative).balanceOf(address(this));
-        if (_wrappedNativeTokenBalance > 0) {
-            IERC20(wrappedNative).safeTransfer(msg.sender, _wrappedNativeTokenBalance);
+            IERC20(wrappedNative).safeTransfer(msg.sender, _depositTokenBalance);
         }
 
         // Refund left over native tokens, if any
