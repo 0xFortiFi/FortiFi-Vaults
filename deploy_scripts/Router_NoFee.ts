@@ -10,9 +10,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  await deploy('FortiFiFeeManager', {
+  await deploy('FortiFiUniV3Router', {
     from: deployer,
-    args: [["0x63eAf99c08b9384BDc871B2141FaE13D65157592"], [10000]],
+    args: ["0xE592427A0AEce92De3Edee1F18E0157C05861564", 0],
     log: true,
   });
 };

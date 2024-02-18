@@ -94,7 +94,6 @@ contract FortiFiWNativeMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Owna
     Strategy[] public strategies;
 
     mapping(uint256 => TokenInfo) public tokenInfo;
-    mapping(address => bool) public useDirectSwap;
 
     event Deposit(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Add(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
@@ -363,7 +362,7 @@ contract FortiFiWNativeMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Owna
 
         uint256 _latestPriceNative = nativeOracle.getPrice();
         uint256 _latestPriceTokenB = _oracle.getPrice();
-        uint256 _swapAmount = _amount * _latestPriceNative * 10**WNATIVE_DECIMALS / _latestPriceTokenB / 10**(_oracle.decimals());
+        uint256 _swapAmount = _amount * _latestPriceNative * 10**18 / _latestPriceTokenB / 10**18 / 10**(WNATIVE_DECIMALS - _strat.decimals);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -377,7 +376,7 @@ contract FortiFiWNativeMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Owna
         return _strategyDepositTokenBalance;
     }
 
-    /// @notice Internal swap function for withdrawals where USDC/strategyDepositToken exists with sufficient liquidity.
+    /// @notice Internal swap function for withdrawals
     /// @dev This function can use any uniswapV2-style router to swap from deposited tokens to the strategy deposit tokens.
     function _swapToDepositTokenDirect(uint256 _amount, Strategy memory _strat) internal {
         address _strategyDepositToken = _strat.depositToken;
@@ -390,7 +389,7 @@ contract FortiFiWNativeMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Owna
         
         uint256 _latestPriceNative = nativeOracle.getPrice();
         uint256 _latestPriceTokenB = _oracle.getPrice();
-        uint256 _swapAmount = _amount * _latestPriceTokenB / 10**(_oracle.decimals()) / _latestPriceNative * 10**WNATIVE_DECIMALS;
+        uint256 _swapAmount = _amount * _latestPriceTokenB / 10**18 / _latestPriceNative * 10**18 * 10**(WNATIVE_DECIMALS - _strat.decimals);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 

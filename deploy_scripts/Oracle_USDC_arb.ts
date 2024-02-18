@@ -10,9 +10,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  await deploy('FortiFiFeeManager', {
+  await deploy('FortiFiDIAPriceOracleL2', {
     from: deployer,
-    args: [["0x63eAf99c08b9384BDc871B2141FaE13D65157592"], [10000]],
+    args: ["0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8", 
+      "0xD210347A7F3E4D3B5f96D4AFa59372247f3A2f84",
+      "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
+      "USDC/USD"
+    ],
     log: true,
   });
 };

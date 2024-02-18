@@ -47,7 +47,7 @@ error CantAddToReceipt();
 /// @notice Error caused when swap fails
 error SwapFailed();
 
-/// @notice Error caused when trying to use a token with less decimals than USDC
+/// @notice Error caused when trying to use an oracle that has incorrect decimals (8)
 error InvalidDecimals();
 
 /// @notice Error caused when trying to set oracle to an invalid address
@@ -100,13 +100,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     event Add(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Rebalance(uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
     event Withdrawal(address indexed depositor, uint256 indexed tokenId, uint256 amountWithdrawn, uint256 profit, uint256 fee);
-    event ApprovalsRefreshed();
     event StrategiesSet(Strategy[]);
-    event MinDepositSet(uint256 minAmount);
-    event SlippageSet(uint16 slippage);
-    event FeeManagerSet(address feeManager);
-    event FeeCalculatorSet(address feeCalculator);
-    event PauseStateUpdated(bool paused);
 
     /// @notice Used to restrict function access while paused.
     modifier whileNotPaused() {
@@ -195,28 +189,24 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     function setMinDeposit(uint256 _amount) external onlyOwner {
         if (_amount < 30_000) revert InvalidMinDeposit();
         minDeposit = _amount;
-        emit MinDepositSet(_amount);
     }
 
     /// @notice Function to set slippage used in swap functions. Must be 1-5% (100-500)
     function setSlippage(uint16 _amount) external onlyOwner {
         if (_amount < 100 || _amount > 500) revert InvalidSlippage();
         slippageBps = _amount;
-        emit SlippageSet(_amount);
     }
 
     /// @notice Function to set new FortiFiFeeManager contract
     function setFeeManager(address _contract) external onlyOwner {
         if (_contract == address(0)) revert ZeroAddress();
         feeMgr = IFortiFiFeeManager(_contract);
-        emit FeeManagerSet(_contract);
     }
 
     /// @notice Function to set new FortiFiFeeCalculator contract
     function setFeeCalculator(address _contract) external onlyOwner {
         if (_contract == address(0)) revert ZeroAddress();
         feeCalc = IFortiFiFeeCalculator(_contract);
-        emit FeeCalculatorSet(_contract);
     }
 
     /// @notice Function to set a direct swap path for a specific token
@@ -228,7 +218,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @notice Function to flip paused state
     function flipPaused() external onlyOwner {
         paused = !paused;
-        emit PauseStateUpdated(paused);
     }
 
     /// @notice Emergency function to recover stuck ERC20 tokens
@@ -254,7 +243,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             IERC20(strategies[i].depositToken).approve(strategies[i].router, type(uint256).max);
             _depositToken.approve(strategies[i].router, type(uint256).max);
         }
-        emit ApprovalsRefreshed();
     }
 
     /// @notice This function sets up the underlying strategies used by the vault.
@@ -280,7 +268,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
             if (_strategies[i].depositToken != depositToken &&
                 (_strategies[i].oracle == address(0) ||
                  _strategies[i].depositToken != IFortiFiPriceOracle(_strategies[i].oracle).token() ||
-                 IFortiFiPriceOracle(_strategies[i].oracle).decimals() <= USDC_DECIMALS) 
+                 IFortiFiPriceOracle(_strategies[i].oracle).decimals() != 8) 
                ) revert InvalidOracle();
             for (uint256 j = 0; j < i; j++) {
                 if (_holdStrategies[j] == _strategies[i].strategy) revert DuplicateStrategy();
@@ -361,7 +349,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _route[2] = _strategyDepositToken;
 
         uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_oracle.decimals() - USDC_DECIMALS);
+        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(8 - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -388,7 +376,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _route[1] = _strategyDepositToken;
 
         uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(_oracle.decimals() - USDC_DECIMALS);
+        uint256 _swapAmount = _amount * (10**_strat.decimals) / _latestPrice*10**(8 - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -415,7 +403,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _route[2] = depositToken;
         
         uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_oracle.decimals() - USDC_DECIMALS);
+        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(8 - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 
@@ -439,7 +427,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         _route[1] = depositToken;
         
         uint256 _latestPrice = _oracle.getPrice();
-        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(_oracle.decimals() - USDC_DECIMALS);
+        uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(8 - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
             (_swapAmount * (BPS - slippageBps) / BPS), 

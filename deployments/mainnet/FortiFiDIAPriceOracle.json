@@ -1,0 +1,170 @@
+{
+  "address": "0xDC655E3Dc8f36096c779294D03C62b3af15De8b0",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_feed",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_key",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidPrice",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "StalePrice",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feed",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "key",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "token",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x4f22cc538abf21af14f49543606d12575da5d4b8db6d8ddfad209fea2417ea9b",
+  "receipt": {
+    "to": null,
+    "from": "0x625d271F634eE0804CCc573C4679aA3AeE475B62",
+    "contractAddress": "0xDC655E3Dc8f36096c779294D03C62b3af15De8b0",
+    "transactionIndex": 5,
+    "gasUsed": "333384",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x6419e84e8a9e5adada5949ca712bf834b25e8b34bb5a0c7dc2c62829598c7db5",
+    "transactionHash": "0x4f22cc538abf21af14f49543606d12575da5d4b8db6d8ddfad209fea2417ea9b",
+    "logs": [],
+    "blockNumber": 41802074,
+    "cumulativeGasUsed": "1431181",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+    "0x28101134A61a4c768eDAf2e32487F920314D3118",
+    "USDT/USD"
+  ],
+  "numDeployments": 2,
+  "solcInputHash": "35515155b9fc8f1d7fd86cf51f1142dc",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.21+commit.d9974bed\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_feed\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_key\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"InvalidPrice\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StalePrice\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"feed\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"key\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"title\":\"FortiFiDIAPriceOracle\",\"version\":1},\"userdoc\":{\"errors\":{\"InvalidPrice()\":[{\"notice\":\"Error caused by negative price returned from oracle\"}],\"StalePrice()\":[{\"notice\":\"Error caused by stale price returned from oracle\"}]},\"kind\":\"user\",\"methods\":{},\"notice\":\"This contract is an implementation of FortiFiPriceOracle adapted for DIA on-chain oracles\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/oracles/FortiFiDIAPriceOracle.sol\":\"FortiFiDIAPriceOracle\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/oracles/FortiFiDIAPriceOracle.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-only\\r\\n// FortiFiDIAPriceOracle by FortiFi\\r\\n\\r\\nimport \\\"./FortiFiPriceOracle.sol\\\";\\r\\n\\r\\npragma solidity 0.8.21;\\r\\n\\r\\ninterface IDIAOracleV2{\\r\\n    function getValue(string memory) external view returns (uint128, uint128);\\r\\n}\\r\\n\\r\\n/// @title FortiFiDIAPriceOracle\\r\\n/// @notice This contract is an implementation of FortiFiPriceOracle adapted for DIA on-chain oracles\\r\\ncontract FortiFiDIAPriceOracle is FortiFiPriceOracle {\\r\\n    string public key;\\r\\n\\r\\n    constructor(address _token, address _feed, string memory _key) FortiFiPriceOracle(_token, _feed) {\\r\\n        key = _key;\\r\\n    }\\r\\n\\r\\n    function getPrice() external view override returns(uint256) {\\r\\n        (uint128 answer, uint128 timeStamp) = IDIAOracleV2(feed).getValue(key);\\r\\n\\r\\n        if (answer <= 0) revert InvalidPrice();\\r\\n        if (timeStamp < block.timestamp - (75*60) /*75 minutes*/ ) revert StalePrice();\\r\\n        \\r\\n        return uint(answer);\\r\\n    }\\r\\n\\r\\n    function decimals() external view override returns (uint8) {\\r\\n        return 8;\\r\\n    }\\r\\n}\",\"keccak256\":\"0x75b37404ce241640c937075d2c9d35b19ad164a985061ce00871dc458619e29c\",\"license\":\"GPL-3.0-only\"},\"contracts/oracles/FortiFiPriceOracle.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-only\\r\\n// FortiFiPriceOracle by FortiFi\\r\\n\\r\\nimport \\\"./interfaces/IFortiFiPriceOracle.sol\\\";\\r\\nimport \\\"./interfaces/AggregatorV3Interface.sol\\\";\\r\\n\\r\\npragma solidity 0.8.21;\\r\\n\\r\\n/// @notice Error caused by negative price returned from oracle\\r\\nerror InvalidPrice();\\r\\n\\r\\n/// @notice Error caused by stale price returned from oracle\\r\\nerror StalePrice();\\r\\n\\r\\n\\r\\n/// @title FortiFiPriceOracle\\r\\n/// @notice This contract is used as a flexible interface to provide prices to FortiFiMASSVault implementations.\\r\\n/// This base version is meant to use Chainlink on-chain price feeds, and can be inherited and modified to \\r\\n/// support other oracles.\\r\\ncontract FortiFiPriceOracle is IFortiFiPriceOracle {\\r\\n    address public immutable token;\\r\\n    address public immutable feed;\\r\\n\\r\\n    constructor(address _token, address _feed) {\\r\\n        token = _token;\\r\\n        feed = _feed;\\r\\n    }\\r\\n\\r\\n    function getPrice() external view virtual returns(uint256) {\\r\\n        AggregatorV3Interface _feed = AggregatorV3Interface(feed);\\r\\n        (\\r\\n            /* uint80 roundID */,\\r\\n            int answer,\\r\\n            /*uint startedAt*/,\\r\\n            uint timeStamp,\\r\\n            /*uint80 answeredInRound*/\\r\\n        ) = _feed.latestRoundData();\\r\\n\\r\\n        if (answer <= 0) revert InvalidPrice();\\r\\n        if (timeStamp < block.timestamp - (75*60) /*75 minutes*/ ) revert StalePrice();\\r\\n        \\r\\n        return uint(answer);\\r\\n    }\\r\\n\\r\\n    function decimals() external view virtual returns (uint8) {\\r\\n        AggregatorV3Interface _feed = AggregatorV3Interface(feed);\\r\\n        return _feed.decimals();\\r\\n    }\\r\\n}\",\"keccak256\":\"0xd9a680d8628c56046a95c47c7af56fca249eb06b087d192164a55875d359d5c0\",\"license\":\"GPL-3.0-only\"},\"contracts/oracles/interfaces/AggregatorV3Interface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface AggregatorV3Interface {\\n  function decimals() external view returns (uint8);\\n\\n  function description() external view returns (string memory);\\n\\n  function version() external view returns (uint256);\\n\\n  function getRoundData(\\n    uint80 _roundId\\n  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\\n\\n  function latestRoundData()\\n    external\\n    view\\n    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\\n}\\n\",\"keccak256\":\"0xfe4e8bb4861bb3860ba890ab91a3b818ec66e5a8f544fb608cfcb73f433472cd\",\"license\":\"MIT\"},\"contracts/oracles/interfaces/IFortiFiPriceOracle.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-only\\r\\n// IFortiFiPriceOracle Interface by FortiFi\\r\\n\\r\\npragma solidity 0.8.21;\\r\\n\\r\\n/// @title Interface for FortiFiPriceOracle\\r\\ninterface IFortiFiPriceOracle {\\r\\n    function getPrice() external view returns(uint256);\\r\\n    function token() external view returns(address);\\r\\n    function decimals() external view returns (uint8);\\r\\n}\",\"keccak256\":\"0x0de4b5cc230d6051e2384a2ea04cba82bb24d11389c4743f1cd3cb5b9f152337\",\"license\":\"GPL-3.0-only\"}},\"version\":1}",
+  "bytecode": "0x60c060405234801561001057600080fd5b5060405161075738038061075783398101604081905261002f91610089565b6001600160a01b03808416608052821660a052600061004e82826101fc565b505050506102bb565b80516001600160a01b038116811461006e57600080fd5b919050565b634e487b7160e01b600052604160045260246000fd5b60008060006060848603121561009e57600080fd5b6100a784610057565b925060206100b6818601610057565b60408601519093506001600160401b03808211156100d357600080fd5b818701915087601f8301126100e757600080fd5b8151818111156100f9576100f9610073565b604051601f8201601f19908116603f0116810190838211818310171561012157610121610073565b816040528281528a8684870101111561013957600080fd5b600093505b8284101561015b578484018601518185018701529285019261013e565b60008684830101528096505050505050509250925092565b600181811c9082168061018757607f821691505b6020821081036101a757634e487b7160e01b600052602260045260246000fd5b50919050565b601f8211156101f757600081815260208120601f850160051c810160208610156101d45750805b601f850160051c820191505b818110156101f3578281556001016101e0565b5050505b505050565b81516001600160401b0381111561021557610215610073565b610229816102238454610173565b846101ad565b602080601f83116001811461025e57600084156102465750858301515b600019600386901b1c1916600185901b1785556101f3565b600085815260208120601f198616915b8281101561028d5788860151825594840194600190910190840161026e565b50858210156102ab5787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b60805160a0516104726102e560003960008181607501526101960152600060df01526104726000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c8063313ce5671461005c57806337a7b7d8146100705780633943380c146100af57806398d5fdca146100c4578063fc0c546a146100da575b600080fd5b604051600881526020015b60405180910390f35b6100977f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b039091168152602001610067565b6100b7610101565b6040516100679190610292565b6100cc61018f565b604051908152602001610067565b6100977f000000000000000000000000000000000000000000000000000000000000000081565b6000805461010e906102e0565b80601f016020809104026020016040519081016040528092919081815260200182805461013a906102e0565b80156101875780601f1061015c57610100808354040283529160200191610187565b820191906000526020600020905b81548152906001019060200180831161016a57829003601f168201915b505050505081565b60008060007f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663960384a060006040518263ffffffff1660e01b81526004016101e1919061031a565b6040805180830381865afa1580156101fd573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061022191906103e2565b915091506000826001600160801b03161161024e5760405162bfc92160e01b815260040160405180910390fd5b61025a61119442610415565b816001600160801b0316101561028357604051630cd5fa0760e11b815260040160405180910390fd5b506001600160801b0316919050565b600060208083528351808285015260005b818110156102bf578581018301518582016040015282016102a3565b506000604082860101526040601f19601f8301168501019250505092915050565b600181811c908216806102f457607f821691505b60208210810361031457634e487b7160e01b600052602260045260246000fd5b50919050565b600060208083526000845481600182811c91508083168061033c57607f831692505b858310810361035957634e487b7160e01b85526022600452602485fd5b878601838152602001818015610376576001811461038c576103b7565b60ff198616825284151560051b820196506103b7565b60008b81526020902060005b868110156103b157815484820152908501908901610398565b83019750505b50949998505050505050505050565b80516001600160801b03811681146103dd57600080fd5b919050565b600080604083850312156103f557600080fd5b6103fe836103c6565b915061040c602084016103c6565b90509250929050565b8181038181111561043657634e487b7160e01b600052601160045260246000fd5b9291505056fea26469706673582212208f9c9fe24b548680753ccf8496ccfd1526510ab03c791850d67bdeaedf413a9164736f6c63430008150033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100575760003560e01c8063313ce5671461005c57806337a7b7d8146100705780633943380c146100af57806398d5fdca146100c4578063fc0c546a146100da575b600080fd5b604051600881526020015b60405180910390f35b6100977f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b039091168152602001610067565b6100b7610101565b6040516100679190610292565b6100cc61018f565b604051908152602001610067565b6100977f000000000000000000000000000000000000000000000000000000000000000081565b6000805461010e906102e0565b80601f016020809104026020016040519081016040528092919081815260200182805461013a906102e0565b80156101875780601f1061015c57610100808354040283529160200191610187565b820191906000526020600020905b81548152906001019060200180831161016a57829003601f168201915b505050505081565b60008060007f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663960384a060006040518263ffffffff1660e01b81526004016101e1919061031a565b6040805180830381865afa1580156101fd573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061022191906103e2565b915091506000826001600160801b03161161024e5760405162bfc92160e01b815260040160405180910390fd5b61025a61119442610415565b816001600160801b0316101561028357604051630cd5fa0760e11b815260040160405180910390fd5b506001600160801b0316919050565b600060208083528351808285015260005b818110156102bf578581018301518582016040015282016102a3565b506000604082860101526040601f19601f8301168501019250505092915050565b600181811c908216806102f457607f821691505b60208210810361031457634e487b7160e01b600052602260045260246000fd5b50919050565b600060208083526000845481600182811c91508083168061033c57607f831692505b858310810361035957634e487b7160e01b85526022600452602485fd5b878601838152602001818015610376576001811461038c576103b7565b60ff198616825284151560051b820196506103b7565b60008b81526020902060005b868110156103b157815484820152908501908901610398565b83019750505b50949998505050505050505050565b80516001600160801b03811681146103dd57600080fd5b919050565b600080604083850312156103f557600080fd5b6103fe836103c6565b915061040c602084016103c6565b90509250929050565b8181038181111561043657634e487b7160e01b600052601160045260246000fd5b9291505056fea26469706673582212208f9c9fe24b548680753ccf8496ccfd1526510ab03c791850d67bdeaedf413a9164736f6c63430008150033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "title": "FortiFiDIAPriceOracle",
+    "version": 1
+  },
+  "userdoc": {
+    "errors": {
+      "InvalidPrice()": [
+        {
+          "notice": "Error caused by negative price returned from oracle"
+        }
+      ],
+      "StalePrice()": [
+        {
+          "notice": "Error caused by stale price returned from oracle"
+        }
+      ]
+    },
+    "kind": "user",
+    "methods": {},
+    "notice": "This contract is an implementation of FortiFiPriceOracle adapted for DIA on-chain oracles",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 2861,
+        "contract": "contracts/oracles/FortiFiDIAPriceOracle.sol:FortiFiDIAPriceOracle",
+        "label": "key",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_string_storage"
+      }
+    ],
+    "types": {
+      "t_string_storage": {
+        "encoding": "bytes",
+        "label": "string",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

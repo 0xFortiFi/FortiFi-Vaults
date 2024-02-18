@@ -133,6 +133,7 @@ contract FortiFiNativeStrategy is Ownable, ERC20 {
                     uint256 _tokenBalance = _token.balanceOf(address(this));
                     if (_tokenBalance > 0) {
                         uint256 _fee = feeCalc.getFees(_user, _tokenBalance);
+                        _token.approve(address(feeMgr), _fee);
                         feeMgr.collectFees(extraTokens[i], _fee);
                         _token.safeTransfer(_user, _tokenBalance - _fee);
                     }

@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('FortiFiFeeManager', {
     from: deployer,
-    args: [["0x63eAf99c08b9384BDc871B2141FaE13D65157592"], [10000]],
+    args: [["0xdb4b133CDAb1cB272CaFe61232aEeBC7aECbd45A"], [10000]],
     log: true,
   });
 };

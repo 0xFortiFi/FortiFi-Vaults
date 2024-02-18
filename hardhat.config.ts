@@ -71,5 +71,13 @@ export default {
       accounts: [account],
       deploy: ['deploy'],
     },
+    arbitrum: {
+      url: "https://arb1.arbitrum.io/rpc",
+      gasPrice: 80000000000,
+      chainId: 42161,
+      allowUnlimitedContractSize: true,
+      accounts: [account],
+      deploy: ['deploy'],
+    },
   },
 };

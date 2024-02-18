@@ -1,0 +1,210 @@
+{
+  "address": "0x57BBC4dB8FcAC0Fb9853c7A22a6CAF768E0E9E20",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_token",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_feed",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_uptimeFeed",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_key",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "GracePeriodNotOver",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidPrice",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SequencerDown",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "StalePrice",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "feed",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "key",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "token",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xf894608f59cbddd5808a5e4ff7d5b1d5f20fb425a6301693b620449335456913",
+  "receipt": {
+    "to": null,
+    "from": "0x625d271F634eE0804CCc573C4679aA3AeE475B62",
+    "contractAddress": "0x57BBC4dB8FcAC0Fb9853c7A22a6CAF768E0E9E20",
+    "transactionIndex": 2,
+    "gasUsed": "4400293",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x34022087a644cd1990e8d43c04a6f809edbd60ec6d53ff78ebc7448c6acb1166",
+    "transactionHash": "0xf894608f59cbddd5808a5e4ff7d5b1d5f20fb425a6301693b620449335456913",
+    "logs": [],
+    "blockNumber": 181796687,
+    "cumulativeGasUsed": "4940598",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xEC70Dcb4A1EFa46b8F2D97C310C9c4790ba5ffA8",
+    "0xD210347A7F3E4D3B5f96D4AFa59372247f3A2f84",
+    "0xFdB631F5EE196F0ed6FAa767959853A9F217697D",
+    "rETH/USD"
+  ],
+  "numDeployments": 3,
+  "solcInputHash": "35515155b9fc8f1d7fd86cf51f1142dc",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.21+commit.d9974bed\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_feed\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_uptimeFeed\",\"type\":\"address\"},{\"internalType\":\"string\",\"name\":\"_key\",\"type\":\"string\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"GracePeriodNotOver\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InvalidPrice\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SequencerDown\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"StalePrice\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"feed\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"key\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Only use on Arbitrum, Optimism, and Metis per Chainlink Documentation\",\"kind\":\"dev\",\"methods\":{},\"title\":\"FortiFiDIAPriceOracleL2\",\"version\":1},\"userdoc\":{\"errors\":{\"GracePeriodNotOver()\":[{\"notice\":\"Error caused when sequencer has not been up longer than the grace period\"}],\"InvalidPrice()\":[{\"notice\":\"Error caused by negative price returned from oracle\"}],\"SequencerDown()\":[{\"notice\":\"Error caused by the sequencer being down\"}],\"StalePrice()\":[{\"notice\":\"Error caused by stale price returned from oracle\"}]},\"kind\":\"user\",\"methods\":{},\"notice\":\"This contract is an implementation of FortiFiPriceOracle adapted for DIA on-chain oracles\",\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/oracles/FortiFiDIAPriceOracleL2.sol\":\"FortiFiDIAPriceOracleL2\"},\"evmVersion\":\"paris\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/oracles/FortiFiDIAPriceOracleL2.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-only\\r\\n// FortiFiDIAPriceOracleL2 by FortiFi\\r\\n\\r\\nimport \\\"./FortiFiPriceOracleL2.sol\\\";\\r\\n\\r\\npragma solidity 0.8.21;\\r\\n\\r\\ninterface IDIAOracleV2{\\r\\n    function getValue(string memory) external view returns (uint128, uint128);\\r\\n}\\r\\n\\r\\n/// @title FortiFiDIAPriceOracleL2\\r\\n/// @notice This contract is an implementation of FortiFiPriceOracle adapted for DIA on-chain oracles\\r\\n/// @dev Only use on Arbitrum, Optimism, and Metis per Chainlink Documentation\\r\\ncontract FortiFiDIAPriceOracleL2 is FortiFiPriceOracleL2 {\\r\\n    string public key;\\r\\n\\r\\n    constructor(address _token, address _feed, address _uptimeFeed, string memory _key) FortiFiPriceOracleL2(_token, _feed, _uptimeFeed) {\\r\\n        key = _key;\\r\\n    }\\r\\n\\r\\n    function getPrice() external view override returns(uint256) {\\r\\n        // Sequencer check from Chainlink documentation \\r\\n        (\\r\\n            /*uint80 roundID*/,\\r\\n            int256 answer,\\r\\n            uint256 startedAt,\\r\\n            /*uint256 updatedAt*/,\\r\\n            /*uint80 answeredInRound*/\\r\\n        ) = sequencerUptimeFeed.latestRoundData();\\r\\n\\r\\n        // Answer == 0: Sequencer is up\\r\\n        // Answer == 1: Sequencer is down\\r\\n        bool isSequencerUp = answer == 0;\\r\\n        if (!isSequencerUp) {\\r\\n            revert SequencerDown();\\r\\n        }\\r\\n\\r\\n        // Make sure the grace period has passed after the\\r\\n        // sequencer is back up.\\r\\n        uint256 timeSinceUp = block.timestamp - startedAt;\\r\\n        if (timeSinceUp <= GRACE_PERIOD_TIME) {\\r\\n            revert GracePeriodNotOver();\\r\\n        }\\r\\n        \\r\\n        (uint128 answer2, uint128 timeStamp) = IDIAOracleV2(feed).getValue(key);\\r\\n\\r\\n        if (answer2 <= 0) revert InvalidPrice();\\r\\n        if (timeStamp < block.timestamp - (75*60) /*75 minutes*/ ) revert StalePrice();\\r\\n        \\r\\n        return uint(answer2);\\r\\n    }\\r\\n\\r\\n    function decimals() external view override returns (uint8) {\\r\\n        return 8;\\r\\n    }\\r\\n}\",\"keccak256\":\"0x19c3bf11526e9fddf73d13fa3616798030b5e1eb01dbd262375501380b9e333d\",\"license\":\"GPL-3.0-only\"},\"contracts/oracles/FortiFiPriceOracleL2.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-only\\r\\n// FortiFiPriceOracleL2 by FortiFi\\r\\n\\r\\nimport \\\"./interfaces/IFortiFiPriceOracle.sol\\\";\\r\\nimport \\\"./interfaces/AggregatorV2V3Interface.sol\\\";\\r\\n\\r\\npragma solidity 0.8.21;\\r\\n\\r\\n/// @notice Error caused by negative price returned from oracle\\r\\nerror InvalidPrice();\\r\\n\\r\\n/// @notice Error caused by stale price returned from oracle\\r\\nerror StalePrice();\\r\\n\\r\\n/// @notice Error caused by the sequencer being down\\r\\nerror SequencerDown();\\r\\n\\r\\n/// @notice Error caused when sequencer has not been up longer than the grace period\\r\\nerror GracePeriodNotOver();\\r\\n\\r\\n\\r\\n/// @title FortiFiPriceOracleL2\\r\\n/// @notice This contract is used as a flexible interface to provide prices to FortiFiMASSVault implementations.\\r\\n/// This base version is meant to use Chainlink on-chain price feeds, and can be inherited and modified to \\r\\n/// support other oracles.\\r\\n/// @dev Only use on Arbitrum, Optimism, and Metis per Chainlink Documentation\\r\\ncontract FortiFiPriceOracleL2 is IFortiFiPriceOracle {\\r\\n    address public immutable token;\\r\\n    address public immutable feed;\\r\\n    uint256 internal constant GRACE_PERIOD_TIME = 3600;\\r\\n    AggregatorV2V3Interface internal sequencerUptimeFeed;\\r\\n\\r\\n    constructor(address _token, address _feed, address _uptimeFeed) {\\r\\n        token = _token;\\r\\n        feed = _feed;\\r\\n        sequencerUptimeFeed = AggregatorV2V3Interface(_uptimeFeed);\\r\\n    }\\r\\n\\r\\n    function getPrice() external view virtual returns(uint256) {\\r\\n        // Sequencer check from Chainlink documentation \\r\\n        (\\r\\n            /*uint80 roundID*/,\\r\\n            int256 answer,\\r\\n            uint256 startedAt,\\r\\n            /*uint256 updatedAt*/,\\r\\n            /*uint80 answeredInRound*/\\r\\n        ) = sequencerUptimeFeed.latestRoundData();\\r\\n\\r\\n        // Answer == 0: Sequencer is up\\r\\n        // Answer == 1: Sequencer is down\\r\\n        bool isSequencerUp = answer == 0;\\r\\n        if (!isSequencerUp) {\\r\\n            revert SequencerDown();\\r\\n        }\\r\\n\\r\\n        // Make sure the grace period has passed after the\\r\\n        // sequencer is back up.\\r\\n        uint256 timeSinceUp = block.timestamp - startedAt;\\r\\n        if (timeSinceUp <= GRACE_PERIOD_TIME) {\\r\\n            revert GracePeriodNotOver();\\r\\n        }\\r\\n\\r\\n        AggregatorV2V3Interface _feed = AggregatorV2V3Interface(feed);\\r\\n        (\\r\\n            /* uint80 roundID */,\\r\\n            int answer2,\\r\\n            /*uint startedAt*/,\\r\\n            uint timeStamp,\\r\\n            /*uint80 answeredInRound*/\\r\\n        ) = _feed.latestRoundData();\\r\\n\\r\\n        if (answer2 <= 0) revert InvalidPrice();\\r\\n        if (timeStamp < block.timestamp - (75*60) /*75 minutes*/ ) revert StalePrice();\\r\\n        \\r\\n        return uint(answer2);\\r\\n    }\\r\\n\\r\\n    function decimals() external view virtual returns (uint8) {\\r\\n        AggregatorV2V3Interface _feed = AggregatorV2V3Interface(feed);\\r\\n        return _feed.decimals();\\r\\n    }\\r\\n}\",\"keccak256\":\"0x3237f510dbb07b5c749241362a14653c1e97c3fc346e17c2c81ec7e0804593e3\",\"license\":\"GPL-3.0-only\"},\"contracts/oracles/interfaces/AggregatorInterface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\ninterface AggregatorInterface {\\r\\n  function latestAnswer() external view returns (int256);\\r\\n\\r\\n  function latestTimestamp() external view returns (uint256);\\r\\n\\r\\n  function latestRound() external view returns (uint256);\\r\\n\\r\\n  function getAnswer(uint256 roundId) external view returns (int256);\\r\\n\\r\\n  function getTimestamp(uint256 roundId) external view returns (uint256);\\r\\n\\r\\n  event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 updatedAt);\\r\\n\\r\\n  event NewRound(uint256 indexed roundId, address indexed startedBy, uint256 startedAt);\\r\\n}\",\"keccak256\":\"0x6a696529bac0d8a56c31da7048451809c45e813e962ad3f22fd8dca44e6784bb\",\"license\":\"MIT\"},\"contracts/oracles/interfaces/AggregatorV2V3Interface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\nimport \\\"./AggregatorInterface.sol\\\";\\r\\nimport \\\"./AggregatorV3Interface.sol\\\";\\r\\n\\r\\ninterface AggregatorV2V3Interface is AggregatorInterface, AggregatorV3Interface {}\",\"keccak256\":\"0xcee944549633e709424660f5e425bca71225e79a9976ef8ff1485652b70b9582\",\"license\":\"MIT\"},\"contracts/oracles/interfaces/AggregatorV3Interface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface AggregatorV3Interface {\\n  function decimals() external view returns (uint8);\\n\\n  function description() external view returns (string memory);\\n\\n  function version() external view returns (uint256);\\n\\n  function getRoundData(\\n    uint80 _roundId\\n  ) external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\\n\\n  function latestRoundData()\\n    external\\n    view\\n    returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound);\\n}\\n\",\"keccak256\":\"0xfe4e8bb4861bb3860ba890ab91a3b818ec66e5a8f544fb608cfcb73f433472cd\",\"license\":\"MIT\"},\"contracts/oracles/interfaces/IFortiFiPriceOracle.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0-only\\r\\n// IFortiFiPriceOracle Interface by FortiFi\\r\\n\\r\\npragma solidity 0.8.21;\\r\\n\\r\\n/// @title Interface for FortiFiPriceOracle\\r\\ninterface IFortiFiPriceOracle {\\r\\n    function getPrice() external view returns(uint256);\\r\\n    function token() external view returns(address);\\r\\n    function decimals() external view returns (uint8);\\r\\n}\",\"keccak256\":\"0x0de4b5cc230d6051e2384a2ea04cba82bb24d11389c4743f1cd3cb5b9f152337\",\"license\":\"GPL-3.0-only\"}},\"version\":1}",
+  "bytecode": "0x60c060405234801561001057600080fd5b506040516108c03803806108c083398101604081905261002f916100a2565b6001600160a01b0384811660805283811660a052600080546001600160a01b03191691841691909117905560016100668282610226565b50505050506102e5565b80516001600160a01b038116811461008757600080fd5b919050565b634e487b7160e01b600052604160045260246000fd5b600080600080608085870312156100b857600080fd5b6100c185610070565b935060206100d0818701610070565b93506100de60408701610070565b60608701519093506001600160401b03808211156100fb57600080fd5b818801915088601f83011261010f57600080fd5b8151818111156101215761012161008c565b604051601f8201601f19908116603f011681019083821181831017156101495761014961008c565b816040528281528b8684870101111561016157600080fd5b600093505b828410156101835784840186015181850187015292850192610166565b600086848301015280965050505050505092959194509250565b600181811c908216806101b157607f821691505b6020821081036101d157634e487b7160e01b600052602260045260246000fd5b50919050565b601f82111561022157600081815260208120601f850160051c810160208610156101fe5750805b601f850160051c820191505b8181101561021d5782815560010161020a565b5050505b505050565b81516001600160401b0381111561023f5761023f61008c565b6102538161024d845461019d565b846101d7565b602080601f83116001811461028857600084156102705750858301515b600019600386901b1c1916600185901b17855561021d565b600085815260208120601f198616915b828110156102b757888601518255948401946001909101908401610298565b50858210156102d55787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b60805160a0516105b161030f60003960008181607501526102670152600060df01526105b16000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c8063313ce5671461005c57806337a7b7d8146100705780633943380c146100af57806398d5fdca146100c4578063fc0c546a146100da575b600080fd5b604051600881526020015b60405180910390f35b6100977f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b039091168152602001610067565b6100b7610101565b6040516100679190610367565b6100cc61018f565b604051908152602001610067565b6100977f000000000000000000000000000000000000000000000000000000000000000081565b6001805461010e906103b5565b80601f016020809104026020016040519081016040528092919081815260200182805461013a906103b5565b80156101875780601f1061015c57610100808354040283529160200191610187565b820191906000526020600020905b81548152906001019060200180831161016a57829003601f168201915b505050505081565b60008060008060009054906101000a90046001600160a01b03166001600160a01b031663feaf968c6040518163ffffffff1660e01b815260040160a060405180830381865afa1580156101e6573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061020a919061040e565b5091945092505082159050806102325760405162032b3d60e81b815260040160405180910390fd5b600061023e834261045e565b9050610e1081116102625760405163d15f73b560e01b815260040160405180910390fd5b6000807f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663960384a060016040518263ffffffff1660e01b81526004016102b29190610485565b6040805180830381865afa1580156102ce573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906102f29190610548565b915091506000826001600160801b03161161031f5760405162bfc92160e01b815260040160405180910390fd5b61032b6111944261045e565b816001600160801b0316101561035457604051630cd5fa0760e11b815260040160405180910390fd5b506001600160801b031695945050505050565b600060208083528351808285015260005b8181101561039457858101830151858201604001528201610378565b506000604082860101526040601f19601f8301168501019250505092915050565b600181811c908216806103c957607f821691505b6020821081036103e957634e487b7160e01b600052602260045260246000fd5b50919050565b805169ffffffffffffffffffff8116811461040957600080fd5b919050565b600080600080600060a0868803121561042657600080fd5b61042f866103ef565b9450602086015193506040860151925060608601519150610452608087016103ef565b90509295509295909350565b8181038181111561047f57634e487b7160e01b600052601160045260246000fd5b92915050565b600060208083526000845481600182811c9150808316806104a757607f831692505b85831081036104c457634e487b7160e01b85526022600452602485fd5b8786018381526020018180156104e157600181146104f757610522565b60ff198616825284151560051b82019650610522565b60008b81526020902060005b8681101561051c57815484820152908501908901610503565b83019750505b50949998505050505050505050565b80516001600160801b038116811461040957600080fd5b6000806040838503121561055b57600080fd5b61056483610531565b915061057260208401610531565b9050925092905056fea26469706673582212203f98f540d6bbc92f7f99113ea0e326cfe0f390a3a047afc56a77482edd6f521a64736f6c63430008150033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100575760003560e01c8063313ce5671461005c57806337a7b7d8146100705780633943380c146100af57806398d5fdca146100c4578063fc0c546a146100da575b600080fd5b604051600881526020015b60405180910390f35b6100977f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b039091168152602001610067565b6100b7610101565b6040516100679190610367565b6100cc61018f565b604051908152602001610067565b6100977f000000000000000000000000000000000000000000000000000000000000000081565b6001805461010e906103b5565b80601f016020809104026020016040519081016040528092919081815260200182805461013a906103b5565b80156101875780601f1061015c57610100808354040283529160200191610187565b820191906000526020600020905b81548152906001019060200180831161016a57829003601f168201915b505050505081565b60008060008060009054906101000a90046001600160a01b03166001600160a01b031663feaf968c6040518163ffffffff1660e01b815260040160a060405180830381865afa1580156101e6573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061020a919061040e565b5091945092505082159050806102325760405162032b3d60e81b815260040160405180910390fd5b600061023e834261045e565b9050610e1081116102625760405163d15f73b560e01b815260040160405180910390fd5b6000807f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663960384a060016040518263ffffffff1660e01b81526004016102b29190610485565b6040805180830381865afa1580156102ce573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906102f29190610548565b915091506000826001600160801b03161161031f5760405162bfc92160e01b815260040160405180910390fd5b61032b6111944261045e565b816001600160801b0316101561035457604051630cd5fa0760e11b815260040160405180910390fd5b506001600160801b031695945050505050565b600060208083528351808285015260005b8181101561039457858101830151858201604001528201610378565b506000604082860101526040601f19601f8301168501019250505092915050565b600181811c908216806103c957607f821691505b6020821081036103e957634e487b7160e01b600052602260045260246000fd5b50919050565b805169ffffffffffffffffffff8116811461040957600080fd5b919050565b600080600080600060a0868803121561042657600080fd5b61042f866103ef565b9450602086015193506040860151925060608601519150610452608087016103ef565b90509295509295909350565b8181038181111561047f57634e487b7160e01b600052601160045260246000fd5b92915050565b600060208083526000845481600182811c9150808316806104a757607f831692505b85831081036104c457634e487b7160e01b85526022600452602485fd5b8786018381526020018180156104e157600181146104f757610522565b60ff198616825284151560051b82019650610522565b60008b81526020902060005b8681101561051c57815484820152908501908901610503565b83019750505b50949998505050505050505050565b80516001600160801b038116811461040957600080fd5b6000806040838503121561055b57600080fd5b61056483610531565b915061057260208401610531565b9050925092905056fea26469706673582212203f98f540d6bbc92f7f99113ea0e326cfe0f390a3a047afc56a77482edd6f521a64736f6c63430008150033",
+  "devdoc": {
+    "details": "Only use on Arbitrum, Optimism, and Metis per Chainlink Documentation",
+    "kind": "dev",
+    "methods": {},
+    "title": "FortiFiDIAPriceOracleL2",
+    "version": 1
+  },
+  "userdoc": {
+    "errors": {
+      "GracePeriodNotOver()": [
+        {
+          "notice": "Error caused when sequencer has not been up longer than the grace period"
+        }
+      ],
+      "InvalidPrice()": [
+        {
+          "notice": "Error caused by negative price returned from oracle"
+        }
+      ],
+      "SequencerDown()": [
+        {
+          "notice": "Error caused by the sequencer being down"
+        }
+      ],
+      "StalePrice()": [
+        {
+          "notice": "Error caused by stale price returned from oracle"
+        }
+      ]
+    },
+    "kind": "user",
+    "methods": {},
+    "notice": "This contract is an implementation of FortiFiPriceOracle adapted for DIA on-chain oracles",
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 3186,
+        "contract": "contracts/oracles/FortiFiDIAPriceOracleL2.sol:FortiFiDIAPriceOracleL2",
+        "label": "sequencerUptimeFeed",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_contract(AggregatorV2V3Interface)3367"
+      },
+      {
+        "astId": 2950,
+        "contract": "contracts/oracles/FortiFiDIAPriceOracleL2.sol:FortiFiDIAPriceOracleL2",
+        "label": "key",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_string_storage"
+      }
+    ],
+    "types": {
+      "t_contract(AggregatorV2V3Interface)3367": {
+        "encoding": "inplace",
+        "label": "contract AggregatorV2V3Interface",
+        "numberOfBytes": "20"
+      },
+      "t_string_storage": {
+        "encoding": "bytes",
+        "label": "string",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

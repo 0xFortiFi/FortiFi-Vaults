@@ -63,7 +63,7 @@ contract FortiFiNativeFortress is Ownable {
         IWNative(address(_wNative)).withdraw(_amount);
 
         // deposit to underlying strategy
-        _strat.deposit{value: _amount}(_amount);
+        _strat.deposit{value: _amount}();
 
         // calculate new strategy receipt tokens received
         _newStratReceipts = _strat.balanceOf(address(this)) - _beforeBalance;
