@@ -6,6 +6,7 @@ typechain
 package-lock.json
 deployments/mainnet/solcInputs
 deployments/mainnet/.chainId
+typechain-types
 
 #Hardhat files
 cache
