@@ -193,7 +193,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
     /// @notice Function to set slippage used in swap functions. Must be 1-5% (100-500)
     function setSlippage(uint16 _amount) external onlyOwner {
-        if (_amount < 100 || _amount > 500) revert InvalidSlippage();
+        if (_amount < 10 || _amount > 500) revert InvalidSlippage();
         slippageBps = _amount;
     }
 
