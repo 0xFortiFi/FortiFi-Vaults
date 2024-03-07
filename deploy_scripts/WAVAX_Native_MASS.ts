@@ -32,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
           decimals: 18
         }, 
         {
-          strategy: "0xfc7427AEb2c76487Aef5c20736C2197F139d898b", // YY Benqi AVAX
+          strategy: "0x0A4BC64396EA683244Ce36a40114Ac6713aFC725", // YY Benqi AVAX
           depositToken: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
           router: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", 
           oracle: "0x0000000000000000000000000000000000000000",
