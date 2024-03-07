@@ -93,7 +93,7 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
 
     Strategy[] public strategies;
 
-    mapping(uint256 => TokenInfo) public tokenInfo;
+    mapping(uint256 => TokenInfo) private tokenInfo;
     mapping(address => bool) public useDirectSwap;
 
     event Deposit(address indexed depositor, uint256 indexed tokenId, uint256 amount, TokenInfo tokenInfo);
@@ -281,19 +281,6 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
         emit StrategiesSet(_strategies);
     }
 
-    /// @notice This function allows for changing the allocations of current strategies
-    function setBpsForStrategies(uint16[] calldata _bps) external onlyOwner {
-        uint256 _length = strategies.length;
-        if (_bps.length != _length) revert InvalidArrayLength();
-        uint256 _totalBps = 0;
-        for (uint256 i = 0; i < _length; i++) {
-            strategies[i].bps = _bps[i];
-            _totalBps += _bps[i];
-        }
-        if (_totalBps != BPS) revert InvalidBps();
-        emit StrategiesSet(strategies);
-    }
-
     /// @notice This function allows a user to rebalance a receipt (ERC1155) token's underlying assets. 
     /// @dev This function utilizes the internal _deposit and _withdraw functions to rebalance based on 
     /// the strategies set in the contract. Since _deposit will set the TokenInfo.deposit to the total 
@@ -326,6 +313,11 @@ contract FortiFiMASSVault is IMASS, ERC1155Supply, IERC1155Receiver, Ownable, Re
     /// @notice View function that returns all strategies
     function getStrategies() public view override returns(Strategy[] memory) {
         return strategies;
+    }
+
+    /// @notice View function that returns tokenInfo
+    function getTokenInfo(uint256 _tokenId) public view returns(TokenInfo memory) {
+        return tokenInfo[_tokenId];
     }
 
     /// @notice Internal function to mint ERC1155 receipts and advance nextToken state variable
