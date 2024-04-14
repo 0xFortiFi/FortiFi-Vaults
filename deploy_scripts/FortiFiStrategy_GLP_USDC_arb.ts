@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
-  await deploy('contracts/strategies/FortiFiGLPStrategyArb.sol:FortiFiGLPStrategyArb', {
+  await deploy('FortiFiGLPStrategyArb', {
     from: deployer,
     args: [
       "0x28f37fa106AA2159c91C769f7AE415952D28b6ac",
