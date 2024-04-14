@@ -1,0 +1,19 @@
+[
+  "constructor(address[],uint16[])",
+  "error InvalidArrayLength()",
+  "error InvalidBps()",
+  "error ZeroAddress()",
+  "event ERC20Recovered(address,uint256)",
+  "event FeesChanged(address[],uint16[])",
+  "event FeesCollected(uint256,address[],uint16[])",
+  "event OwnershipTransferred(address indexed,address indexed)",
+  "function BPS() view returns (uint16)",
+  "function collectFees(address,uint256)",
+  "function owner() view returns (address)",
+  "function receivers(uint256) view returns (address)",
+  "function recoverERC20(address,uint256)",
+  "function renounceOwnership()",
+  "function setSplit(address[],uint16[])",
+  "function splitBps(uint256) view returns (uint16)",
+  "function transferOwnership(address)"
+]
