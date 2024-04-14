@@ -56,6 +56,7 @@ contract FortiFiTokenHelper {
 
     }
 
+    /// @notice Function to retrieve SAMS tokenInfo
     function getSAMSInfo(
         address[] calldata _contracts, 
         uint[][] calldata _tokenIds) external view returns(
