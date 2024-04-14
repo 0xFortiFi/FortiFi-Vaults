@@ -8,6 +8,11 @@ package-lock.json
 deployments/mainnet/solcInputs
 deployments/mainnet/.chainId
 typechain-types
+test
+deployments
+deploy_scripts
+deploy
+contracts/mock
 
 #Hardhat files
 cache
