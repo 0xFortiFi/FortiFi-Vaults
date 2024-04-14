@@ -5,11 +5,11 @@ import "../vaults/interfaces/IMASS.sol";
 import "../vaults/interfaces/ISAMS.sol";
 
 interface IMASSHelper {
-    function tokenInfo(uint) external view returns(IMASS.TokenInfo memory);
+    function getTokenInfo(uint) external view returns(IMASS.TokenInfo memory);
 }
 
 interface ISAMSHelper {
-    function tokenInfo(uint) external view returns(ISAMS.TokenInfo memory);
+    function getTokenInfo(uint) external view returns(ISAMS.TokenInfo memory);
 }
 
 pragma solidity 0.8.21;
@@ -20,51 +20,74 @@ contract FortiFiTokenHelper {
 
     constructor() {}
 
-    /// @notice Function to retrieve tokenInfo
-    function getInfo(
+    /// @notice Function to retrieve MASS tokenInfo
+    function getMASSInfo(
         address[] calldata _contracts, 
-        bool[] calldata _isMASS, 
-        uint[][] calldata _tokenIds) external view returns(IMASS.TokenInfo[] memory) {
+        uint[][] calldata _tokenIds) external view returns(
+            IMASS.TokenInfo memory _info1, 
+            IMASS.TokenInfo memory _info2,
+            IMASS.TokenInfo memory _info3,
+            IMASS.TokenInfo memory _info4,
+            IMASS.TokenInfo memory _info5) {
         
         IMASSHelper _mass;
+        uint _tokenCount;
+        uint _length = _contracts.length;
+
+        for (uint i = 0; i < _length; i++ ) {
+            uint _tokensLength = _tokenIds[i].length;
+
+            _mass = IMASSHelper(_contracts[i]);
+            for (uint j = 0; j < _tokensLength; j++) {
+                if (_tokenCount == 0) {
+                    _info1 = _mass.getTokenInfo(_tokenIds[i][j]);
+                } else if (_tokenCount == 1) {
+                    _info2 = _mass.getTokenInfo(_tokenIds[i][j]);
+                } else if (_tokenCount == 2) {
+                    _info3 = _mass.getTokenInfo(_tokenIds[i][j]);
+                } else if (_tokenCount == 3) {
+                    _info4 = _mass.getTokenInfo(_tokenIds[i][j]);
+                } else {
+                    _info5 = _mass.getTokenInfo(_tokenIds[i][j]);
+                }
+                _tokenCount += 1;
+            } 
+        }
+
+    }
+
+    function getSAMSInfo(
+        address[] calldata _contracts, 
+        uint[][] calldata _tokenIds) external view returns(
+            ISAMS.TokenInfo memory _info1, 
+            ISAMS.TokenInfo memory _info2,
+            ISAMS.TokenInfo memory _info3,
+            ISAMS.TokenInfo memory _info4,
+            ISAMS.TokenInfo memory _info5) {
+        
         ISAMSHelper _sams;
         uint _tokenCount;
         uint _length = _contracts.length;
 
         for (uint i = 0; i < _length; i++ ) {
-            _tokenCount += _tokenIds[i].length;
-        }
-
-        IMASS.TokenInfo[] memory _info = new IMASS.TokenInfo[](_tokenCount);
-
-        for (uint i = 0; i < _length; i++ ) {
             uint _tokensLength = _tokenIds[i].length;
 
-            if (_isMASS[i]) {
-                _mass = IMASSHelper(_contracts[i]);
-                for (uint j = 0; j < _tokensLength; j++) {
-                    IMASS.TokenInfo memory _tokenInfo = _mass.tokenInfo(_tokenIds[i][j]);
-                    _info[_info.length] = _tokenInfo;
+            _sams = ISAMSHelper(_contracts[i]);
+            for (uint j = 0; j < _tokensLength; j++) {
+                if (_tokenCount == 0) {
+                    _info1 = _sams.getTokenInfo(_tokenIds[i][j]);
+                } else if (_tokenCount == 1) {
+                    _info2 = _sams.getTokenInfo(_tokenIds[i][j]);
+                } else if (_tokenCount == 2) {
+                    _info3 = _sams.getTokenInfo(_tokenIds[i][j]);
+                } else if (_tokenCount == 3) {
+                    _info4 = _sams.getTokenInfo(_tokenIds[i][j]);
+                } else {
+                    _info5 = _sams.getTokenInfo(_tokenIds[i][j]);
                 }
-            } else {
-                _sams = ISAMSHelper(_contracts[i]);
-                for (uint j = 0; j < _tokensLength; j++) {
-                    IMASS.TokenInfo memory _tokenInfo;
-                    ISAMS.TokenInfo memory _samsInfo = _sams.tokenInfo(_tokenIds[i][j]);
-                    _tokenInfo.deposit = _samsInfo.deposit;
-                    uint _numPositions = _samsInfo.positions.length;
-                    for (uint k = 0; k < _numPositions; k++) {
-                        _tokenInfo.positions[k].receipt = _samsInfo.positions[k].receipt;
-                        _tokenInfo.positions[k].strategy.strategy = _samsInfo.positions[k].strategy.strategy;
-                        _tokenInfo.positions[k].strategy.isFortiFi = _samsInfo.positions[k].strategy.isFortiFi;
-                        _tokenInfo.positions[k].strategy.bps = _samsInfo.positions[k].strategy.bps;
-                    }
-                    _info[_info.length] = _tokenInfo;
-                }
+                _tokenCount += 1;
             }
         }
-        
-        return _info;
 
     }
 }
