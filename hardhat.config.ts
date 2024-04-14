@@ -1,19 +1,37 @@
-//import "@openzeppelin/hardhat-upgrades";
-import "@nomiclabs/hardhat-waffle";
-import "solidity-coverage";
-import "@nomiclabs/hardhat-etherscan";
-import '@nomicfoundation/hardhat-ethers';
-import 'hardhat-deploy';
-import 'hardhat-deploy-ethers';
+require("@nomicfoundation/hardhat-toolbox");
+require("@nomicfoundation/hardhat-verify");
 /* eslint-disable node/no-path-concat */
 require("dotenv").config({ path: __dirname + "/.env" });
 
 const account = process.env.PRIVATE_KEY;
 const etherscanKey = process.env.ETHERSCAN_KEY;
+const arbiKey = process.env.ARBISCAN_KEY;
 
 export default {
   etherscan: {
-    apiKey: etherscanKey,
+    apiKey: {
+      snowscan: etherscanKey,
+      arbitrumOne: arbiKey,
+      snowtrace: "snowtrace", // apiKey is not required, just set a placeholder
+    },
+    customChains: [
+      {
+        network: "snowscan",
+        chainId: 43114,
+        urls: {
+          apiURL: "https://api.snowscan.xyz/api",
+          browserURL: "https://snowscan.xyz"
+        }
+      },
+      // {
+      //   network: "snowtrace",
+      //   chainId: 43114,
+      //   urls: {
+      //     apiURL: "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
+      //     browserURL: "https://avalanche.routescan.io"
+      //   }
+      // },
+    ]
   },
   solidity: {
     compilers: [
@@ -71,6 +89,22 @@ export default {
       accounts: [account],
       deploy: ['deploy'],
     },
+    snowscan: {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+      gasPrice: 25000000000,
+      chainId: 43114,
+      allowUnlimitedContractSize: true,
+      accounts: [account],
+      deploy: ['deploy'],
+    },
+    // snowtrace: {
+    //   url: "https://api.avax.network/ext/bc/C/rpc",
+    //   gasPrice: 25000000000,
+    //   chainId: 43114,
+    //   allowUnlimitedContractSize: true,
+    //   accounts: [account],
+    //   deploy: ['deploy'],
+    // },
     arbitrum: {
       url: "https://arb1.arbitrum.io/rpc",
       gasPrice: 80000000000,

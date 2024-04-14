@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       "0x03d8137b35206Dda7d6313Ba0FDE02EC4c265414",
       [
         {
-          strategy: "0x75C5E96456c429Db8D5747F0e4016B900767E7fe", 
+          strategy: "0x4D7604D1c1e7c1998CD44a1b49a3d79f43b93E24", 
           depositToken: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
           router: "0x60aE616a2155Ee3d9A68541Ba4544862310933d4", 
           oracle: "0x0000000000000000000000000000000000000000",
