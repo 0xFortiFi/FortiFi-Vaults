@@ -45,11 +45,15 @@ A description of changes can be found here:
 ## Contract Descriptions
 
 ### FortiFiSAMSVault
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/vaults/FortiFiSAMSVault.sol)
+
 SAMS Vaults are the most basic vault type in the FortiFi ecosystem. They allow for the deposit of a single token, which is then split and deposited into multiple sub-strategies, including FortiFiStrategy strategies. This allows for diversified yield from a single asset.
 
 SAMS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees.
 
 ### FortiFiMASSVault
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/vaults/FortiFiMASSVaultV2.sol)
+
 MASS Vaults allow for the deposit of a single token, which is then split, swapped into other assets if necessary, and then deposited into sub-strategies, including FortiFiStrategy strategies. MASS Vaults allow for highly customizable yield strategies to be implemented.
 
 MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees, as well as FortiFiPriceOracle contracts and FortiFiRouter contracts to assist in swapping assets.
@@ -57,6 +61,8 @@ MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calc
 **V2 of this contract was created to allow the retrieval of assets deposited into an underlying strategy that has become bricked, preventing normal withdrawal**
 
 ### FortiFiWNativeMASSVault
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/vaults/FortiFiWNativeMASSVaultV2.sol)
+
 Wrapped Native MASS Vaults allow for the deposit of the wrapped native asset of whatever chain the vault is on (i.e. WAVAX for Avalanche), which is then split, swapped into other assets if necessary, and then deposited into sub-strategies, including FortiFiStrategy strategies. Wrapped Native MASS Vaults allow for highly customizable yield strategies to be implemented.
 
 MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees, as well as FortiFiPriceOracle contracts and FortiFiRouter contracts to assist in swapping assets.
@@ -64,6 +70,8 @@ MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calc
 **V2 of this contract was created to allow the retrieval of assets deposited into an underlying strategy that has become bricked, preventing normal withdrawal**
 
 ### FortiFiStrategy
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiStrategy.sol)
+
 FortiFiStrategy contracts are meant to be used as a sort of wrapper for yield strategies that do not adhere to the simple structure of:
 
 ```deposit(amount of deposit token)``` 
@@ -74,64 +82,74 @@ These strategies can be modified to allow for arbitrary logic to be performed be
 
 Initial strategies inheriting from this contract are:
 
-**FortiFiNativeStrategy** (For strategies that use wrapped native tokens as the deposit token)
+[**FortiFiNativeStrategy**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiNativeStrategy.sol) (For strategies that use wrapped native tokens as the deposit token)
 
-**FortiFiGLPStrategy** (GMX / GLP)
+[**FortiFiGLPStrategy**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiGLPStrategy.sol) (GMX / GLP)
 
-**FortiFiWombatStrategy** (Wombat Finance)
+[**FortiFiWombatStrategy**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiWombatStrategy.sol) (Wombat Finance)
 
-**FortiFiVectorStrategy** (Vector Finance)
+[**FortiFiVectorStrategy**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiVectorStrategy.sol) (Vector Finance)
 
 FortiFiStrategies isolate user deposits into FortiFiFortress contracts.
 
 ### FortiFiFortress
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiFortress.sol)
+
 FortiFiFortress contracts are used to isolate users' receipt tokens, which is necessary for strategies that have unique deposit or withdraw functions. Fortress contracts are deployed by FortiFiStrategy contracts, and can only be accessed by the contract that deploys them.
 
 Initial fortresses inheriting from this contract are:
 
-**FortiFiNativeFortress** ((Allows unwrapping of wrapped native assets in order to utilize protocols that require native asset deposits))
+[**FortiFiNativeFortress**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiNativeFortress.sol) (Allows unwrapping of wrapped native assets in order to utilize protocols that require native asset deposits)
 
-**FortiFiWombatFortress** (Wombat Finance)
+[**FortiFiWombatFortress**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiWombatFortress.sol) (Wombat Finance)
 
-**FortiFiVectorFortress** (Vector Finance)
+[**FortiFiVectorFortress**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiVectorFortress.sol) (Vector Finance)
 
 ### FortiFiPriceOracle
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiPriceOracle.sol)
+
 FortiFiPriceOracle contracts are used as an interface to on-chain price feeds in order to provide the vaults accurate price information without relying on pool reserves or other manipulable methods. Non-chainlink price feeds can be used by inheriting this contract and modifying as necessary.
 
 Initial oracles inheriting from this contract are:
 
-**FortiFiDIAPriceOracle** (DIA)
+[**FortiFiDIAPriceOracle**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiDIAPriceOracle.sol) (DIA)
 
-**FortiFiMockPriceOracle** (Used in a case where an oracle is not needed for logic executed by the router (i.e. For ggAVAX since the ggAVAX router deposits/redeems directly from the contract without needing to swap). Returns a static price.)
+[**FortiFiMockPriceOracle**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiMockOracle.sol) (Used in a case where an oracle is not needed for logic executed by the router (i.e. For ggAVAX since the ggAVAX router deposits/redeems directly from the contract without needing to swap). Returns a static price.)
 
 ### FortiFiPriceOracleL2
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiPriceOracleL2.sol)
+
 FortiFiPriceOracleL2 contracts are a modified version of FortiFiPriceOracle that allows for use on layer 2 networks that may experience sequencer downtime. These contract utilize Chainlink's sequencer uptime feeds to ensure that swaps cannot happen while the sequencer is down or for the first 60 minutes after the sequencer comes back online.
 
 Non-chainlink price feeds can be used by inheriting this contract and modifying as necessary.
 
 Initial oracles inheriting from this contract are:
 
-**FortiFiDIAPriceOracleL2** (DIA)
+[**FortiFiDIAPriceOracleL2**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiDIAPriceOracleL2.sol) (DIA)
 
 ### FortiFiRouter
 FortiFiRouter contracts are adapters that act as an interface to concentrated liquidity pools. Since the original architecture of MASS vaults only allowed for swapExactTokensForTokens calls to UniV2/Trader Joe V1 pools, these routers must utilize data contained in these calls to execute swaps.
 
 Initial oracles inheriting from this contract are:
 
-**FortiFiUniV3Router** (Uniswap)
+[**FortiFiUniV3Router**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiUniV3Router.sol) (Uniswap)
 
-**FortiFiUniV3MultiHopRouter** (Uniswap for when assets don't have a direct pair and wrapped native tokens are used as an intermediate step in the swap)
+[**FortiFiUniV3MultiHopRouter**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiUniV3MultiHopRouter.sol) (Uniswap for when assets don't have a direct pair and wrapped native tokens are used as an intermediate step in the swap)
 
-**FortiFiLBRouter** (Trader Joe Liquidity Book)
+[**FortiFiLBRouter**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiLBRouter.sol) (Trader Joe Liquidity Book)
 
-**FortiFiLBRouter** (Trader Joe Liquidity Book, used when there is no asset/asset fallback v1 pool that can be executed to swap, and wrapped native assets must be used as an intermediate step in the swap)
+[**FortiFiLBRouter2**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiLBRouter2.sol) (Trader Joe Liquidity Book, used when there is no asset/asset fallback v1 pool that can be executed to swap, and wrapped native assets must be used as an intermediate step in the swap)
 
-**FortiFiGGAvaxRouter** (gogopool, used to deposit/redeem ggAVAX directly without swapping)
+[**FortiFiGGAvaxRouter**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiGGAvaxRouter.sol) (gogopool, used to deposit/redeem ggAVAX directly without swapping)
 
 ### FortiFiFeeCalculator
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/fee-calculators/FortiFiFeeCalculator.sol)
+
 FortiFiFeeCalculator contracts are utilized by SAMS and MASS Vaults to calculate performance fees. The fees are calculated based on a user's NFT holdings as specified upon deployment. 
 
 ### FortiFiFeeManager
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/fee-managers/FortiFiFeeManager.sol)
+
 FortiFiFeeManager contracts are utilized by SAMS and MASS Vaults to split performance fees among one or more addresses.
 
 ## Deployed Contracts
