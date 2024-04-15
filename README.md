@@ -99,7 +99,7 @@ FortiFiFortress contracts are used to isolate users' receipt tokens, which is ne
 
 Initial fortresses inheriting from this contract are:
 
-[**FortiFiNativeFortress**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiNativeFortress.sol) ((Allows unwrapping of wrapped native assets in order to utilize protocols that require native asset deposits))
+[**FortiFiNativeFortress**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiNativeFortress.sol) (Allows unwrapping of wrapped native assets in order to utilize protocols that require native asset deposits)
 
 [**FortiFiWombatFortress**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/strategies/FortiFiWombatFortress.sol) (Wombat Finance)
 
@@ -114,7 +114,7 @@ Initial oracles inheriting from this contract are:
 
 [**FortiFiDIAPriceOracle**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiDIAPriceOracle.sol) (DIA)
 
-[**FortiFiMockPriceOracle**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiMockPriceOracle.sol) (Used in a case where an oracle is not needed for logic executed by the router (i.e. For ggAVAX since the ggAVAX router deposits/redeems directly from the contract without needing to swap). Returns a static price.)
+[**FortiFiMockPriceOracle**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiMockOracle.sol) (Used in a case where an oracle is not needed for logic executed by the router (i.e. For ggAVAX since the ggAVAX router deposits/redeems directly from the contract without needing to swap). Returns a static price.)
 
 ### FortiFiPriceOracleL2
 [View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/oracles/FortiFiPriceOracleL2.sol)
@@ -138,7 +138,7 @@ Initial oracles inheriting from this contract are:
 
 [**FortiFiLBRouter**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiLBRouter.sol) (Trader Joe Liquidity Book)
 
-[**FortiFiLBRouter**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiLBRouter2.sol) (Trader Joe Liquidity Book, used when there is no asset/asset fallback v1 pool that can be executed to swap, and wrapped native assets must be used as an intermediate step in the swap)
+[**FortiFiLBRouter2**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiLBRouter2.sol) (Trader Joe Liquidity Book, used when there is no asset/asset fallback v1 pool that can be executed to swap, and wrapped native assets must be used as an intermediate step in the swap)
 
 [**FortiFiGGAvaxRouter**](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/routers/FortiFiGGAvaxRouter.sol) (gogopool, used to deposit/redeem ggAVAX directly without swapping)
 
