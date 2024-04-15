@@ -4,7 +4,7 @@
 
 ## Authors
 
-- [@xrpant](https://www.x.com/xrpant)
+- [@xrpant](https://www.github.com/anthonybautista)
 
 
 ## Introduction
@@ -14,6 +14,8 @@ This repository contains all of the contracts related to the FortiFi Vaults Ecos
 To get started, clone the repo and:
 
 ```yarn``` to install all dependencies
+
+```npx hardhat compile``` to compile contracts
 
 
 
@@ -25,35 +27,41 @@ To get started, clone the repo and:
 
 Make a burner wallet for this, just in case you commit by mistake but .env is in the .gitignore.
 
+`ETHERSCAN_KEY`
 
-## Running Tests
+Explorer API key used for contract verification
 
-To run tests, run the following command
 
-```bash
-  yarn test
-```
+## Audit Information
 
-You can specify the test script to run in package.json. 
+An audit of the ForiFi Vault architecture was performed by Blaize Security in October 2023. You can view artifacts from their audit in the ```blaize-audit``` directory of this repository, including their test suite.
 
-Test scripts are located in the /test directory, and cover basic functionality of all FortiFi contracts. 
+[Audit Report](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/blaize-audit/FortiFi-audit-report-v2-%5B30-Oct-2023%5D.pdf)
 
-There are supporting 'mock' contracts in contracts/mock, which should not be deployed and are solely for the purpose of testing. These mock contracts include mock strategies and a mock MASS Vault contract that does not require a working swap router. 
+After this audit was conducted, development on the protocol continued to include new strategies, additional safety mechanisms, router adapters, and support for wrapped native token deposits. 
+
+A description of changes can be found here:
+[Post-Audit Change Report #1](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/change-reports/FortiFi_Post-Audit_Change_Report.pdf)
 ## Contract Descriptions
 
 ### FortiFiSAMSVault
-SAMS Vaults are the heart of the FortiFi ecosystem. They allow for the deposit of a single token, which is then split and deposited into multiple sub-strategies, including FortiFiStrategy strategies. This allows for diversified yield from a single asset.
+SAMS Vaults are the most basic vault type in the FortiFi ecosystem. They allow for the deposit of a single token, which is then split and deposited into multiple sub-strategies, including FortiFiStrategy strategies. This allows for diversified yield from a single asset.
 
 SAMS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees.
 
 ### FortiFiMASSVault
-MASS Vaults allow for the deposit of a single token, which is then split, swapped into other assets if necessary, and then deposited into sub-strategies, including FortiFiStrategy strategies and SAMS Vaults. MASS Vaults are designed to function similarly to ETF tokens, but the underlying assets are yield-bearing.
+MASS Vaults allow for the deposit of a single token, which is then split, swapped into other assets if necessary, and then deposited into sub-strategies, including FortiFiStrategy strategies. MASS Vaults allow for highly customizable yield strategies to be implemented.
 
-When setting strategies you must specify the router and oracle you would like to use to get prices and swap for the strategy deposit token. Routers must be Uniswap V2 style routers with a swapTokensForExactTokens function, and the oracle should be a Chainlink price feed or similar oracle with a latestAnswer view function that returns the price.
+MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees, as well as FortiFiPriceOracle contracts and FortiFiRouter contracts to assist in swapping assets.
 
-MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees.
+**V2 of this contract was created to allow the retrieval of assets deposited into an underlying strategy that has become bricked, preventing normal withdrawal**
 
-MASS Vaults utilize FortiFiPriceOracle contracts to get on-chain price feeds to calculate swap values.
+### FortiFiWNativeMASSVault
+Wrapped Native MASS Vaults allow for the deposit of the wrapped native asset of whatever chain the vault is on (i.e. WAVAX for Avalanche), which is then split, swapped into other assets if necessary, and then deposited into sub-strategies, including FortiFiStrategy strategies. Wrapped Native MASS Vaults allow for highly customizable yield strategies to be implemented.
+
+MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees, as well as FortiFiPriceOracle contracts and FortiFiRouter contracts to assist in swapping assets.
+
+**V2 of this contract was created to allow the retrieval of assets deposited into an underlying strategy that has become bricked, preventing normal withdrawal**
 
 ### FortiFiStrategy
 FortiFiStrategy contracts are meant to be used as a sort of wrapper for yield strategies that do not adhere to the simple structure of:
@@ -62,20 +70,63 @@ FortiFiStrategy contracts are meant to be used as a sort of wrapper for yield st
 
 ```withdraw(amount of receipt token to burn)```
 
-This contract must be used for Delta Prime strategies, and can be used as is. Other strategies can inherit this contract and add necessary modifications.
+These strategies can be modified to allow for arbitrary logic to be performed before depositing to the underlying yield strategy. For example, the FortiFiGLPStrategy mints/burns GLP using USDC in order to deposit GLP into Yield Yak.
 
 Initial strategies inheriting from this contract are:
+
+**FortiFiNativeStrategy** (For strategies that use wrapped native tokens as the deposit token)
+
+**FortiFiGLPStrategy** (GMX / GLP)
+
+**FortiFiWombatStrategy** (Wombat Finance)
 
 **FortiFiVectorStrategy** (Vector Finance)
 
 FortiFiStrategies isolate user deposits into FortiFiFortress contracts.
 
 ### FortiFiFortress
-FortiFiFortress contracts are used to isolate users' receipt tokens, which is necessary for strategies that have unique deposit or withdraw functions. Fortress contracts are deployed by FortiFiStrategy contracts, and can only be accessed by the contract that deploys them. A fortress is created for each vault receipt token (1155) used to deposit to the FortiFiStrategy.
+FortiFiFortress contracts are used to isolate users' receipt tokens, which is necessary for strategies that have unique deposit or withdraw functions. Fortress contracts are deployed by FortiFiStrategy contracts, and can only be accessed by the contract that deploys them.
 
 Initial fortresses inheriting from this contract are:
 
+**FortiFiNativeFortress** ((Allows unwrapping of wrapped native assets in order to utilize protocols that require native asset deposits))
+
+**FortiFiWombatFortress** (Wombat Finance)
+
 **FortiFiVectorFortress** (Vector Finance)
+
+### FortiFiPriceOracle
+FortiFiPriceOracle contracts are used as an interface to on-chain price feeds in order to provide the vaults accurate price information without relying on pool reserves or other manipulable methods. Non-chainlink price feeds can be used by inheriting this contract and modifying as necessary.
+
+Initial oracles inheriting from this contract are:
+
+**FortiFiDIAPriceOracle** (DIA)
+
+**FortiFiMockPriceOracle** (Used in a case where an oracle is not needed for logic executed by the router (i.e. For ggAVAX since the ggAVAX router deposits/redeems directly from the contract without needing to swap). Returns a static price.)
+
+### FortiFiPriceOracleL2
+FortiFiPriceOracleL2 contracts are a modified version of FortiFiPriceOracle that allows for use on layer 2 networks that may experience sequencer downtime. These contract utilize Chainlink's sequencer uptime feeds to ensure that swaps cannot happen while the sequencer is down or for the first 60 minutes after the sequencer comes back online.
+
+Non-chainlink price feeds can be used by inheriting this contract and modifying as necessary.
+
+Initial oracles inheriting from this contract are:
+
+**FortiFiDIAPriceOracleL2** (DIA)
+
+### FortiFiRouter
+FortiFiRouter contracts are adapters that act as an interface to concentrated liquidity pools. Since the original architecture of MASS vaults only allowed for swapExactTokensForTokens calls to UniV2/Trader Joe V1 pools, these routers must utilize data contained in these calls to execute swaps.
+
+Initial oracles inheriting from this contract are:
+
+**FortiFiUniV3Router** (Uniswap)
+
+**FortiFiUniV3MultiHopRouter** (Uniswap for when assets don't have a direct pair and wrapped native tokens are used as an intermediate step in the swap)
+
+**FortiFiLBRouter** (Trader Joe Liquidity Book)
+
+**FortiFiLBRouter** (Trader Joe Liquidity Book, used when there is no asset/asset fallback v1 pool that can be executed to swap, and wrapped native assets must be used as an intermediate step in the swap)
+
+**FortiFiGGAvaxRouter** (gogopool, used to deposit/redeem ggAVAX directly without swapping)
 
 ### FortiFiFeeCalculator
 FortiFiFeeCalculator contracts are utilized by SAMS and MASS Vaults to calculate performance fees. The fees are calculated based on a user's NFT holdings as specified upon deployment. 
@@ -83,6 +134,50 @@ FortiFiFeeCalculator contracts are utilized by SAMS and MASS Vaults to calculate
 ### FortiFiFeeManager
 FortiFiFeeManager contracts are utilized by SAMS and MASS Vaults to split performance fees among one or more addresses.
 
-### FortiFiPriceOracle
-FortiFiPriceOracle contracts are utilized by MASS Vaults to calculate swap prices. The base contract uses Chainlink's AggregatorV3Interface and can be extended for other price feeds.
+## Deployed Contracts
+
+Current Active Deployments:
+
+**MultiYields (fka Vaults)**
+
+[Avalanche LST Wrapped Native MASS MultiYield](https://snowscan.xyz/address/0x853e7a9dcc5037cd624834dc5f33151aa49d2d73#code)
+
+[Avalance Stability MASS MultiYield](https://snowscan.xyz/address/0x432963c721599cd039ff610fad447d487380d858#code)
+
+**Strategies**
+
+[FortiFiGLPStrategy](https://snowscan.xyz/address/0x72a1702785e1208973819b9f692801ab26fca882#code)
+
+[FortiFiWombatStrategy - sAVAX](https://snowscan.xyz/address/0xca33e819b1a3e519b02830ced658fd0543599410#code)
+
+[FortiFiWombatStrategy - ggAVAX](https://snowscan.xyz/address/0x666d883b9d5bb40f4d100d3c9919abfe29608f30#code)
+
+**Oracles**
+
+[FortiFiPriceOracle - AVAX](https://snowscan.xyz/address/0xdfabbc3d82b8234a88a9f64faab1f514a857a3df#code)
+
+[FortiFiDIAPriceOracle - sAVAX](https://snowscan.xyz/address/0x0c53b73efdde61874c945395a813253326de8eea#code)
+
+[FortiFiDIAPriceOracle - USDT](https://snowscan.xyz/address/0xdc655e3dc8f36096c779294d03c62b3af15de8b0#code)
+
+[FortiFiMockPriceOracle - ggAVAX](https://snowscan.xyz/address/0x4a30cb77aac31c9b7fec0700feacd3bdb44147f6#code)
+
+**Routers**
+
+[FortiFiLBRouter - sAVAX](https://snowscan.xyz/address/0x8b8cb06b4e9b171064345e32ff575c77ca805ce3#code)
+
+[FortiFiLBRouter2 - USDT](https://snowscan.xyz/address/0xd2746098c8ff73cd676f293b061248b124eb2806#code)
+
+[FortiFiGGAvaxRouter](https://snowscan.xyz/address/0xa5eec52dd815ee7b3b91da8af5face1aa996336c#code)
+
+**Price Managers**
+
+[FortiFiPriceManager - Avalanche](https://snowscan.xyz/address/0xf964894470afc11037f6bcb38609f77e9eba9851#code)
+
+**Fee Calculators**
+
+[FortiFiPriceCalculator - Avalanche LST](https://snowscan.xyz/address/0xc15711c7c8deac7a360f9b8826e7c151088d0d8c#code)
+
+[FortiFiPriceCalculator - Avalanche Stability](https://snowscan.xyz/address/0x97f9fe54aa908ac0e8b2d10244bd4bba87d51160#code)
+
 
