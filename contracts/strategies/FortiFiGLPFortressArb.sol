@@ -56,7 +56,7 @@ contract FortiFiGLPFortressArb is FortiFiFortress {
 
         // get price and mint GLP
         uint256 _glpPrice = IGLPManager(rewardRouter.glpManager()).getPrice(true); // maximize price
-        uint256 _glpOut = _amount * (10**18) / _glpPrice*10**(30 - 6); // GLP decimals are 18, price precision is 30 - 6 (USDC decimals)
+        uint256 _glpOut = _amount * 10**30 / _glpPrice * 10**12; // GLP price decimals are 30, GLP decimals 18 - 6 (USDC decimals) = 12 
         uint256 _glpAmount = rewardRouter.mintAndStakeGlp(address(_dToken), _amount, 0, _glpOut * (BPS - slippageBps) / BPS);
 
         // deposit to underlying strategy
@@ -87,7 +87,7 @@ contract FortiFiGLPFortressArb is FortiFiFortress {
         uint256 _fsGlpReceived = FSGLP.balanceOf(address(this));
 
         // redeem GLP for deposit token
-        uint256 _glpPrice = IGLPManager(rewardRouter.glpManager()).getPrice(true); // maximize price
+        uint256 _glpPrice = IGLPManager(rewardRouter.glpManager()).getPrice(false); 
         uint256 _dTokenOut = _fsGlpReceived * (_glpPrice / 10**18) / 10**(30 - 6); // GLP decimals are 18, price precision is 30 - 6 (USDC decimals)
         rewardRouter.unstakeAndRedeemGlp(address(_dToken), _fsGlpReceived, _dTokenOut * (BPS - slippageBps) / BPS, msg.sender);
 
