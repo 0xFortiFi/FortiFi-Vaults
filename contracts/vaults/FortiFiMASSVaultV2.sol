@@ -404,6 +404,8 @@ contract FortiFiMASSVaultV2 is IMASS, ERC1155Supply, Ownable, ReentrancyGuard {
         _route[2] = depositToken;
         
         uint256 _latestPrice = _oracle.getPrice();
+
+        // WARNING: This amount will be 0 if strat.decimals is more than 8, meaning no slippage check 
         uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(8 - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 
@@ -428,6 +430,8 @@ contract FortiFiMASSVaultV2 is IMASS, ERC1155Supply, Ownable, ReentrancyGuard {
         _route[1] = depositToken;
         
         uint256 _latestPrice = _oracle.getPrice();
+
+        // WARNING: This amount will be 0 if strat.decimals is more than 8, meaning no slippage check 
         uint256 _swapAmount = _amount * (_latestPrice / 10**_strat.decimals) / 10**(8 - USDC_DECIMALS);
 
         _router.swapExactTokensForTokens(_amount, 

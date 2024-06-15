@@ -392,6 +392,8 @@ contract FortiFiWNativeMASSVaultV2 is IMASS, ERC1155Supply, Ownable, ReentrancyG
         
         uint256 _latestPriceNative = nativeOracle.getPrice();
         uint256 _latestPriceTokenB = _oracle.getPrice();
+
+        // WARNING: This amount can be 0 if _amount is sufficiently small (~1 * 10**18), meaning no slippage check.
         uint256 _swapAmount = _amount * _latestPriceTokenB / 10**18 / _latestPriceNative * 10**18 * 10**(WNATIVE_DECIMALS - _strat.decimals);
 
         _router.swapExactTokensForTokens(_amount, 

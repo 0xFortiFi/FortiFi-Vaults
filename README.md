@@ -42,6 +42,10 @@ After this audit was conducted, development on the protocol continued to include
 
 A description of changes can be found here:
 [Post-Audit Change Report #1](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/change-reports/FortiFi_Post-Audit_Change_Report.pdf)
+
+Bug Bounty submissions which included markdown can be found here: 
+[Bug Bounty Submissions](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/bug-bounty/)
+
 ## Contract Descriptions
 
 ### FortiFiSAMSVault
