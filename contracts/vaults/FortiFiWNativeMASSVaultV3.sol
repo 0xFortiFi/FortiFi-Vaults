@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// FortiFiWNativeMASSVault V2 by FortiFi
+// FortiFiWNativeMASSVault V3 by FortiFi
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -75,9 +75,8 @@ error StrategyBricked();
 /// @title Contract for FortiFi Wrapped Native MASS Vaults V2
 /// @notice This contract allows for the deposit of wrapped native tokens, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
-/// @dev This V2 contract removes the ability to have SAMS vaults as strategies, and adds strategyIsBricked for non-FortiFi strats.
-/// The isSAMS property of the Strategy struct was left in order to minimize downstream impacts.
-contract FortiFiWNativeMASSVaultV2 is IMASS, ERC1155Supply, Ownable, ReentrancyGuard {
+/// @dev This V3 contract updated swap logic that incorrectly set slippage for swaps back to the deposit token
+contract FortiFiWNativeMASSVaultV3 is IMASS, ERC1155Supply, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     string public name;
     string public symbol;

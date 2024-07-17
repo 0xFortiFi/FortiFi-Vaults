@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// FortiFiMASSVault V2 by FortiFi
+// FortiFiMASSVault V3 by FortiFi
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -72,12 +72,11 @@ error CantWithdrawStrategyReceipts();
 /// @notice Error caused when trying to deposit to bricked strategy
 error StrategyBricked();
 
-/// @title Contract for FortiFi MASS Vaults V2
+/// @title Contract for FortiFi MASS Vaults V3
 /// @notice This contract allows for the deposit of a single asset, which is then swapped into various assets and deposited in to 
 /// multiple yield-bearing strategies. 
-/// @dev This V2 contract removes the ability to have SAMS vaults as strategies, and adds strategyIsBricked for non-FortiFi strats.
-/// The isSAMS property of the Strategy struct was left in order to minimize downstream impacts.
-contract FortiFiMASSVaultV2 is IMASS, ERC1155Supply, Ownable, ReentrancyGuard {
+/// @dev This V3 contract fixes swap logic that affected strategy deposit tokens with decimals larger than 7
+contract FortiFiMASSVaultV3 is IMASS, ERC1155Supply, Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     string public name;
     string public symbol;
