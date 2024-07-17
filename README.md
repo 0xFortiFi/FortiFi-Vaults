@@ -46,6 +46,9 @@ A description of changes can be found here:
 Bug Bounty submissions which included markdown can be found here: 
 [Bug Bounty Submissions](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/bug-bounty/)
 
+Bug Bounty conclusion and recap can be found here: 
+[Bug Bounty Recap](https://fortifi.substack.com/p/bug-bounty-conclusion-and-change)
+
 ## Contract Descriptions
 
 ### FortiFiSAMSVault
@@ -56,7 +59,7 @@ SAMS Vaults are the most basic vault type in the FortiFi ecosystem. They allow f
 SAMS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calculate and collect performance fees.
 
 ### FortiFiMASSVault
-[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/vaults/FortiFiMASSVaultV2.sol)
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/vaults/FortiFiMASSVaultV3.sol)
 
 MASS Vaults allow for the deposit of a single token, which is then split, swapped into other assets if necessary, and then deposited into sub-strategies, including FortiFiStrategy strategies. MASS Vaults allow for highly customizable yield strategies to be implemented.
 
@@ -65,7 +68,7 @@ MASS Vaults utilize FortiFiFeeCalculator and FortiFiFeeManager contracts to calc
 **V2 of this contract was created to allow the retrieval of assets deposited into an underlying strategy that has become bricked, preventing normal withdrawal**
 
 ### FortiFiWNativeMASSVault
-[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/vaults/FortiFiWNativeMASSVaultV2.sol)
+[View Code](https://github.com/0xFortiFi/FortiFi-Vaults/blob/main/contracts/vaults/FortiFiWNativeMASSVaultV3.sol)
 
 Wrapped Native MASS Vaults allow for the deposit of the wrapped native asset of whatever chain the vault is on (i.e. WAVAX for Avalanche), which is then split, swapped into other assets if necessary, and then deposited into sub-strategies, including FortiFiStrategy strategies. Wrapped Native MASS Vaults allow for highly customizable yield strategies to be implemented.
 
